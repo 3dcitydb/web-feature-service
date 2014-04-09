@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema elementFormDefault="qualified" version="1.0" targetNamespace="http://www.opengis.net/fes/2.0" xmlns:ns2="http://www.w3.org/1999/xlink" xmlns:ns1="http://www.opengis.net/ows/1.1" xmlns:fes="http://www.opengis.net/fes/2.0" xmlns:tns="http://www.opengis.net/fes/2.0" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:import namespace="http://www.opengis.net/ows/1.1" schemaLocation="schema4.xsd"/>
+
+  <xs:import namespace="http://www.w3.org/1999/xlink" schemaLocation="schema2.xsd"/>
+
+  <xs:element name="Filter_Capabilities">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Conformance" type="tns:ConformanceType"/>
+        <xs:element name="Id_Capabilities" type="tns:Id_CapabilitiesType" minOccurs="0"/>
+        <xs:element name="Scalar_Capabilities" type="tns:Scalar_CapabilitiesType" minOccurs="0"/>
+        <xs:element name="Spatial_Capabilities" type="tns:Spatial_CapabilitiesType" minOccurs="0"/>
+        <xs:element name="Temporal_Capabilities" type="tns:Temporal_CapabilitiesType" minOccurs="0"/>
+        <xs:element name="Functions" type="tns:AvailableFunctionsType" minOccurs="0"/>
+        <xs:element name="Extended_Capabilities" type="tns:Extended_CapabilitiesType" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="LogicalOperators">
+    <xs:complexType>
+      <xs:sequence/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:complexType name="ConformanceType">
+    <xs:sequence>
+      <xs:element name="Constraint" type="ns1:DomainType" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="Id_CapabilitiesType">
+    <xs:sequence>
+      <xs:element name="ResourceIdentifier" type="tns:ResourceIdentifierType" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ResourceIdentifierType">
+    <xs:sequence>
+      <xs:element ref="ns1:Metadata" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:QName" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="Scalar_CapabilitiesType">
+    <xs:sequence>
+      <xs:element ref="tns:LogicalOperators" minOccurs="0"/>
+      <xs:element name="ComparisonOperators" type="tns:ComparisonOperatorsType" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ComparisonOperatorsType">
+    <xs:sequence>
+      <xs:element name="ComparisonOperator" type="tns:ComparisonOperatorType" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ComparisonOperatorType">
+    <xs:sequence/>
+    <xs:attribute name="name" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="Spatial_CapabilitiesType">
+    <xs:sequence>
+      <xs:element name="GeometryOperands" type="tns:GeometryOperandsType"/>
+      <xs:element name="SpatialOperators" type="tns:SpatialOperatorsType"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="GeometryOperandsType">
+    <xs:sequence>
+      <xs:element name="GeometryOperand" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:sequence/>
+          <xs:attribute name="name" type="xs:QName" use="required"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="SpatialOperatorsType">
+    <xs:sequence>
+      <xs:element name="SpatialOperator" type="tns:SpatialOperatorType" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="SpatialOperatorType">
+    <xs:sequence>
+      <xs:element name="GeometryOperands" type="tns:GeometryOperandsType" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="Temporal_CapabilitiesType">
+    <xs:sequence>
+      <xs:element name="TemporalOperands" type="tns:TemporalOperandsType"/>
+      <xs:element name="TemporalOperators" type="tns:TemporalOperatorsType"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="TemporalOperandsType">
+    <xs:sequence>
+      <xs:element name="TemporalOperand" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:sequence/>
+          <xs:attribute name="name" type="xs:QName" use="required"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="TemporalOperatorsType">
+    <xs:sequence>
+      <xs:element name="TemporalOperator" type="tns:TemporalOperatorType" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="TemporalOperatorType">
+    <xs:sequence>
+      <xs:element name="TemporalOperands" type="tns:TemporalOperandsType" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="AvailableFunctionsType">
+    <xs:sequence>
+      <xs:element name="Function" type="tns:AvailableFunctionType" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="AvailableFunctionType">
+    <xs:sequence>
+      <xs:element ref="ns1:Metadata" minOccurs="0"/>
+      <xs:element name="Returns" type="xs:QName"/>
+      <xs:element name="Arguments" type="tns:ArgumentsType" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="ArgumentsType">
+    <xs:sequence>
+      <xs:element name="Argument" type="tns:ArgumentType" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ArgumentType">
+    <xs:sequence>
+      <xs:element ref="ns1:Metadata" minOccurs="0"/>
+      <xs:element name="Type" type="xs:QName"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="Extended_CapabilitiesType">
+    <xs:sequence>
+      <xs:element name="AdditionalOperators" type="tns:AdditionalOperatorsType" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="AdditionalOperatorsType">
+    <xs:sequence>
+      <xs:element name="Operator" type="tns:ExtensionOperatorType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ExtensionOperatorType">
+    <xs:sequence/>
+    <xs:attribute name="name" type="xs:QName" use="required"/>
+  </xs:complexType>
+</xs:schema>
+
