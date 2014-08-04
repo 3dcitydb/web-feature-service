@@ -65,7 +65,6 @@ import de.tub.citydb.api.concurrent.WorkerPool;
 import de.tub.citydb.api.event.EventDispatcher;
 import de.tub.citydb.api.registry.ObjectRegistry;
 import de.tub.citydb.config.Config;
-import de.tub.citydb.config.project.exporter.CityGMLVersionType;
 import de.tub.citydb.database.DatabaseConnectionPool;
 import de.tub.citydb.modules.citygml.common.database.cache.CacheTableManager;
 import de.tub.citydb.modules.citygml.common.database.uid.UIDCacheManager;
@@ -76,6 +75,7 @@ import de.tub.citydb.modules.citygml.exporter.database.content.DBSplittingResult
 import de.tub.citydb.modules.citygml.exporter.database.uid.GeometryGmlIdCache;
 import de.tub.citydb.modules.common.concurrent.IOWriterWorkerFactory;
 import de.tub.citydb.modules.common.filter.ExportFilter;
+import de.tub.citydb.util.Util;
 
 public class ExportController {
 	private final JAXBBuilder jaxbBuilder;
@@ -104,7 +104,7 @@ public class ExportController {
 		int queueSize = exporterConfig.getProject().getExporter().getResources().getThreadPool().getDefaultPool().getMaxThreads() * 2;
 
 		// prepare SAXWriter
-		exporterConfig.getProject().getExporter().setCityGMLVersion(CityGMLVersionType.fromCityGMLVersion(version));
+		exporterConfig.getProject().getExporter().setCityGMLVersion(Util.fromCityGMLVersion(version));
 
 		SAXWriter saxWriter = new SAXWriter();
 		saxWriter.setWriteEncoding(true);

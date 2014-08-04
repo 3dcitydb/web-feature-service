@@ -50,7 +50,7 @@ import de.tub.citydb.api.database.DatabaseSrs;
 import de.tub.citydb.api.event.EventDispatcher;
 import de.tub.citydb.api.registry.ObjectRegistry;
 import de.tub.citydb.config.Config;
-import de.tub.citydb.config.internal.Internal;
+import de.tub.citydb.config.language.Language;
 import de.tub.citydb.config.project.database.DBConnection;
 import de.tub.citydb.config.project.database.Database;
 import de.tub.citydb.config.project.global.LanguageType;
@@ -96,7 +96,7 @@ public class WebServiceInitializer implements ServletContextListener {
 		// init internationalized labels 
 		LanguageType lang = LanguageType.fromValue(System.getProperty("user.language"));
 		exporterConfig.getProject().getGlobal().setLanguage(lang);
-		Internal.I18N = ResourceBundle.getBundle("de.tub.citydb.gui.Label", new Locale(lang.value()));
+		Language.I18N = ResourceBundle.getBundle("de.tub.citydb.gui.Label", new Locale(lang.value()));
 
 		// start new event dispatcher thread
 		registry.setEventDispatcher(new EventDispatcher());

@@ -45,6 +45,7 @@ import de.tub.citydb.modules.citygml.common.database.uid.UIDCache;
 import de.tub.citydb.modules.citygml.common.database.uid.UIDCacheManager;
 import de.tub.citydb.modules.citygml.exporter.util.FeatureProcessException;
 import de.tub.citydb.modules.citygml.exporter.util.FeatureProcessor;
+import de.tub.citydb.util.Util;
 
 public class FeatureMemberWriter implements FeatureProcessor {
 	private final SingleWorkerPool<SAXEventBuffer> writerPool;
@@ -64,7 +65,7 @@ public class FeatureMemberWriter implements FeatureProcessor {
 		this.exporterConfig = exporterConfig;
 
 		wfsFactory = new ObjectFactory();		
-		CityGMLVersion version = exporterConfig.getProject().getExporter().getCityGMLVersion().toCityGMLVersion();
+		CityGMLVersion version = Util.toCityGMLVersion(exporterConfig.getProject().getExporter().getCityGMLVersion());
 		jaxbMarshaller = jaxbBuilder.createJAXBMarshaller(version);
 	}
 
