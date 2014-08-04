@@ -25,7 +25,7 @@
  */
 package vcs.citydb.wfs.util;
 
-import de.tub.citydb.api.concurrent.DefaultWorkerImpl;
+import org.citydb.api.concurrent.DefaultWorkerImpl;
 
 public class NullWorker<T> extends DefaultWorkerImpl<T> {
 

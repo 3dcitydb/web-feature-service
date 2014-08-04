@@ -36,6 +36,7 @@ import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.namespace.QName;
 
+import org.citydb.api.registry.ObjectRegistry;
 import org.citygml4j.model.citygml.CityGMLClass;
 import org.citygml4j.model.module.Module;
 import org.citygml4j.model.module.Modules;
@@ -54,8 +55,6 @@ import vcs.citydb.wfs.exception.WFSExceptionCode;
 
 import com.sun.xml.xsom.XSAttributeUse;
 import com.sun.xml.xsom.XSElementDecl;
-
-import de.tub.citydb.api.registry.ObjectRegistry;
 
 public class FeatureTypeHandler {
 	private final SchemaHandler schemaHandler;

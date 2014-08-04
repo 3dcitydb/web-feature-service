@@ -40,6 +40,8 @@ import net.opengis.wfs._2.ListStoredQueriesType;
 import net.opengis.wfs._2.ObjectFactory;
 import net.opengis.wfs._2.StoredQueryListItemType;
 
+import org.citydb.api.registry.ObjectRegistry;
+import org.citydb.log.Logger;
 import org.citygml4j.builder.jaxb.JAXBBuilder;
 import org.citygml4j.model.module.citygml.CityGMLModule;
 import org.citygml4j.model.module.citygml.CityGMLVersion;
@@ -54,9 +56,6 @@ import vcs.citydb.wfs.operation.BaseRequestHandler;
 import vcs.citydb.wfs.util.LoggerUtil;
 
 import com.sun.xml.internal.bind.marshaller.NamespacePrefixMapper;
-
-import de.tub.citydb.api.registry.ObjectRegistry;
-import de.tub.citydb.log.Logger;
 
 public class ListStoredQueriesHandler {
 	private final Logger log = Logger.getInstance();

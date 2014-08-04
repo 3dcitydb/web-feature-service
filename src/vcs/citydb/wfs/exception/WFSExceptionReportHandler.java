@@ -37,12 +37,12 @@ import net.opengis.ows._1.ExceptionReport;
 import net.opengis.ows._1.ExceptionType;
 import net.opengis.ows._1.ObjectFactory;
 
+import org.citydb.log.Logger;
 import org.citygml4j.builder.jaxb.JAXBBuilder;
 import org.citygml4j.util.xml.SAXWriter;
 import org.xml.sax.SAXException;
 
 import vcs.citydb.wfs.config.Constants;
-import de.tub.citydb.log.Logger;
 
 public class WFSExceptionReportHandler {
 	private final Logger log = Logger.getInstance();

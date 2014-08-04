@@ -41,6 +41,14 @@ import net.opengis.wfs._2.QueryType;
 import net.opengis.wfs._2.ResolveValueType;
 import net.opengis.wfs._2.StoredQueryType;
 
+import org.citydb.api.registry.ObjectRegistry;
+import org.citydb.config.Config;
+import org.citydb.config.project.filter.FeatureClass;
+import org.citydb.config.project.filter.FilterMode;
+import org.citydb.config.project.filter.GmlId;
+import org.citydb.log.Logger;
+import org.citydb.modules.common.filter.feature.FeatureClassFilter;
+import org.citydb.modules.common.filter.feature.GmlIdFilter;
 import org.citygml4j.builder.jaxb.JAXBBuilder;
 import org.citygml4j.model.module.Modules;
 import org.citygml4j.model.module.citygml.CityGMLVersion;
@@ -56,14 +64,6 @@ import vcs.citydb.wfs.operation.storedquery.StoredQuery;
 import vcs.citydb.wfs.operation.storedquery.StoredQueryManager;
 import vcs.citydb.wfs.util.LoggerUtil;
 import vcs.citydb.wfs.xml.NamespaceFilter;
-import de.tub.citydb.api.registry.ObjectRegistry;
-import de.tub.citydb.config.Config;
-import de.tub.citydb.config.project.filter.FeatureClass;
-import de.tub.citydb.config.project.filter.FilterMode;
-import de.tub.citydb.config.project.filter.GmlId;
-import de.tub.citydb.log.Logger;
-import de.tub.citydb.modules.common.filter.feature.FeatureClassFilter;
-import de.tub.citydb.modules.common.filter.feature.GmlIdFilter;
 
 public class GetFeatureHandler {
 	private final Logger log = Logger.getInstance();
@@ -292,7 +292,7 @@ public class GetFeatureHandler {
 			// TODO: this is a hack to create a valid exporter filter
 			exporterConfig.getProject().getExporter().getFilter().setMode(FilterMode.COMPLEX);
 			exporterConfig.getProject().getExporter().getFilter().getComplexFilter().setFeatureClass(featureClassFilter);
-			queryExpression.setFeatureTypeFilter(new FeatureClassFilter(exporterConfig, de.tub.citydb.modules.common.filter.FilterMode.EXPORT));
+			queryExpression.setFeatureTypeFilter(new FeatureClassFilter(exporterConfig, org.citydb.modules.common.filter.FilterMode.EXPORT));
 		}
 
 		// populate resource id filter
@@ -304,7 +304,7 @@ public class GetFeatureHandler {
 
 			exporterConfig.getProject().getExporter().getFilter().setMode(FilterMode.SIMPLE);
 			exporterConfig.getProject().getExporter().getFilter().getSimpleFilter().setGmlIdFilter(gmlIdFilter);
-			queryExpression.setGmlIdFilter(new GmlIdFilter(exporterConfig, de.tub.citydb.modules.common.filter.FilterMode.EXPORT));
+			queryExpression.setGmlIdFilter(new GmlIdFilter(exporterConfig, org.citydb.modules.common.filter.FilterMode.EXPORT));
 		}
 
 		return queryExpression;

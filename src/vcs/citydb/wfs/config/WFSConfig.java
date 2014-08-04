@@ -29,13 +29,14 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
+import org.citydb.config.project.database.Database;
+import org.citydb.config.project.global.Cache;
+
 import vcs.citydb.wfs.config.capabilities.Capabilities;
 import vcs.citydb.wfs.config.feature.FeatureTypes;
 import vcs.citydb.wfs.config.operation.Operations;
 import vcs.citydb.wfs.config.system.Logging;
 import vcs.citydb.wfs.config.system.Server;
-import de.tub.citydb.config.project.database.Database;
-import de.tub.citydb.config.project.global.Cache;
 
 @XmlRootElement(name="wfs")
 @XmlType(name="WFSConfigType", propOrder={

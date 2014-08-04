@@ -55,6 +55,13 @@ import net.opengis.wfs._2.GetCapabilitiesType;
 import net.opengis.wfs._2.GetFeatureType;
 import net.opengis.wfs._2.ListStoredQueriesType;
 
+import org.citydb.api.concurrent.SingleWorkerPool;
+import org.citydb.api.concurrent.Worker;
+import org.citydb.api.concurrent.WorkerFactory;
+import org.citydb.api.registry.ObjectRegistry;
+import org.citydb.config.Config;
+import org.citydb.log.Logger;
+import org.citydb.modules.citygml.common.database.cache.CacheTableManager;
 import org.citygml4j.builder.jaxb.JAXBBuilder;
 import org.citygml4j.xml.schema.SchemaHandler;
 import org.xml.sax.InputSource;
@@ -75,13 +82,6 @@ import vcs.citydb.wfs.operation.storedquery.StoredQueryManager;
 import vcs.citydb.wfs.util.CacheTableCleanerWorker;
 import vcs.citydb.wfs.xml.NamespaceFilter;
 import vcs.citydb.wfs.xml.ValidationEventHandlerImpl;
-import de.tub.citydb.api.concurrent.SingleWorkerPool;
-import de.tub.citydb.api.concurrent.Worker;
-import de.tub.citydb.api.concurrent.WorkerFactory;
-import de.tub.citydb.api.registry.ObjectRegistry;
-import de.tub.citydb.config.Config;
-import de.tub.citydb.log.Logger;
-import de.tub.citydb.modules.citygml.common.database.cache.CacheTableManager;
 
 @WebServlet(Constants.WFS_SERVICE_PATH)
 public class WFSService extends HttpServlet { 

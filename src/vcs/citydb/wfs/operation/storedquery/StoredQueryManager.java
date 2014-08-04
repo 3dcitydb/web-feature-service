@@ -40,6 +40,7 @@ import net.opengis.wfs._2.QueryExpressionTextType;
 import net.opengis.wfs._2.StoredQueryDescriptionType;
 import net.opengis.wfs._2.Title;
 
+import org.citydb.util.Util;
 import org.citygml4j.builder.jaxb.JAXBBuilder;
 import org.citygml4j.model.module.Modules;
 import org.citygml4j.model.module.citygml.CityGMLModule;
@@ -53,7 +54,6 @@ import vcs.citydb.wfs.config.WFSConfig;
 import vcs.citydb.wfs.exception.WFSException;
 import vcs.citydb.wfs.exception.WFSExceptionCode;
 import vcs.citydb.wfs.xml.NamespaceFilter;
-import de.tub.citydb.util.Util;
 
 public class StoredQueryManager {
 	private final StoredQuery DEFAULT_QUERY;

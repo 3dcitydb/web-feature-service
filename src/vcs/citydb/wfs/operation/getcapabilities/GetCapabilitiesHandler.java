@@ -62,6 +62,9 @@ import net.opengis.wfs._2.FeatureTypeType;
 import net.opengis.wfs._2.GetCapabilitiesType;
 import net.opengis.wfs._2.WFS_CapabilitiesType;
 
+import org.citydb.api.database.DatabaseSrs;
+import org.citydb.database.DatabaseConnectionPool;
+import org.citydb.log.Logger;
 import org.citygml4j.builder.jaxb.JAXBBuilder;
 import org.citygml4j.model.module.citygml.CityGMLModule;
 import org.citygml4j.model.module.citygml.CityGMLVersion;
@@ -81,10 +84,6 @@ import vcs.citydb.wfs.exception.WFSExceptionCode;
 import vcs.citydb.wfs.util.LoggerUtil;
 
 import com.sun.xml.internal.bind.marshaller.NamespacePrefixMapper;
-
-import de.tub.citydb.api.database.DatabaseSrs;
-import de.tub.citydb.database.DatabaseConnectionPool;
-import de.tub.citydb.log.Logger;
 
 public class GetCapabilitiesHandler {
 	private final Logger log = Logger.getInstance();

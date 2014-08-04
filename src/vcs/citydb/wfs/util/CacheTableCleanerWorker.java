@@ -27,9 +27,9 @@ package vcs.citydb.wfs.util;
 
 import java.sql.SQLException;
 
-import de.tub.citydb.api.concurrent.DefaultWorkerImpl;
-import de.tub.citydb.log.Logger;
-import de.tub.citydb.modules.citygml.common.database.cache.CacheTableManager;
+import org.citydb.api.concurrent.DefaultWorkerImpl;
+import org.citydb.log.Logger;
+import org.citydb.modules.citygml.common.database.cache.CacheTableManager;
 
 public class CacheTableCleanerWorker extends DefaultWorkerImpl<CacheTableManager> {
 	private final Logger log = Logger.getInstance();

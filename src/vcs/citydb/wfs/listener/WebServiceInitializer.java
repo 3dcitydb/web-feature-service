@@ -41,21 +41,22 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
+import org.citydb.api.database.DatabaseConfigurationException;
+import org.citydb.api.database.DatabaseSrs;
+import org.citydb.api.event.EventDispatcher;
+import org.citydb.api.registry.ObjectRegistry;
+import org.citydb.config.Config;
+import org.citydb.config.language.Language;
+import org.citydb.config.project.database.DBConnection;
+import org.citydb.config.project.database.Database;
+import org.citydb.config.project.global.LanguageType;
+import org.citydb.database.DatabaseConnectionPool;
+import org.citydb.log.Logger;
+
 import vcs.citydb.wfs.config.Constants;
 import vcs.citydb.wfs.config.WFSConfig;
 import vcs.citydb.wfs.config.system.ConsoleLog;
 import vcs.citydb.wfs.config.system.FileLog;
-import de.tub.citydb.api.database.DatabaseConfigurationException;
-import de.tub.citydb.api.database.DatabaseSrs;
-import de.tub.citydb.api.event.EventDispatcher;
-import de.tub.citydb.api.registry.ObjectRegistry;
-import de.tub.citydb.config.Config;
-import de.tub.citydb.config.language.Language;
-import de.tub.citydb.config.project.database.DBConnection;
-import de.tub.citydb.config.project.database.Database;
-import de.tub.citydb.config.project.global.LanguageType;
-import de.tub.citydb.database.DatabaseConnectionPool;
-import de.tub.citydb.log.Logger;
 
 @WebListener
 public class WebServiceInitializer implements ServletContextListener {
@@ -96,7 +97,7 @@ public class WebServiceInitializer implements ServletContextListener {
 		// init internationalized labels 
 		LanguageType lang = LanguageType.fromValue(System.getProperty("user.language"));
 		exporterConfig.getProject().getGlobal().setLanguage(lang);
-		Language.I18N = ResourceBundle.getBundle("de.tub.citydb.gui.Label", new Locale(lang.value()));
+		Language.I18N = ResourceBundle.getBundle("org.citydb.gui.Label", new Locale(lang.value()));
 
 		// start new event dispatcher thread
 		registry.setEventDispatcher(new EventDispatcher());

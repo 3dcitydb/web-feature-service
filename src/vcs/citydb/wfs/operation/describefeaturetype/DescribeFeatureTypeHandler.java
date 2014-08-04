@@ -39,6 +39,7 @@ import javax.xml.namespace.QName;
 
 import net.opengis.wfs._2.DescribeFeatureTypeType;
 
+import org.citydb.log.Logger;
 import org.citygml4j.model.module.Module;
 import org.citygml4j.model.module.Modules;
 import org.citygml4j.model.module.citygml.CityGMLModuleType;
@@ -52,7 +53,6 @@ import vcs.citydb.wfs.exception.WFSExceptionMessage;
 import vcs.citydb.wfs.operation.BaseRequestHandler;
 import vcs.citydb.wfs.operation.FeatureTypeHandler;
 import vcs.citydb.wfs.util.LoggerUtil;
-import de.tub.citydb.log.Logger;
 
 public class DescribeFeatureTypeHandler {
 	private final Logger log = Logger.getInstance();

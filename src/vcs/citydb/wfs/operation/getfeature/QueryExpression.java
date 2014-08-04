@@ -29,8 +29,8 @@ import java.util.Set;
 
 import javax.xml.namespace.QName;
 
-import de.tub.citydb.modules.common.filter.feature.FeatureClassFilter;
-import de.tub.citydb.modules.common.filter.feature.GmlIdFilter;
+import org.citydb.modules.common.filter.feature.FeatureClassFilter;
+import org.citydb.modules.common.filter.feature.GmlIdFilter;
 
 public class QueryExpression {
 	// This class is just a dummy and needs

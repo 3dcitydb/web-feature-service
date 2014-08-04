@@ -28,12 +28,12 @@ package vcs.citydb.wfs.operation.getfeature;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.citydb.modules.common.filter.feature.FeatureClassFilter;
+import org.citydb.modules.common.filter.feature.GmlIdFilter;
+import org.citydb.util.Util;
 import org.citygml4j.model.citygml.CityGMLClass;
 
 import vcs.citydb.wfs.exception.WFSException;
-import de.tub.citydb.modules.common.filter.feature.FeatureClassFilter;
-import de.tub.citydb.modules.common.filter.feature.GmlIdFilter;
-import de.tub.citydb.util.Util;
 
 public class QueryBuilder {
 	// TODO: rewrite query builder using a dynamic sql generator such as squiggle
