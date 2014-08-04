@@ -97,7 +97,7 @@ public class WebServiceInitializer implements ServletContextListener {
 		// init internationalized labels 
 		LanguageType lang = LanguageType.fromValue(System.getProperty("user.language"));
 		exporterConfig.getProject().getGlobal().setLanguage(lang);
-		Language.I18N = ResourceBundle.getBundle("org.citydb.gui.Label", new Locale(lang.value()));
+		Language.I18N = ResourceBundle.getBundle("org.citydb.config.language.Label", new Locale(lang.value()));
 
 		// start new event dispatcher thread
 		registry.setEventDispatcher(new EventDispatcher());
