@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<wfs xmlns="http://www.gis.tu-berlin.de/3dcitydb-impexp/config"
+<wfs xmlns="http://www.3dcitydb.org/importer-exporter/config"
   xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xlink="http://www.w3.org/1999/xlink"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://www.gis.tu-berlin.de/3dcitydb-impexp/config schemas/config/config.xsd">
+  xsi:schemaLocation="http://www.3dcitydb.org/importer-exporter/config schemas/config/config.xsd">
   <capabilities>
     <owsMetadata>
       <ows:ServiceIdentification>

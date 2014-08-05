@@ -45,7 +45,7 @@ public class WFSConfigSchemaWriter {
 			public Result createOutput(String namespaceUri, String suggestedFileName) throws IOException {
 				File file;
 
-				if (namespaceUri.equals("http://www.gis.tu-berlin.de/3dcitydb-impexp/config"))
+				if (namespaceUri.equals("http://www.3dcitydb.org/importer-exporter/config"))
 					file = new File(Constants.CONFIG_SCHEMA_FILE);
 				else
 					file = new File(Constants.CONFIG_SCHEMA_PATH + "/ows/" + suggestedFileName);
