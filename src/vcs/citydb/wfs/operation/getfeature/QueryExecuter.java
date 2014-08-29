@@ -69,6 +69,7 @@ import vcs.citydb.wfs.exception.WFSExceptionCode;
 
 public class QueryExecuter {
 	private final List<QueryExpression> queryExpressions;
+	private final FeatureMemberWriter featureMemberWriter;
 	private final long count;
 	private final ResultTypeType resultType;
 	private final WorkerPool<DBSplittingResult> databaseWorkerPool;
@@ -84,6 +85,7 @@ public class QueryExecuter {
 
 	public QueryExecuter(GetFeatureType wfsRequest,
 			List<QueryExpression> queryExpressions, 
+			FeatureMemberWriter featureMemberWriter,
 			WorkerPool<DBSplittingResult> databaseWorkerPool,
 			SingleWorkerPool<SAXEventBuffer> writerPool,
 			DatabaseConnectionPool connectionPool,
@@ -91,6 +93,7 @@ public class QueryExecuter {
 			ExportFilter exportFilter,
 			Config exporterConfig) throws JAXBException, DatatypeConfigurationException {
 		this.queryExpressions = queryExpressions;
+		this.featureMemberWriter = featureMemberWriter;
 		this.databaseWorkerPool = databaseWorkerPool;
 		this.writerPool = writerPool;
 		this.connectionPool = connectionPool;
@@ -114,6 +117,8 @@ public class QueryExecuter {
 		boolean countBreak = false;
 		long returnedFeature = 0;
 		int currentQuery = -1;
+		boolean isWriteBareFeature = !isMultipleQueryRequest && queryExpressions.get(0).isGetFeatureById();
+		featureMemberWriter.setWriteMemberProperty(!isWriteBareFeature);
 
 		Connection connection = null;
 		Statement stmt = null;
@@ -128,7 +133,8 @@ public class QueryExecuter {
 				long matchAll = rs.getLong("match_all");
 				long returnAll = resultType == ResultTypeType.RESULTS ? Math.min(matchAll, count) : 0;		
 
-				startFeatureCollection(matchAll, returnAll, false);
+				if (!isWriteBareFeature)
+					startFeatureCollection(matchAll, returnAll, false);
 				setExporterContext(queryExpressions.get(0));
 
 				if (resultType == ResultTypeType.RESULTS) {
@@ -142,8 +148,7 @@ public class QueryExecuter {
 									databaseWorkerPool.join();
 
 									endFeatureCollection(true);
-								} else
-									currentQuery = 0;
+								}
 
 								// add feature collections for intermediate queries without matches
 								while (currentQuery < queryNo - 1) {
@@ -202,11 +207,25 @@ public class QueryExecuter {
 					}
 				}		
 
-				endFeatureCollection(false);
+				if (!isWriteBareFeature)
+					endFeatureCollection(false);
 
 			} else {
 				// no results returned
-				writeFeatureCollection(0, false);
+				if (!isWriteBareFeature) {
+					if (isMultipleQueryRequest) {
+						startFeatureCollection(0, 0, false);
+						for (int i = 0; i < queryExpressions.size(); i++)
+							writeFeatureCollection(0, true);						
+						endFeatureCollection(false);
+					} else
+						writeFeatureCollection(0, false);
+				} 
+				else {
+					QueryExpression getFeatureById = queryExpressions.get(0);
+					String identifier = getFeatureById.getGmlIdFilter().getFilterState().get(0);					
+					throw new WFSException(WFSExceptionCode.NOT_FOUND, "The specified feature identified by '" + identifier + "' was not found.", identifier);
+				}
 			}
 
 		} catch (SQLException e) {

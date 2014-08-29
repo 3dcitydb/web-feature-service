@@ -124,7 +124,7 @@ public class GetFeatureHandler {
 			throw new WFSException(WFSExceptionCode.OPERATION_PARSING_FAILED, "No query provided.", operationHandle);
 
 		// compile queries to be executed from ad hoc and stored queries
-		List<QueryType> queries = new ArrayList<QueryType>();
+		List<QueryTypeWrapper> queries = new ArrayList<QueryTypeWrapper>();
 		for (JAXBElement<? extends AbstractQueryExpressionType> queryElem: wfsRequest.getAbstractQueryExpression()) {
 			if (!(queryElem.getValue() instanceof StoredQueryType))
 				throw new WFSException(WFSExceptionCode.OPTION_NOT_SUPPORTED, "Only stored query expressions are supported in a GetFeature request.", operationHandle);
@@ -133,31 +133,34 @@ public class GetFeatureHandler {
 		}
 
 		// iterate through queries		
-		for (QueryType query : queries) {
+		for (QueryTypeWrapper query : queries) {
 			// dummy fields to store parsing results
 			// TODO: must be replaced with FE layer
 			Set<QName> featureTypeNames = null;
 			Set<String> resourceIds = null;
 
-			String queryHandle = query.isSetHandle() ? query.getHandle() : operationHandle;
+			String queryHandle = query.queryType.isSetHandle() ? query.queryType.getHandle() : operationHandle;
 
 			// TODO: aliases - and implicitly joins - are not supported
-			if (!query.getAliases().isEmpty())
+			if (!query.queryType.getAliases().isEmpty())
 				throw new WFSException(WFSExceptionCode.OPTION_NOT_SUPPORTED, "Aliases for feature type names are not supported.", queryHandle);
 
-			if (query.isSetFeatureVersion())
+			if (query.queryType.isSetFeatureVersion())
 				throw new WFSException(WFSExceptionCode.OPTION_NOT_SUPPORTED, "Feature versioning is not supported.", queryHandle);
 
 			// TODO: add support for sorting
-			if (query.isSetAbstractSortingClause())
+			if (query.queryType.isSetAbstractSortingClause())
 				throw new WFSException(WFSExceptionCode.OPTION_NOT_SUPPORTED, "Sorting is not supported.", queryHandle);
 
 			// TODO: add support for coordinate transformation
-			if (query.isSetSrsName())
+			if (query.queryType.isSetSrsName())
 				throw new WFSException(WFSExceptionCode.OPTION_NOT_SUPPORTED, "Coordinate transformation is not supported.", queryHandle);
 
 			// get feature type names and check for unique CityGML version
-			featureTypeNames = featureTypeHandler.getFeatureTypeNames(query.getTypeNames(), namespaceFilter, false, queryHandle);
+			if (query.queryType.getTypeNames().size() > 1)
+				throw new WFSException(WFSExceptionCode.OPERATION_NOT_SUPPORTED, "Join queries are not supported.", queryHandle);
+			
+			featureTypeNames = featureTypeHandler.getFeatureTypeNames(query.queryType.getTypeNames(), namespaceFilter, false, queryHandle);
 			CityGMLVersion featureVersion = CityGMLVersion.fromCityGMLModule(Modules.getCityGMLModule(featureTypeNames.iterator().next().getNamespaceURI()));
 			if (version == null)
 				version = featureVersion;
@@ -165,12 +168,12 @@ public class GetFeatureHandler {
 				throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "Mixing feature types from different CityGML versions is not supported.", queryHandle);
 			
 			// TODO: add support for projection attributes
-			if (query.isSetAbstractProjectionClause())
+			if (query.queryType.isSetAbstractProjectionClause())
 				throw new WFSException(WFSExceptionCode.OPTION_NOT_SUPPORTED, "Property projection is not supported.", queryHandle);
 
 			// validate selection clause of query
-			if (query.isSetAbstractSelectionClause()) {
-				FilterType filter = validateSelectionClause(query.getAbstractSelectionClause(), queryHandle);
+			if (query.queryType.isSetAbstractSelectionClause()) {
+				FilterType filter = validateSelectionClause(query.queryType.getAbstractSelectionClause(), queryHandle);
 
 				if (filter != null) {
 					resourceIds = filterHandler.getResourceIds(filter, queryHandle);
@@ -180,7 +183,7 @@ public class GetFeatureHandler {
 			// map parsing result into query expression
 			// TODO: again, the query expression should simply hold
 			// objects from the intermediate FE layer
-			QueryExpression queryExpression = getQueryExpression(featureTypeNames, resourceIds);
+			QueryExpression queryExpression = getQueryExpression(featureTypeNames, resourceIds, query.isGetFeatureById);
 			queryExpression.setHandle(queryHandle);
 			queryExpressions.add(queryExpression);
 		}
@@ -192,9 +195,9 @@ public class GetFeatureHandler {
 		log.info(LoggerUtil.getLogMessage(request, "GetFeature operation successfully finished."));
 	}
 
-	private void compileQuery(AbstractQueryExpressionType abstractQuery, List<QueryType> queries, NamespaceFilter namespaceFilter, String handle) throws WFSException {
+	private void compileQuery(AbstractQueryExpressionType abstractQuery, List<QueryTypeWrapper> queries, NamespaceFilter namespaceFilter, String handle) throws WFSException {
 		if (abstractQuery instanceof QueryType) {
-			queries.add((QueryType)abstractQuery);
+			queries.add(new QueryTypeWrapper((QueryType)abstractQuery, false));
 		} 
 		
 		else if (abstractQuery instanceof StoredQueryType) {
@@ -202,8 +205,12 @@ public class GetFeatureHandler {
 
 			StoredQuery storedQuery = storedQueryManager.getStoredQuery(query.getId(), handle);
 			if (storedQuery != null) {
+				if (storedQuery.getId().equals("http://www.opengis.net/def/query/OGC-WFS/0/GetFeatureById")) {
+					queries.add(new QueryTypeWrapper((QueryType)storedQuery.compile(query, namespaceFilter).iterator().next(), true));
+				} else {
 				for (AbstractQueryExpressionType compiled : storedQuery.compile(query, namespaceFilter))
 					compileQuery(compiled, queries, namespaceFilter, handle);
+				}
 			} else
 				throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, "No stored query with identifier '" + query.getId() + "' is offered by this server.", handle);
 		} 
@@ -240,7 +247,8 @@ public class GetFeatureHandler {
 	}
 
 	private QueryExpression getQueryExpression(Set<QName> featureTypeNames,
-			Set<String> resourceIds) {
+			Set<String> resourceIds,
+			boolean isGetFeatureById) {
 		QueryExpression queryExpression = new QueryExpression();
 
 		// set exporter filter according to the parsing results
@@ -307,7 +315,19 @@ public class GetFeatureHandler {
 			queryExpression.setGmlIdFilter(new GmlIdFilter(exporterConfig, org.citydb.modules.common.filter.FilterMode.EXPORT));
 		}
 
+		// is this the GetFeatureById query?
+		queryExpression.setGetFeatureById(isGetFeatureById);
+
 		return queryExpression;
+	}
+	private final class QueryTypeWrapper {
+		protected final QueryType queryType;
+		protected final boolean isGetFeatureById;
+		
+		protected QueryTypeWrapper(QueryType queryType, boolean isGetFeatureById) {
+			this.queryType = queryType;
+			this.isGetFeatureById = isGetFeatureById;
+		}
 	}
 
 }

@@ -128,16 +128,20 @@ public class ExportController {
 		}
 
 		// set WFS prefix and schema location
+		if (queryExpressions.size() > 1 || !queryExpressions.get(0).isGetFeatureById()) {
 		saxWriter.setPrefix(Constants.WFS_NAMESPACE_PREFIX, Constants.WFS_NAMESPACE_URI);
 		saxWriter.setSchemaLocation(Constants.WFS_NAMESPACE_URI, Constants.WFS_SCHEMA_LOCATION);
+		}
 
 		// set CityGML prefixes and schema locations
 		ModuleContext moduleContext = new ModuleContext(version);
 		for (Module module : moduleContext.getModules()) {
-			if (!(module instanceof CityGMLModule) ||
-					module.getType() == CityGMLModuleType.CORE ||
-					module.getType() == CityGMLModuleType.GENERICS)
+			if (!(module instanceof CityGMLModule) || module.getType() == CityGMLModuleType.CORE)
 				saxWriter.setPrefix(module.getNamespacePrefix(), module.getNamespaceURI());
+			else if (module.getType() == CityGMLModuleType.GENERICS) {
+				saxWriter.setPrefix(module.getNamespacePrefix(), module.getNamespaceURI());
+				saxWriter.setSchemaLocation(module.getNamespaceURI(), module.getSchemaLocation());
+			}
 		}
 		
 		for (QueryExpression queryExpression : queryExpressions) {
@@ -225,6 +229,7 @@ public class ExportController {
 					1,
 					false);
 
+			FeatureMemberWriter featureMemberWriter = new FeatureMemberWriter(writerPool, uidCacheManager, jaxbBuilder, exporterConfig);
 			databaseWorkerPool = new WorkerPool<DBSplittingResult>(
 					"db_exporter_pool",
 					exporterConfig.getProject().getExporter().getResources().getThreadPool().getDefaultPool().getMinThreads(), 
@@ -233,7 +238,7 @@ public class ExportController {
 					new DBExportWorkerFactory(
 							connectionPool, 
 							jaxbBuilder,
-							new FeatureMemberWriter(writerPool, uidCacheManager, jaxbBuilder, exporterConfig), 
+							featureMemberWriter, 
 							xlinkPool,
 							uidCacheManager,
 							cacheTableManager,
@@ -253,6 +258,7 @@ public class ExportController {
 			try {
 				queryExecuter = new QueryExecuter(wfsRequest, 
 						queryExpressions,
+						featureMemberWriter,
 						databaseWorkerPool,
 						writerPool,
 						connectionPool,

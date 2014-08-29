@@ -153,11 +153,11 @@ public class WFSService extends HttpServlet {
 		// read WFS 2.0 schema to validate requests
 		if (wfsConfig.getOperations().isUseXMLValidation()) {
 			try {
-				schemaHandler.parseSchema(new File(getServletContext().getRealPath(Constants.XML_SCHEMAS_PATH + "/wfs/2.0/wfs.xsd")));
+				schemaHandler.parseSchema(new File(getServletContext().getRealPath(Constants.XML_SCHEMAS_PATH + "/wfs/2.0.2/wfs.xsd")));
 				SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
 				wfsSchema = schemaFactory.newSchema(schemaHandler.getSchemaSources());			
 			} catch (SAXException e) {
-				String message = "Failed to read WFS XML Schema from " + Constants.XML_SCHEMAS_PATH + "/wfs/2.0/wfs.xsd.";
+				String message = "Failed to read WFS XML Schema from " + Constants.XML_SCHEMAS_PATH + "/wfs/2.0.2/wfs.xsd.";
 				log.error(message);
 				log.error(e.getMessage());
 				throw new ServletException(message, e);

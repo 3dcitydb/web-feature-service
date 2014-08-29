@@ -24,7 +24,8 @@
         <ows:UpperCorner>180 90</ows:UpperCorner>
       </ows:WGS84BoundingBox>
     </featureType>
-    <version>2.0</version>
+    <version isDefault="true">2.0</version>
+    <version>1.0</version>
   </featureTypes>
   <operations>
     <useXMLValidation>true</useXMLValidation>
@@ -37,7 +38,7 @@
     <referenceSystems>
       <referenceSystem id="WGS84">
         <srid>4326</srid>
-        <gmlSrsName>urn:ogc:def:crs:EPSG::4326</gmlSrsName>
+        <gmlSrsName>http://www.opengis.net/def/crs/epsg/0/4326</gmlSrsName>
         <description>WGS 84</description>
       </referenceSystem>
     </referenceSystems>

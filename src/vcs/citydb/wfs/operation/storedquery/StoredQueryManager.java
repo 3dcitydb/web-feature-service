@@ -40,10 +40,9 @@ import net.opengis.wfs._2.QueryExpressionTextType;
 import net.opengis.wfs._2.StoredQueryDescriptionType;
 import net.opengis.wfs._2.Title;
 
-import org.citydb.util.Util;
 import org.citygml4j.builder.jaxb.JAXBBuilder;
-import org.citygml4j.model.module.Modules;
 import org.citygml4j.model.module.citygml.CityGMLModule;
+import org.citygml4j.model.module.citygml.CityGMLModuleType;
 import org.citygml4j.model.module.citygml.CityGMLVersion;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -77,7 +76,8 @@ public class StoredQueryManager {
 	}
 
 	public StoredQuery getStoredQuery(String id, String handle) throws WFSException {
-		if (DEFAULT_QUERY.getId().equals(id))
+		// urn:ogc:def:query:OGC-WFS::GetFeatureById is deprecated since 2.0.2 but still supported
+		if (DEFAULT_QUERY.getId().equals(id) || "urn:ogc:def:query:OGC-WFS::GetFeatureById".equals(id))
 			return DEFAULT_QUERY;
 		
 		throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, "A stored query with identifier '" + id + "' is not offered by this server.", handle);
@@ -95,7 +95,7 @@ public class StoredQueryManager {
 		// GetFeatureById query according to the WFS 2.0 spec
 		StoredQueryDescriptionType description = new StoredQueryDescriptionType();
 
-		description.setId("urn:ogc:def:query:OGC-WFS::GetFeatureById");
+		description.setId("http://www.opengis.net/def/query/OGC-WFS/0/GetFeatureById");
 
 		Title queryTitle = new Title();
 		queryTitle.setLang("en");
@@ -124,19 +124,16 @@ public class StoredQueryManager {
 		Element query = document.createElementNS(Constants.WFS_NAMESPACE_URI, "Query");
 
 		NamespaceFilter namespaceFilter = new NamespaceFilter();
+		CityGMLVersion version = wfsConfig.getFeatureTypes().getDefaultVersion();
 		boolean multipleVersions = wfsConfig.getFeatureTypes().getVersions().size() > 1;
-		List<String> typeNames = new ArrayList<String>();
-		for (QName typeName : wfsConfig.getFeatureTypes().getDefaultFeatureTypes()) {
-			CityGMLModule module = Modules.getCityGMLModule(typeName.getNamespaceURI());
+		CityGMLModule module = version.getCityGMLModule(CityGMLModuleType.CORE);		
 			String prefix = module.getNamespacePrefix();
 			if (multipleVersions)
-				prefix += (CityGMLVersion.fromCityGMLModule(module) == CityGMLVersion.v2_0_0) ? "2" : "1";
+			prefix += (version == CityGMLVersion.v2_0_0) ? "2" : "1";
 
-			typeNames.add(prefix + ':' + typeName.getLocalPart());
 			namespaceFilter.startPrefixMapping(prefix, module.getNamespaceURI());
-		}
 
-		query.setAttribute("typeNames", Util.collection2string(typeNames, " "));
+		query.setAttribute("typeNames", "schema-element(" + prefix + ':' + "_CityObject)");
 		Element filter = document.createElementNS(Constants.FES_NAMESPACE_URI, "Filter");
 		Element resourceId = document.createElementNS(Constants.FES_NAMESPACE_URI, "fes:ResourceId");
 		resourceId.setAttribute("rid", "${id}");
@@ -147,7 +144,7 @@ public class StoredQueryManager {
 		queryExpression.getContent().add(query);		
 		queryExpression.setIsPrivate(false);
 		queryExpression.setLanguage("en");
-		queryExpression.setReturnFeatureTypes(wfsConfig.getFeatureTypes().getDefaultFeatureTypes());
+		queryExpression.setReturnFeatureTypes(new ArrayList<QName>());
 		queryExpression.setLanguage(StoredQuery.DEFAULT_LANGUAGE);
 		description.getQueryExpressionText().add(queryExpression);
 

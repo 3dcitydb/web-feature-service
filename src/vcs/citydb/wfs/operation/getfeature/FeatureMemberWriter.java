@@ -53,6 +53,8 @@ public class FeatureMemberWriter implements FeatureProcessor {
 	private final Config exporterConfig;
 	private final ObjectFactory wfsFactory;	
 	private final JAXBMarshaller jaxbMarshaller;
+	
+	private boolean writeMemberProperty;
 
 	public FeatureMemberWriter(SingleWorkerPool<SAXEventBuffer> writerPool, 
 			UIDCacheManager lookupServerManager, 
@@ -68,8 +70,16 @@ public class FeatureMemberWriter implements FeatureProcessor {
 		jaxbMarshaller = jaxbBuilder.createJAXBMarshaller(version);
 	}
 
+	public boolean isWriteMemberProperty() {
+		return writeMemberProperty;
+	}
+	public void setWriteMemberProperty(boolean writeMemberProperty) {
+		this.writeMemberProperty = writeMemberProperty;
+	}
 	@Override
 	public void process(AbstractFeature abstractFeature) throws FeatureProcessException {
+		JAXBElement<?> output = null;
+		if (writeMemberProperty) {
 		MemberPropertyType memberProperty = new MemberPropertyType();
 
 		if (!exporterConfig.getInternal().isRegisterGmlIdInCache() || !isFeatureAlreadyExported(abstractFeature)) {
@@ -77,15 +87,17 @@ public class FeatureMemberWriter implements FeatureProcessor {
 			memberProperty.getContent().add(jaxbMarshaller.marshalJAXBElement(abstractFeature));
 		} else
 			memberProperty.setHref("#" + abstractFeature.getId());
-
+			output = wfsFactory.createMember(memberProperty);
+		} else {
+			output = jaxbMarshaller.marshalJAXBElement(abstractFeature);
+		}
 		try {
 			SAXEventBuffer buffer = new SAXEventBuffer();
 			Marshaller marshaller = jaxbBuilder.getJAXBContext().createMarshaller();
 			marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);				
 
-			JAXBElement<?> memberPropertyElement = wfsFactory.createMember(memberProperty);
-			if (memberPropertyElement != null)
-				marshaller.marshal(memberPropertyElement, buffer);
+			if (output != null)
+				marshaller.marshal(output, buffer);
 			else
 				throw new FeatureProcessException("Failed to write feature with gml:id '" + abstractFeature.getId() + "'.");
 

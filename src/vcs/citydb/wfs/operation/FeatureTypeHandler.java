@@ -26,7 +26,6 @@
 package vcs.citydb.wfs.operation;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -50,6 +49,7 @@ import org.citygml4j.xml.schema.SchemaHandler;
 import org.citygml4j.xml.schema.SchemaWalker;
 
 import vcs.citydb.wfs.config.WFSConfig;
+import vcs.citydb.wfs.config.feature.FeatureType;
 import vcs.citydb.wfs.exception.WFSException;
 import vcs.citydb.wfs.exception.WFSExceptionCode;
 
@@ -142,7 +142,7 @@ public class FeatureTypeHandler {
 			if (!isSchemaElementFunction)
 				result.add(qName);
 			else
-				result.addAll(resolveSchemaElementFunction(qName));
+				result.addAll(resolveSchemaElementFunction(qName, handle));
 		}
 
 		return getFeatureTypeNames(result, canBeEmpty, handle);
@@ -208,8 +208,16 @@ public class FeatureTypeHandler {
 		return getElementDecl(featureTypeName, handle) != null;
 	}
 
-	private Set<QName> resolveSchemaElementFunction(QName featureTypeName) {
-		// TODO: not implemented yet
-		return Collections.emptySet();
+	private Set<QName> resolveSchemaElementFunction(QName featureTypeName, String handle) {
+		CityGMLVersion version = CityGMLVersion.fromCityGMLModule(Modules.getCityGMLModule(featureTypeName.getNamespaceURI()));					
+		if (!wfsConfig.getFeatureTypes().getVersions().contains(version))
+			throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, "Feature types from CityGML version '" + version + "' are not advertised.", handle);
+		if (featureTypeName.getLocalPart().equals("_CityObject")) {
+			Set<QName> types = new HashSet<QName>();
+			for (FeatureType type : wfsConfig.getFeatureTypes().getFeatureTypes())
+				types.add(type.getQName(version));
+			return types;
+		}
+		throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, "Only the abstract super type '_CityObject' may be used as parameter for the schema-element() function.", handle);
 	}
 }

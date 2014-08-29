@@ -37,6 +37,7 @@ public class QueryExpression {
 	// to be replaced by a FE object layer
 	private Set<QName> featureTypeNames;
 	private String handle;
+	private boolean isGetFeatureById;
 	
 	// TODO: replace these filter classes
 	private GmlIdFilter gmlIdFilter;
@@ -72,6 +73,12 @@ public class QueryExpression {
 
 	public void setHandle(String handle) {
 		this.handle = handle;
+	}
+	public boolean isGetFeatureById() {
+		return isGetFeatureById;
+	}
+	public void setGetFeatureById(boolean isGetFeatureById) {
+		this.isGetFeatureById = isGetFeatureById;
 	}
 	
 }

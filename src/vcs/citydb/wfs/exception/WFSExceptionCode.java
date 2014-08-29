@@ -51,6 +51,7 @@ public class WFSExceptionCode {
 	public static final WFSExceptionCode OPERATION_PARSING_FAILED = new WFSExceptionCode("OperationParsingFailed", HttpServletResponse.SC_BAD_REQUEST);
 	public static final WFSExceptionCode OPERATION_PROCESSING_FAILED = new WFSExceptionCode("OperationProcessingFailed", HttpServletResponse.SC_FORBIDDEN);
 	public static final WFSExceptionCode RESPONSE_CACHE_EXPIRED = new WFSExceptionCode("ResponseCacheExpired", HttpServletResponse.SC_FORBIDDEN);
+	public static final WFSExceptionCode NOT_FOUND = new WFSExceptionCode("NotFound", HttpServletResponse.SC_NOT_FOUND);
 	
 	// Server exception codes
 	public static final WFSExceptionCode INTERNAL_SERVER_ERROR = new WFSExceptionCode("InternalServerError", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

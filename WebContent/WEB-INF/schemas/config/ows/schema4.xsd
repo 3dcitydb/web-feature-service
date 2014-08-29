@@ -277,46 +277,12 @@
     <xs:attribute name="dimensions" type="xs:positiveInteger"/>
   </xs:complexType>
 
-  <xs:complexType name="RangeType">
+  <xs:complexType name="ExceptionType">
     <xs:sequence>
-      <xs:element name="MinimumValue" type="tns:ValueType" minOccurs="0"/>
-      <xs:element name="MaximumValue" type="tns:ValueType" minOccurs="0"/>
-      <xs:element name="Spacing" type="tns:ValueType" minOccurs="0"/>
+      <xs:element name="ExceptionText" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
-    <xs:attribute ref="tns:rangeClosure"/>
-  </xs:complexType>
-
-  <xs:simpleType name="ValueType">
-    <xs:restriction base="xs:string"/>
-  </xs:simpleType>
-
-  <xs:complexType name="DomainMetadataType">
-    <xs:simpleContent>
-      <xs:extension base="xs:string">
-        <xs:attribute ref="tns:reference"/>
-      </xs:extension>
-    </xs:simpleContent>
-  </xs:complexType>
-
-  <xs:complexType name="RequestMethodType">
-    <xs:complexContent>
-      <xs:extension base="tns:OnlineResourceType">
-        <xs:sequence>
-          <xs:element name="Constraint" type="tns:DomainType" minOccurs="0" maxOccurs="unbounded"/>
-        </xs:sequence>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-
-  <xs:complexType name="OnlineResourceType">
-    <xs:sequence/>
-    <xs:attribute ref="ns1:type"/>
-    <xs:attribute ref="ns1:href"/>
-    <xs:attribute ref="ns1:role"/>
-    <xs:attribute ref="ns1:arcrole"/>
-    <xs:attribute ref="ns1:title"/>
-    <xs:attribute ref="ns1:show"/>
-    <xs:attribute ref="ns1:actuate"/>
+    <xs:attribute name="exceptionCode" type="xs:string" use="required"/>
+    <xs:attribute name="locator" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="DomainType">
@@ -343,6 +309,27 @@
     </xs:sequence>
   </xs:complexType>
 
+  <xs:simpleType name="ValueType">
+    <xs:restriction base="xs:string"/>
+  </xs:simpleType>
+
+  <xs:complexType name="RangeType">
+    <xs:sequence>
+      <xs:element name="MinimumValue" type="tns:ValueType" minOccurs="0"/>
+      <xs:element name="MaximumValue" type="tns:ValueType" minOccurs="0"/>
+      <xs:element name="Spacing" type="tns:ValueType" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute ref="tns:rangeClosure"/>
+  </xs:complexType>
+
+  <xs:complexType name="DomainMetadataType">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute ref="tns:reference"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
   <xs:complexType name="MetadataType">
     <xs:sequence>
       <xs:element name="AbstractMetaData" type="xs:anyType" minOccurs="0"/>
@@ -357,12 +344,25 @@
     <xs:attribute ref="ns1:actuate"/>
   </xs:complexType>
 
-  <xs:complexType name="ExceptionType">
-    <xs:sequence>
-      <xs:element name="ExceptionText" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
-    </xs:sequence>
-    <xs:attribute name="exceptionCode" type="xs:string" use="required"/>
-    <xs:attribute name="locator" type="xs:string"/>
+  <xs:complexType name="RequestMethodType">
+    <xs:complexContent>
+      <xs:extension base="tns:OnlineResourceType">
+        <xs:sequence>
+          <xs:element name="Constraint" type="tns:DomainType" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="OnlineResourceType">
+    <xs:sequence/>
+    <xs:attribute ref="ns1:type"/>
+    <xs:attribute ref="ns1:href"/>
+    <xs:attribute ref="ns1:role"/>
+    <xs:attribute ref="ns1:arcrole"/>
+    <xs:attribute ref="ns1:title"/>
+    <xs:attribute ref="ns1:show"/>
+    <xs:attribute ref="ns1:actuate"/>
   </xs:complexType>
 
   <xs:complexType name="ManifestType">
