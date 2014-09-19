@@ -113,6 +113,7 @@ public class QueryExecuter {
 	public void executeQuery() throws WFSException {
 		String query = queryBuilder.buildQuery(queryExpressions);
 
+		boolean purgeConnectionPool = false;
 		boolean isMultipleQueryRequest = queryExpressions.size() > 1;
 		boolean countBreak = false;
 		long returnedFeature = 0;
@@ -229,6 +230,7 @@ public class QueryExecuter {
 			}
 
 		} catch (SQLException e) {
+			purgeConnectionPool = true;
 			throw new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "A fatal SQL error occurred whilst querying the database.", e);		
 		} catch (JAXBException e) {
 			throw new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "A fatal JAXB error occurred whilst marshalling the response document.", e);
@@ -260,6 +262,10 @@ public class QueryExecuter {
 					throw new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "Failed to close database resource", e);
 				}
 			}
+
+			// purge connection pool to remove possibly defect connections
+			if (purgeConnectionPool)
+				connectionPool.purge();
 		}
 	}
 
