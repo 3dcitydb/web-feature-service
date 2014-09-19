@@ -276,9 +276,6 @@ public class WFSService extends HttpServlet {
 					// handle GetFeature request
 					GetFeatureHandler getFeatureHandler = new GetFeatureHandler(jaxbBuilder, wfsConfig, exporterConfig);
 					getFeatureHandler.doOperation((GetFeatureType)wfsRequest, namespaceFilter, request, response);
-
-					// free one slot from the request queue
-					requestQueue.poll();
 				} catch (InterruptedException e) {
 					throw new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "The service has internally interrupted the request: " + e.getMessage());
 				}
@@ -325,6 +322,9 @@ public class WFSService extends HttpServlet {
 				response.reset();
 			
 			exceptionReportHandler.sendErrorResponse(e, request, response);
+		} finally {
+			// free one slot from the request queue
+			requestQueue.poll();
 		}
 	}
 
