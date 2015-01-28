@@ -65,6 +65,7 @@ import net.opengis.wfs._2.WFS_CapabilitiesType;
 import org.citydb.api.database.DatabaseSrs;
 import org.citydb.database.DatabaseConnectionPool;
 import org.citydb.log.Logger;
+import org.citydb.util.Util;
 import org.citygml4j.builder.jaxb.JAXBBuilder;
 import org.citygml4j.model.module.citygml.CityGMLModule;
 import org.citygml4j.model.module.citygml.CityGMLVersion;
@@ -114,6 +115,22 @@ public class GetCapabilitiesHandler {
 		if (!wfsRequest.isSetService() || !Constants.WFS_SERVICE_STRING.equals(wfsRequest.getService()))
 			throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, "The attribute 'service' must match the fixed value '" + Constants.WFS_SERVICE_STRING + "'.");		
 
+		// negotiate version
+		String version = Constants.DEFAULT_WFS_VERSION;
+		if (wfsRequest.isSetAcceptVersions() && wfsRequest.getAcceptVersions().isSetVersion()) {
+			boolean success = false;
+			for (String tmp : wfsRequest.getAcceptVersions().getVersion()) {
+				if (Constants.SUPPORTED_WFS_VERSIONS.contains(tmp)) {
+					version = tmp;
+					success = true;
+					break;
+				}
+			}
+
+			if (!success)
+				throw new WFSException(WFSExceptionCode.VERSION_NEGOTIATION_FAILED, "None of the requested version numbers '" + Util.collection2string(wfsRequest.getAcceptVersions().getVersion(), ", ") + "' is supported by this WFS service implementation.");
+		}
+
 		// check whether we are supposed to return a static capabilities document
 		boolean dynamic = true;
 		if (wfsConfig.getCapabilities() != null && wfsConfig.getCapabilities().getValue() instanceof String) {
@@ -127,7 +144,7 @@ public class GetCapabilitiesHandler {
 		if (dynamic) {
 			// dynamically generate capabilities document
 			WFS_CapabilitiesType capabilities = new WFS_CapabilitiesType();
-			capabilities.setVersion(Constants.WFS_VERSION_STRING);
+			capabilities.setVersion(version);
 
 			// service identification and provider are copied from configuration file
 			if (wfsConfig.getCapabilities() != null && wfsConfig.getCapabilities().getValue() instanceof OWSMetadata) {
@@ -186,9 +203,12 @@ public class GetCapabilitiesHandler {
 		DomainType operationVersion = new DomainType();
 		operationVersion.setName("version");
 		operationVersion.setAllowedValues(new AllowedValues());
-		ValueType operationVersionValue = new ValueType();
-		operationVersionValue.setValue(Constants.WFS_VERSION_STRING);
-		operationVersion.getAllowedValues().getValueOrRange().add(operationVersionValue);
+
+		for (String version : Constants.SUPPORTED_WFS_VERSIONS) {
+			ValueType value = new ValueType();
+			value.setValue(version);
+			operationVersion.getAllowedValues().getValueOrRange().add(value);
+		}
 
 		// GetCapabilities operation
 		{
@@ -201,9 +221,12 @@ public class GetCapabilitiesHandler {
 			getCapabilities.getParameter().add(acceptVersions);
 			acceptVersions.setName("AcceptVersions");
 			acceptVersions.setAllowedValues(new AllowedValues());
-			ValueType version = new ValueType();
-			version.setValue(Constants.WFS_VERSION_STRING);
-			acceptVersions.getAllowedValues().getValueOrRange().add(version);
+
+			for (String version : Constants.SUPPORTED_WFS_VERSIONS) {
+				ValueType value = new ValueType();
+				value.setValue(version);
+				acceptVersions.getAllowedValues().getValueOrRange().add(value);
+			}
 
 			DomainType acceptFormats = new DomainType();
 			getCapabilities.getParameter().add(acceptFormats);
@@ -349,7 +372,7 @@ public class GetCapabilitiesHandler {
 		}
 	}
 
-	private void addFilterCapabilities(Filter_Capabilities filterCapabilities) {
+	private void addFilterCapabilities(Filter_Capabilities filterCapabilities) {		
 		// conformance section
 		ConformanceType conformance = new ConformanceType();
 		filterCapabilities.setConformance(conformance);
@@ -364,7 +387,8 @@ public class GetCapabilitiesHandler {
 		constraints.put("ImplementsQuery", trueValue);
 		constraints.put("ImplementsAdHocQuery", falseValue);
 		constraints.put("ImplementsFunctions", falseValue);
-		constraints.put("ImplementsMinStandardFilter", falseValue);
+		constraints.put("ImplementsResourceld", falseValue);
+		constraints.put("ImplementsMinStandardFilter", falseValue);		
 		constraints.put("ImplementsStandardFilter", falseValue);
 		constraints.put("ImplementsMinSpatialFilter", falseValue);
 		constraints.put("ImplementsSpatialFilter", falseValue);
@@ -373,6 +397,8 @@ public class GetCapabilitiesHandler {
 		constraints.put("ImplementsVersionNav", falseValue);
 		constraints.put("ImplementsSorting", falseValue);
 		constraints.put("ImplementsExtendedOperators", falseValue);
+		constraints.put("ImplementsMinimumXPath", falseValue);
+		constraints.put("ImplementsSchemaElementFunc", falseValue);
 
 		for (Entry<String, ValueType> entry : constraints.entrySet()) {
 			DomainType constraint = new DomainType();

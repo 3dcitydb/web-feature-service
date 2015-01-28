@@ -84,6 +84,10 @@ public class StoredQuery {
 		return description.getTitle();
 	}
 
+	public NamespaceFilter getNamespaceFilter() {
+		return namespaceFilter;
+	}
+	
 	public List<QName> getReturnFeatureTypeNames() {
 		Set<QName> featureTypeNames = new HashSet<QName>();
 		for (QueryExpressionTextType queryExpression : description.getQueryExpressionText())

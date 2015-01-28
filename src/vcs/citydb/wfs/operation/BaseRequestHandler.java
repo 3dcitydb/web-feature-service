@@ -25,6 +25,8 @@
  */
 package vcs.citydb.wfs.operation;
 
+import org.citydb.util.Util;
+
 import vcs.citydb.wfs.config.Constants;
 import vcs.citydb.wfs.exception.WFSException;
 import vcs.citydb.wfs.exception.WFSExceptionCode;
@@ -40,8 +42,8 @@ public class BaseRequestHandler {
 			throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, "The attribute 'service' must match the fixed value '" + Constants.WFS_SERVICE_STRING + "'.", operationHandle);
 
 		// check version attribute
-		if (!wfsRequest.isSetVersion() || !Constants.WFS_VERSION_STRING.equals(wfsRequest.getVersion()))
-			throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, "The attribute 'version' must match the fixed value '" + Constants.WFS_VERSION_STRING + "'.", operationHandle);
+		if (!wfsRequest.isSetVersion() || !Constants.SUPPORTED_WFS_VERSIONS.contains(wfsRequest.getVersion()))
+			throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, "The attribute 'version' must match one of the supported version numbers '" + Util.collection2string(Constants.SUPPORTED_WFS_VERSIONS, ", ") + "'.", operationHandle);
 	}
 	
 }

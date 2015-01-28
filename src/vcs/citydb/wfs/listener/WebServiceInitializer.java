@@ -43,6 +43,7 @@ import javax.xml.bind.Unmarshaller;
 
 import org.citydb.api.database.DatabaseConfigurationException;
 import org.citydb.api.database.DatabaseSrs;
+import org.citydb.api.database.DatabaseVersionException;
 import org.citydb.api.event.EventDispatcher;
 import org.citydb.api.registry.ObjectRegistry;
 import org.citydb.config.Config;
@@ -52,6 +53,9 @@ import org.citydb.config.project.database.Database;
 import org.citydb.config.project.global.LanguageType;
 import org.citydb.database.DatabaseConnectionPool;
 import org.citydb.log.Logger;
+import org.citygml4j.builder.jaxb.JAXBBuilder;
+import org.citygml4j.xml.schema.SchemaHandler;
+import org.xml.sax.SAXException;
 
 import vcs.citydb.wfs.config.Constants;
 import vcs.citydb.wfs.config.WFSConfig;
@@ -68,6 +72,24 @@ public class WebServiceInitializer implements ServletContextListener {
 		ObjectRegistry registry = ObjectRegistry.getInstance();
 		WFSConfig wfsConfig = null;
 		Config exporterConfig = null;
+
+		// initialize JAXB context for CityGML and WFS schemas and register with ObjectRegistry
+		try {
+			JAXBBuilder jaxbBuilder = new JAXBBuilder("net.opengis.wfs._2", "net.opengis.ows._1", "net.opengis.fes._2");
+			registry.register(JAXBBuilder.class.getName(), jaxbBuilder);
+		} catch (JAXBException e) {
+			context.setAttribute(Constants.INIT_ERROR_ATTRNAME, new ServletException("Failed to initialize JAXB context.", e));
+			return;
+		}
+
+		// initialize and register CityGML XML schema handler
+		try {
+			SchemaHandler schemaHandler = SchemaHandler.newInstance(); 
+			registry.register(SchemaHandler.class.getName(), schemaHandler);
+		} catch (SAXException e) {
+			context.setAttribute(Constants.INIT_ERROR_ATTRNAME, new ServletException("Failed to initialize CityGML XML schema parser.", e));
+			return;
+		}
 
 		// read WFS configuration file and register with ObjectRegistry
 		try {
@@ -91,7 +113,8 @@ public class WebServiceInitializer implements ServletContextListener {
 		registry.register(Config.class.getName(), exporterConfig);
 
 		// map from WFS to 3DCityDB configuration
-		exporterConfig.getProject().setDatabase(wfsConfig.getDatabase());
+		exporterConfig.getProject().getDatabase().setActiveConnection(wfsConfig.getDatabase().getConnection());
+		exporterConfig.getProject().getDatabase().setReferenceSystems(wfsConfig.getDatabase().getReferenceSystems());
 		exporterConfig.getProject().getGlobal().setCache(wfsConfig.getUIDCache());
 
 		// init internationalized labels 
@@ -183,25 +206,24 @@ public class WebServiceInitializer implements ServletContextListener {
 
 	private void initDatabaseConnectionPool(Config exporterConfig) throws ServletException {
 		Database databaseConfig = exporterConfig.getProject().getDatabase();
-		if (databaseConfig.getConnections().size() == 0) {
+		if (databaseConfig.getActiveConnection() == null) {
 			String message = "No database connection provided in " + Constants.CONFIG_PATH + '/' + Constants.CONFIG_FILE + '.';
 			log.error(message);
 			throw new ServletException(message);
 		}
 
-		DBConnection connection = databaseConfig.getConnections().get(0);
+		DBConnection connection = databaseConfig.getActiveConnection();
 		connection.setInternalPassword(connection.getPassword());		
-		databaseConfig.setActiveConnection(connection);
 
 		DatabaseConnectionPool connectionPool = DatabaseConnectionPool.getInstance();
 		try {
 			connectionPool.connect(exporterConfig);
-		} catch (DatabaseConfigurationException | SQLException e) {
+		} catch (DatabaseConfigurationException | SQLException | DatabaseVersionException e) {
 			String message = "Failed to connect to database.";
 			log.error(message);
 			log.error(e.getMessage());
 			throw new ServletException(message, e);
-		} 
+		}
 
 		log.info("Database connection established.");
 		connectionPool.getActiveDatabaseAdapter().getConnectionMetaData().printToConsole();

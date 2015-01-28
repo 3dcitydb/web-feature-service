@@ -25,6 +25,10 @@
  */
 package vcs.citydb.wfs.config;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 
 public class Constants {
 	public static final String CONFIG_PATH = "/WEB-INF";
@@ -43,7 +47,8 @@ public class Constants {
 	
 	public static final String WFS_SERVICE_PATH = "/wfs";
 	public static final String WFS_SERVICE_STRING = "WFS";
-	public static final String WFS_VERSION_STRING = "2.0.0";
+	public static final List<String> SUPPORTED_WFS_VERSIONS = new ArrayList<String>(Arrays.asList(new String[]{"2.0.2", "2.0.0"}));
+	public static final String DEFAULT_WFS_VERSION = "2.0.2";	
 	
 	public static final String WFS_NAMESPACE_URI = "http://www.opengis.net/wfs/2.0";
 	public static final String WFS_NAMESPACE_PREFIX = "wfs";

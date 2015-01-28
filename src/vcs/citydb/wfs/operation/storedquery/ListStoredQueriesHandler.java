@@ -43,13 +43,10 @@ import net.opengis.wfs._2.StoredQueryListItemType;
 import org.citydb.api.registry.ObjectRegistry;
 import org.citydb.log.Logger;
 import org.citygml4j.builder.jaxb.JAXBBuilder;
-import org.citygml4j.model.module.citygml.CityGMLModule;
-import org.citygml4j.model.module.citygml.CityGMLVersion;
 import org.citygml4j.util.xml.SAXWriter;
 import org.xml.sax.SAXException;
 
 import vcs.citydb.wfs.config.Constants;
-import vcs.citydb.wfs.config.WFSConfig;
 import vcs.citydb.wfs.exception.WFSException;
 import vcs.citydb.wfs.exception.WFSExceptionCode;
 import vcs.citydb.wfs.operation.BaseRequestHandler;
@@ -59,16 +56,13 @@ import com.sun.xml.internal.bind.marshaller.NamespacePrefixMapper;
 
 public class ListStoredQueriesHandler {
 	private final Logger log = Logger.getInstance();
-	private final WFSConfig wfsConfig;
 
 	private final BaseRequestHandler baseRequestHandler;
 	private final StoredQueryManager storedQueryManager;
 	private final Marshaller marshaller;
 	private final ObjectFactory wfsFactory;
 
-	public ListStoredQueriesHandler(JAXBBuilder jaxbBuilder, WFSConfig wfsConfig) throws JAXBException {
-		this.wfsConfig = wfsConfig;
-		
+	public ListStoredQueriesHandler(JAXBBuilder jaxbBuilder) throws JAXBException {
 		baseRequestHandler = new BaseRequestHandler();
 		storedQueryManager = (StoredQueryManager)ObjectRegistry.getInstance().lookup(StoredQueryManager.class.getName());
 		wfsFactory = new ObjectFactory();
@@ -113,17 +107,6 @@ public class ListStoredQueriesHandler {
 			saxWriter.setIndentString("  ");
 			saxWriter.setPrefix(Constants.WFS_NAMESPACE_PREFIX, Constants.WFS_NAMESPACE_URI);
 			saxWriter.setSchemaLocation(Constants.WFS_NAMESPACE_URI, Constants.WFS_SCHEMA_LOCATION);
-
-			// set CityGML prefixes
-			boolean multipleVersions = wfsConfig.getFeatureTypes().getVersions().size() > 1;
-			for (CityGMLModule module : wfsConfig.getFeatureTypes().getCityGMLModules()) {
-				String prefix = module.getNamespacePrefix();
-				String uri = module.getNamespaceURI();
-				if (multipleVersions) 
-					prefix += (CityGMLVersion.fromCityGMLModule(module) == CityGMLVersion.v2_0_0) ? "2" : "1";
-
-				saxWriter.setPrefix(prefix, uri);
-			}
 
 			saxWriter.setOutput(new OutputStreamWriter(response.getOutputStream(), "UTF-8"));
 			marshaller.setProperty("com.sun.xml.internal.bind.namespacePrefixMapper", new NamespacePrefixMapper() {

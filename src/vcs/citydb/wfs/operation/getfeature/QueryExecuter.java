@@ -27,9 +27,9 @@ package vcs.citydb.wfs.operation.getfeature;
 
 import java.math.BigInteger;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -64,12 +64,13 @@ import org.citygml4j.util.xml.SAXFragmentWriter.WriteMode;
 import org.xml.sax.SAXException;
 
 import vcs.citydb.wfs.config.Constants;
+import vcs.citydb.wfs.config.WFSConfig;
 import vcs.citydb.wfs.exception.WFSException;
 import vcs.citydb.wfs.exception.WFSExceptionCode;
 
 public class QueryExecuter {
 	private final List<QueryExpression> queryExpressions;
-	private final FeatureMemberWriter featureMemberWriter;
+	private final FeatureMemberWriterFactory writerFactory;
 	private final long count;
 	private final ResultTypeType resultType;
 	private final WorkerPool<DBSplittingResult> databaseWorkerPool;
@@ -85,15 +86,16 @@ public class QueryExecuter {
 
 	public QueryExecuter(GetFeatureType wfsRequest,
 			List<QueryExpression> queryExpressions, 
-			FeatureMemberWriter featureMemberWriter,
+			FeatureMemberWriterFactory writerFactory,
 			WorkerPool<DBSplittingResult> databaseWorkerPool,
 			SingleWorkerPool<SAXEventBuffer> writerPool,
 			DatabaseConnectionPool connectionPool,
 			JAXBBuilder jaxbBuilder,
 			ExportFilter exportFilter,
+			WFSConfig wfsConfig,
 			Config exporterConfig) throws JAXBException, DatatypeConfigurationException {
 		this.queryExpressions = queryExpressions;
-		this.featureMemberWriter = featureMemberWriter;
+		this.writerFactory = writerFactory;
 		this.databaseWorkerPool = databaseWorkerPool;
 		this.writerPool = writerPool;
 		this.connectionPool = connectionPool;
@@ -101,7 +103,8 @@ public class QueryExecuter {
 		this.exporterConfig = exporterConfig;
 
 		// get standard request parameters
-		count = wfsRequest.isSetCount() ? wfsRequest.getCount().longValue() : Long.MAX_VALUE;		
+		long maxFeatureCount = wfsConfig.getSecurity().getMaxFeatureCount();
+		count = wfsRequest.isSetCount() && wfsRequest.getCount().longValue() < maxFeatureCount ? wfsRequest.getCount().longValue() : maxFeatureCount;		
 		resultType = wfsRequest.getResultType();
 
 		queryBuilder = new QueryBuilder();
@@ -113,22 +116,23 @@ public class QueryExecuter {
 	public void executeQuery() throws WFSException {
 		String query = queryBuilder.buildQuery(queryExpressions);
 
-		boolean purgeConnectionPool = false;
 		boolean isMultipleQueryRequest = queryExpressions.size() > 1;
 		boolean countBreak = false;
 		long returnedFeature = 0;
 		int currentQuery = -1;
+
+		boolean purgeConnectionPool = false;
 		boolean isWriteBareFeature = !isMultipleQueryRequest && queryExpressions.get(0).isGetFeatureById();
-		featureMemberWriter.setWriteMemberProperty(!isWriteBareFeature);
+		writerFactory.setWriteMemberProperty(!isWriteBareFeature);
 
 		Connection connection = null;
-		Statement stmt = null;
+		PreparedStatement stmt = null;
 		ResultSet rs = null;
 
 		try {
 			connection = initConnection();			
-			stmt = connection.createStatement();				
-			rs = stmt.executeQuery(query);
+			stmt = connection.prepareStatement(query.toString());
+			rs = stmt.executeQuery();
 
 			if (rs.next()) {
 				long matchAll = rs.getLong("match_all");
@@ -196,9 +200,11 @@ public class QueryExecuter {
 
 							if (countBreak) {
 								rs.close();
+								stmt.close();
 
 								QueryBuilder builder = new QueryBuilder();
-								rs = stmt.executeQuery(builder.buildHitsQuery(queryExpressions.get(currentQuery)));
+								stmt = connection.prepareStatement(builder.buildHitsQuery(queryExpressions.get(currentQuery)));
+								rs = stmt.executeQuery();
 								if (rs.next())
 									matchQuery = rs.getLong(1);
 							}
@@ -218,6 +224,7 @@ public class QueryExecuter {
 						startFeatureCollection(0, 0, false);
 						for (int i = 0; i < queryExpressions.size(); i++)
 							writeFeatureCollection(0, true);						
+
 						endFeatureCollection(false);
 					} else
 						writeFeatureCollection(0, false);

@@ -12,9 +12,10 @@
       <xs:element name="capabilities" type="CapabilitiesType" minOccurs="0"/>
       <xs:element name="featureTypes" type="FeatureTypesType"/>
       <xs:element name="operations" type="OperationsType" minOccurs="0"/>
-      <xs:element name="database" type="DatabaseType"/>
+      <xs:element name="database" type="WFSDatabaseType"/>
       <xs:element name="server" type="ServiceType"/>
       <xs:element name="uidCache" type="CacheType" minOccurs="0"/>
+      <xs:element name="security" type="SecurityType" minOccurs="0"/>
       <xs:element name="logging" type="LoggingType" minOccurs="0"/>
     </xs:sequence>
   </xs:complexType>
@@ -60,14 +61,8 @@
   <xs:complexType name="OperationsType">
     <xs:sequence>
       <xs:element name="useXMLValidation" type="xs:boolean" minOccurs="0"/>
-      <xs:element name="GetFeature" type="GetFeatureOperationType" minOccurs="0"/>
       <xs:element name="DescribeFeatureType" type="DescribeFeatureTypeOperationType" minOccurs="0"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="GetFeatureOperationType">
-    <xs:sequence>
-      <xs:element name="outputFormat" type="GetFeatureOutputFormatType" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="GetFeature" type="GetFeatureOperationType" minOccurs="0"/>
     </xs:sequence>
   </xs:complexType>
 
@@ -77,20 +72,16 @@
     </xs:sequence>
   </xs:complexType>
 
-  <xs:complexType name="DatabaseType">
+  <xs:complexType name="GetFeatureOperationType">
+    <xs:sequence>
+      <xs:element name="outputFormat" type="GetFeatureOutputFormatType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="WFSDatabaseType">
     <xs:sequence>
       <xs:element ref="referenceSystems" minOccurs="0"/>
-      <xs:element name="connections" minOccurs="0">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="connection" type="ConnectionType" maxOccurs="unbounded"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="activeConnection" type="xs:IDREF" minOccurs="0"/>
-      <xs:element name="updateBatching" type="UpdateBatchingType" minOccurs="0"/>
-      <xs:element name="workspaces" type="WorkspacesType" minOccurs="0"/>
-      <xs:element name="operation" type="DBOperationType" minOccurs="0"/>
+      <xs:element name="connection" type="ConnectionType"/>
     </xs:sequence>
   </xs:complexType>
 
@@ -148,40 +139,6 @@
     <xs:attribute name="suspectTimeout" type="xs:int"/>
   </xs:complexType>
 
-  <xs:complexType name="UpdateBatchingType">
-    <xs:sequence>
-      <xs:element name="featureBatchValue" type="xs:positiveInteger" default="20"/>
-      <xs:element name="gmlIdCacheBatchValue" type="xs:positiveInteger" default="1000"/>
-      <xs:element name="tempBatchValue" type="xs:positiveInteger" default="1000"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="WorkspacesType">
-    <xs:sequence>
-      <xs:element name="import" type="WorkspaceType"/>
-      <xs:element name="export" type="WorkspaceType"/>
-      <xs:element name="kmlExport" type="WorkspaceType"/>
-      <xs:element name="operations" type="WorkspaceType"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="WorkspaceType">
-    <xs:sequence>
-      <xs:element name="name" type="xs:string"/>
-      <xs:element name="timestamp" type="xs:string" minOccurs="0"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="DBOperationType">
-    <xs:sequence>
-      <xs:element name="lastUsed" type="DBOperationModeType" minOccurs="0"/>
-      <xs:element name="boundingBoxFeatureClass" type="FeatureClassModeType" minOccurs="0"/>
-      <xs:element name="boundingBoxSrs" type="xs:IDREF" minOccurs="0"/>
-      <xs:element name="spatialIndex" type="xs:boolean"/>
-      <xs:element name="normalIndex" type="xs:boolean"/>
-    </xs:sequence>
-  </xs:complexType>
-
   <xs:complexType name="ServiceType">
     <xs:sequence>
       <xs:element name="externalServiceURL" type="xs:string"/>
@@ -194,6 +151,13 @@
     <xs:sequence>
       <xs:element name="mode" type="CacheModeType"/>
       <xs:element name="localPath" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="SecurityType">
+    <xs:sequence>
+      <xs:element name="maxFeatureCount" type="xs:long" minOccurs="0"/>
+      <xs:element name="stripGeometry" type="xs:boolean" default="false" minOccurs="0"/>
     </xs:sequence>
   </xs:complexType>
 
@@ -244,6 +208,12 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <xs:simpleType name="DescribeFeatureTypeOutputFormatType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="application/gml+xml; version=3.1"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:simpleType name="GetFeatureOutputFormatType">
     <xs:restriction base="xs:string">
       <xs:enumeration value="application/gml+xml; version=3.1"/>
@@ -251,41 +221,10 @@
     </xs:restriction>
   </xs:simpleType>
 
-  <xs:simpleType name="DescribeFeatureTypeOutputFormatType">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="application/gml+xml; version=3.1"/>
-    </xs:restriction>
-  </xs:simpleType>
-
   <xs:simpleType name="DatabaseTypeType">
     <xs:restriction base="xs:string">
       <xs:enumeration value="Oracle"/>
       <xs:enumeration value="PostGIS"/>
-    </xs:restriction>
-  </xs:simpleType>
-
-  <xs:simpleType name="DBOperationModeType">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="report"/>
-      <xs:enumeration value="boundingBox"/>
-      <xs:enumeration value="indexes"/>
-    </xs:restriction>
-  </xs:simpleType>
-
-  <xs:simpleType name="FeatureClassModeType">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="CityObject"/>
-      <xs:enumeration value="Building"/>
-      <xs:enumeration value="Bridge"/>
-      <xs:enumeration value="CityFurniture"/>
-      <xs:enumeration value="CityObjectGroup"/>
-      <xs:enumeration value="GenericCityObject"/>
-      <xs:enumeration value="LandUse"/>
-      <xs:enumeration value="ReliefFeature"/>
-      <xs:enumeration value="Transportation"/>
-      <xs:enumeration value="Tunnel"/>
-      <xs:enumeration value="Vegetation"/>
-      <xs:enumeration value="WaterBody"/>
     </xs:restriction>
   </xs:simpleType>
 

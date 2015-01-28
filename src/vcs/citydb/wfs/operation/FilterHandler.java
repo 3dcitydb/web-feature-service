@@ -42,7 +42,7 @@ public class FilterHandler {
 	// This class is just a dummy and needs
 	// to be replaced by a FE filter support
 
-	public Set<String> getResourceIds(FilterType filter, String handle) {
+	public Set<String> getResourceIds(FilterType filter, String handle) throws WFSException {
 		Set<String> resourceIds = new HashSet<String>();
 
 		if (filter.get_Id() != null) {

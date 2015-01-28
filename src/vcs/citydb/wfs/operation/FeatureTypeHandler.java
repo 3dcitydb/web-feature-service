@@ -208,7 +208,7 @@ public class FeatureTypeHandler {
 		return getElementDecl(featureTypeName, handle) != null;
 	}
 
-	private Set<QName> resolveSchemaElementFunction(QName featureTypeName, String handle) {
+	private Set<QName> resolveSchemaElementFunction(QName featureTypeName, String handle) throws WFSException {
 		CityGMLVersion version = CityGMLVersion.fromCityGMLModule(Modules.getCityGMLModule(featureTypeName.getNamespaceURI()));					
 		if (!wfsConfig.getFeatureTypes().getVersions().contains(version))
 			throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, "Feature types from CityGML version '" + version + "' are not advertised.", handle);

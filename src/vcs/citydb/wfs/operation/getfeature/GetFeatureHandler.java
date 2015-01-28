@@ -219,7 +219,7 @@ public class GetFeatureHandler {
 			throw new WFSException(WFSExceptionCode.OPTION_NOT_SUPPORTED, "Only ad hoc and stored query expressions are supported in a GetFeature request.", handle);
 	}
 
-	private FilterType validateSelectionClause(JAXBElement<?> selectionClauseElement, String handle) {
+	private FilterType validateSelectionClause(JAXBElement<?> selectionClauseElement, String handle) throws WFSException {
 		if (!(selectionClauseElement.getValue() instanceof FilterType))
 			throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, "The element " + selectionClauseElement.getName() + " is not supported as selection clause of queries.", handle); 
 

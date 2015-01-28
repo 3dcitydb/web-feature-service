@@ -47,13 +47,10 @@ import net.opengis.wfs._2.StoredQueryDescriptionType;
 import org.citydb.api.registry.ObjectRegistry;
 import org.citydb.log.Logger;
 import org.citygml4j.builder.jaxb.JAXBBuilder;
-import org.citygml4j.model.module.citygml.CityGMLModule;
-import org.citygml4j.model.module.citygml.CityGMLVersion;
 import org.citygml4j.util.xml.SAXWriter;
 import org.xml.sax.SAXException;
 
 import vcs.citydb.wfs.config.Constants;
-import vcs.citydb.wfs.config.WFSConfig;
 import vcs.citydb.wfs.exception.WFSException;
 import vcs.citydb.wfs.exception.WFSExceptionCode;
 import vcs.citydb.wfs.operation.BaseRequestHandler;
@@ -63,16 +60,13 @@ import com.sun.xml.internal.bind.marshaller.NamespacePrefixMapper;
 
 public class DescribeStoredQueriesHandler {
 	private final Logger log = Logger.getInstance();
-	private final WFSConfig wfsConfig;
 
 	private final BaseRequestHandler baseRequestHandler;
 	private final StoredQueryManager storedQueryManager;
 	private final Marshaller marshaller;
 	private final ObjectFactory wfsFactory;
 
-	public DescribeStoredQueriesHandler(JAXBBuilder jaxbBuilder, WFSConfig wfsConfig) throws JAXBException {
-		this.wfsConfig = wfsConfig;
-		
+	public DescribeStoredQueriesHandler(JAXBBuilder jaxbBuilder) throws JAXBException {
 		baseRequestHandler = new BaseRequestHandler();
 		storedQueryManager = (StoredQueryManager)ObjectRegistry.getInstance().lookup(StoredQueryManager.class.getName());
 		wfsFactory = new ObjectFactory();
@@ -104,8 +98,8 @@ public class DescribeStoredQueriesHandler {
 		try {
 			// generate response
 			DescribeStoredQueriesResponseType describeStoredQueriesResponse = new DescribeStoredQueriesResponseType();
-
-			for (StoredQuery storedQuery : storedQueries) {
+			
+			for (StoredQuery storedQuery : storedQueries) {				
 				StoredQueryDescriptionType description = storedQuery.getStoredQueryDescription();
 
 				// suppress private query expression texts
@@ -125,21 +119,11 @@ public class DescribeStoredQueriesHandler {
 
 			saxWriter.setWriteEncoding(true);
 			saxWriter.setIndentString("  ");
+			
 			saxWriter.setPrefix(Constants.WFS_NAMESPACE_PREFIX, Constants.WFS_NAMESPACE_URI);
 			saxWriter.setPrefix(Constants.FES_NAMESPACE_PREFIX, Constants.FES_NAMESPACE_URI);
-			saxWriter.setPrefix("xs", XMLConstants.W3C_XML_SCHEMA_NS_URI);
+			saxWriter.setPrefix("xs", XMLConstants.W3C_XML_SCHEMA_NS_URI);		
 			saxWriter.setSchemaLocation(Constants.WFS_NAMESPACE_URI, Constants.WFS_SCHEMA_LOCATION);
-
-			// set CityGML prefixes
-			boolean multipleVersions = wfsConfig.getFeatureTypes().getVersions().size() > 1;
-			for (CityGMLModule module : wfsConfig.getFeatureTypes().getCityGMLModules()) {
-				String prefix = module.getNamespacePrefix();
-				String uri = module.getNamespaceURI();
-				if (multipleVersions) 
-					prefix += (CityGMLVersion.fromCityGMLModule(module) == CityGMLVersion.v2_0_0) ? "2" : "1";
-
-				saxWriter.setPrefix(prefix, uri);
-			}
 
 			saxWriter.setOutput(new OutputStreamWriter(response.getOutputStream(), "UTF-8"));
 			marshaller.setProperty("com.sun.xml.internal.bind.namespacePrefixMapper", new NamespacePrefixMapper() {
@@ -147,7 +131,7 @@ public class DescribeStoredQueriesHandler {
 					return saxWriter.getPrefix(namespaceUri);
 				}
 			});
-			
+
 			marshaller.marshal(responseElement, saxWriter);
 
 			// close SAX writer. this also closes the servlet output stream.

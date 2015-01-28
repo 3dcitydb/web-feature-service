@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<wfs xmlns="http://www.3dcitydb.org/importer-exporter/config"
-  xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xlink="http://www.w3.org/1999/xlink"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://www.3dcitydb.org/importer-exporter/config schemas/config/config.xsd">
+<wfs xmlns="http://www.3dcitydb.org/importer-exporter/config" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xlink="http://www.w3.org/1999/xlink"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.3dcitydb.org/importer-exporter/config schemas/config/config.xsd">
   <capabilities>
     <owsMetadata>
       <ows:ServiceIdentification>
         <ows:Title>3DCityDB Web Feature Service</ows:Title>
         <ows:ServiceType>WFS</ows:ServiceType>
         <ows:ServiceTypeVersion>2.0.0</ows:ServiceTypeVersion>
+        <ows:ServiceTypeVersion>2.0.2</ows:ServiceTypeVersion>
       </ows:ServiceIdentification>
       <ows:ServiceProvider>
-        <ows:ProviderName></ows:ProviderName>
-        <ows:ServiceContact></ows:ServiceContact>
+        <ows:ProviderName/>
+        <ows:ServiceContact/>
       </ows:ServiceProvider>
     </owsMetadata>
   </capabilities>
@@ -42,24 +41,22 @@
         <description>WGS 84</description>
       </referenceSystem>
     </referenceSystems>
-    <connections>
-      <connection 
-        initialSize="10" 
-        maxActive="100" 
-        maxIdle="50" 
-        minIdle="0" 
-        suspectTimeout="60"
-        timeBetweenEvictionRunsMillis="30000" 
-        minEvictableIdleTimeMillis="60000">
-        <description/>
-        <type>PostGIS</type>
-        <server></server>
-        <port>5432</port>
-        <sid></sid>
-        <user></user>
-        <password></password>
-      </connection>
-    </connections>
+    <connection 
+      initialSize="10" 
+      maxActive="100" 
+      maxIdle="50" 
+      minIdle="0" 
+      suspectTimeout="60" 
+      timeBetweenEvictionRunsMillis="30000" 
+      minEvictableIdleTimeMillis="60000">
+      <description/>
+      <type>PostGIS</type>
+      <server/>
+      <port>5432</port>
+      <sid/>
+      <user/>
+      <password/>
+    </connection>
   </database>
   <server>
     <externalServiceURL>http://[server]:[port]/[context]</externalServiceURL>

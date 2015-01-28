@@ -30,19 +30,19 @@ import javax.xml.bind.annotation.XmlType;
 
 @XmlType(name="OperationsType", propOrder={
 		"useXMLValidation",
-		"getFeature",
-		"describeFeatureType"
+		"describeFeatureType",
+		"getFeature"
 })
 public class Operations {
 	private Boolean useXMLValidation = true;
-	@XmlElement(name="GetFeature")
-    private GetFeatureOperation getFeature;
 	@XmlElement(name="DescribeFeatureType")
 	private DescribeFeatureTypeOperation describeFeatureType;
+	@XmlElement(name="GetFeature")
+    private GetFeatureOperation getFeature;
 	
 	public Operations() {
-		getFeature = new GetFeatureOperation();
 		describeFeatureType = new DescribeFeatureTypeOperation();
+		getFeature = new GetFeatureOperation();
 	}
 	
 	public Boolean isUseXMLValidation() {
@@ -53,6 +53,14 @@ public class Operations {
 		this.useXMLValidation = useXMLValidation;
 	}
 
+	public DescribeFeatureTypeOperation getDescribeFeatureType() {
+		return describeFeatureType;
+	}
+
+	public void setDescribeFeatureType(DescribeFeatureTypeOperation describeFeatureType) {
+		this.describeFeatureType = describeFeatureType;
+	}
+
 	public GetFeatureOperation getGetFeature() {
 		return getFeature;
 	}
@@ -61,12 +69,4 @@ public class Operations {
 		this.getFeature = getFeature;
 	}
 
-	public DescribeFeatureTypeOperation getDescribeFeatureType() {
-		return describeFeatureType;
-	}
-
-	public void setDescribeFeatureType(DescribeFeatureTypeOperation describeFeatureType) {
-		this.describeFeatureType = describeFeatureType;
-	}
-	
 }

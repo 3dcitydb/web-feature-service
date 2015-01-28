@@ -113,7 +113,7 @@ public class DescribeFeatureTypeHandler {
 		log.info(LoggerUtil.getLogMessage(request, "DescribeFeatureType operation successfully finished."));
 	}
 
-	private String getSchemaFileLocation(Set<QName> featureTypeNames, String handle) {
+	private String getSchemaFileLocation(Set<QName> featureTypeNames, String handle) throws WFSException {
 		CityGMLVersion version = wfsConfig.getFeatureTypes().getDefaultVersion();
 		if (!featureTypeNames.isEmpty())
 			version = CityGMLVersion.fromCityGMLModule(Modules.getCityGMLModule(featureTypeNames.iterator().next().getNamespaceURI()));

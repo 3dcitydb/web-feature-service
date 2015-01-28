@@ -29,12 +29,13 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-import org.citydb.config.project.database.Database;
 import org.citydb.config.project.global.Cache;
 
 import vcs.citydb.wfs.config.capabilities.Capabilities;
+import vcs.citydb.wfs.config.database.Database;
 import vcs.citydb.wfs.config.feature.FeatureTypes;
 import vcs.citydb.wfs.config.operation.Operations;
+import vcs.citydb.wfs.config.security.Security;
 import vcs.citydb.wfs.config.system.Logging;
 import vcs.citydb.wfs.config.system.Server;
 
@@ -46,7 +47,8 @@ import vcs.citydb.wfs.config.system.Server;
 		"database",
 		"server",
 		"uidCache",
-		"logging"
+		"security",
+		"logging"		
 })
 public class WFSConfig {
 	private Capabilities capabilities;
@@ -58,6 +60,7 @@ public class WFSConfig {
 	@XmlElement(required=true)	
 	private Server server;
 	private Cache uidCache;
+	private Security security;
 	private Logging logging;
 	
 	public WFSConfig() {
@@ -67,6 +70,7 @@ public class WFSConfig {
 		database = new Database();
 		server = new Server();
 		uidCache = new Cache();
+		security = new Security();
 		logging = new Logging();
 	}
 
@@ -124,6 +128,14 @@ public class WFSConfig {
 
 	public void setUIDCache(Cache uidCache) {
 		this.uidCache = uidCache;
+	}
+
+	public Security getSecurity() {
+		return security;
+	}
+
+	public void setSecurity(Security security) {
+		this.security = security;
 	}
 
 	public Logging getLogging() {

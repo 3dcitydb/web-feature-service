@@ -55,6 +55,8 @@ import vcs.citydb.wfs.exception.WFSExceptionCode;
 import vcs.citydb.wfs.xml.NamespaceFilter;
 
 public class StoredQueryManager {
+	public static final String GET_FEATURE_BY_ID_NAME = "http://www.opengis.net/def/query/OGC-WFS/0/GetFeatureById";
+	
 	private final StoredQuery DEFAULT_QUERY;
 	private final JAXBBuilder jaxbBuilder;
 	private final TransformerFactory transformerFactory;
@@ -95,7 +97,7 @@ public class StoredQueryManager {
 		// GetFeatureById query according to the WFS 2.0 spec
 		StoredQueryDescriptionType description = new StoredQueryDescriptionType();
 
-		description.setId("http://www.opengis.net/def/query/OGC-WFS/0/GetFeatureById");
+		description.setId(GET_FEATURE_BY_ID_NAME);
 
 		Title queryTitle = new Title();
 		queryTitle.setLang("en");
@@ -127,15 +129,15 @@ public class StoredQueryManager {
 		CityGMLVersion version = wfsConfig.getFeatureTypes().getDefaultVersion();
 		boolean multipleVersions = wfsConfig.getFeatureTypes().getVersions().size() > 1;
 		CityGMLModule module = version.getCityGMLModule(CityGMLModuleType.CORE);		
-			String prefix = module.getNamespacePrefix();
-			if (multipleVersions)
+		String prefix = module .getNamespacePrefix();
+		if (multipleVersions)
 			prefix += (version == CityGMLVersion.v2_0_0) ? "2" : "1";
-
-			namespaceFilter.startPrefixMapping(prefix, module.getNamespaceURI());
-
+		
+		namespaceFilter.startPrefixMapping(prefix, module.getNamespaceURI());
 		query.setAttribute("typeNames", "schema-element(" + prefix + ':' + "_CityObject)");
+	
 		Element filter = document.createElementNS(Constants.FES_NAMESPACE_URI, "Filter");
-		Element resourceId = document.createElementNS(Constants.FES_NAMESPACE_URI, "fes:ResourceId");
+		Element resourceId = document.createElementNS(Constants.FES_NAMESPACE_URI, "ResourceId");
 		resourceId.setAttribute("rid", "${id}");
 		filter.appendChild(resourceId);
 		query.appendChild(filter);

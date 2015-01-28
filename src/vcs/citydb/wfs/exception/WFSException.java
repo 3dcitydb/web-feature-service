@@ -31,8 +31,7 @@ import java.util.List;
 
 import vcs.citydb.wfs.config.Constants;
 
-
-public class WFSException extends RuntimeException {
+public class WFSException extends Exception {
 	private static final long serialVersionUID = -1620130047924173953L;
 	
 	private List<WFSExceptionMessage> exceptionMessages = new ArrayList<WFSExceptionMessage>();
@@ -118,8 +117,12 @@ public class WFSException extends RuntimeException {
 		exceptionMessages.add(message);
 	}
 	
+	public void addExceptionMessages(List<WFSExceptionMessage> messages) {
+		exceptionMessages.addAll(messages);
+	}
+	
 	public String getVersion() {
-		return Constants.WFS_VERSION_STRING;
+		return Constants.DEFAULT_WFS_VERSION;
 	}
 	
 	public String getLanguage() {

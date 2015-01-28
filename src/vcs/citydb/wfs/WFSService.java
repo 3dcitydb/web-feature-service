@@ -49,6 +49,7 @@ import javax.xml.parsers.SAXParserFactory;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
+import net.opengis.ows._1.AcceptVersionsType;
 import net.opengis.wfs._2.DescribeFeatureTypeType;
 import net.opengis.wfs._2.DescribeStoredQueriesType;
 import net.opengis.wfs._2.GetCapabilitiesType;
@@ -92,7 +93,6 @@ public class WFSService extends HttpServlet {
 	private Config exporterConfig;
 	private JAXBBuilder jaxbBuilder;
 	private SAXParserFactory saxParserFactory;
-	private SchemaHandler schemaHandler;
 	private Schema wfsSchema;
 	private ArrayBlockingQueue<String> requestQueue;
 	private SingleWorkerPool<CacheTableManager> cacheTableCleanerPool;
@@ -104,18 +104,12 @@ public class WFSService extends HttpServlet {
 		Object error = getServletContext().getAttribute(Constants.INIT_ERROR_ATTRNAME);
 		if (error instanceof ServletException)
 			throw (ServletException)error;
-		
-		// initialize JAXB context for WFS and CityGML schemas
-		try {
-			jaxbBuilder = new JAXBBuilder("net.opengis.wfs._2", "net.opengis.ows._1", "net.opengis.fes._2");
-		} catch (JAXBException e) {
-			throw new ServletException("Failed to initialize JAXB context.", e);
-		}
 
 		log.info("WFS service is loaded by servlet container.");
 
 		// service specific initialization
 		ObjectRegistry registry = ObjectRegistry.getInstance();
+		jaxbBuilder = (JAXBBuilder)registry.lookup(JAXBBuilder.class.getName());
 		wfsConfig = (WFSConfig)registry.lookup(WFSConfig.class.getName());
 		exporterConfig = (Config)registry.lookup(Config.class.getName());
 		requestQueue = new ArrayBlockingQueue<String>(wfsConfig.getServer().getMaxParallelRequests(), true);
@@ -139,20 +133,10 @@ public class WFSService extends HttpServlet {
 			throw new ServletException(message, e);
 		}
 
-		// initialize and register schema handler
-		try {
-			schemaHandler = SchemaHandler.newInstance(); 
-			registry.register(SchemaHandler.class.getName(), schemaHandler);
-		} catch (SAXException e) {
-			String message = "Failed to initialize CityGML XML schema parser.";
-			log.error(message);
-			log.error(e.getMessage());
-			throw new ServletException(message, e);
-		}
-
 		// read WFS 2.0 schema to validate requests
 		if (wfsConfig.getOperations().isUseXMLValidation()) {
 			try {
+				SchemaHandler schemaHandler = (SchemaHandler)registry.lookup(SchemaHandler.class.getName());
 				schemaHandler.parseSchema(new File(getServletContext().getRealPath(Constants.XML_SCHEMAS_PATH + "/wfs/2.0.2/wfs.xsd")));
 				SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
 				wfsSchema = schemaFactory.newSchema(schemaHandler.getSchemaSources());			
@@ -211,6 +195,16 @@ public class WFSService extends HttpServlet {
 					// TODO: improve mapping
 					GetCapabilitiesType wfsRequest = new GetCapabilitiesType();
 					wfsRequest.setService(parameterMap.containsKey("SERVICE") ? parameterMap.get("SERVICE")[0] : null);
+
+					if (parameterMap.containsKey("ACCEPTVERSIONS")) {
+						AcceptVersionsType acceptVersions = new AcceptVersionsType();
+						for (String version : parameterMap.get("ACCEPTVERSIONS")[0].split(",")) {
+							if (!version.isEmpty())
+								acceptVersions.getVersion().add(version.trim());
+						}
+
+						wfsRequest.setAcceptVersions(acceptVersions);
+					}
 
 					// handle GetCapabilities request
 					GetCapabilitiesHandler getCapabilitiesHandler = new GetCapabilitiesHandler(jaxbBuilder, wfsConfig);
@@ -298,13 +292,13 @@ public class WFSService extends HttpServlet {
 
 			else if (wfsRequest instanceof ListStoredQueriesType) {
 				// handle ListStoredQueries request
-				ListStoredQueriesHandler listStoredQueriesHandler = new ListStoredQueriesHandler(jaxbBuilder, wfsConfig);
+				ListStoredQueriesHandler listStoredQueriesHandler = new ListStoredQueriesHandler(jaxbBuilder);
 				listStoredQueriesHandler.doOperation((ListStoredQueriesType)wfsRequest, request, response);
 			}
 
 			else if (wfsRequest instanceof DescribeStoredQueriesType) {
 				// handle ListStoredQueries request
-				DescribeStoredQueriesHandler describeStoredQueriesHandler = new DescribeStoredQueriesHandler(jaxbBuilder, wfsConfig);
+				DescribeStoredQueriesHandler describeStoredQueriesHandler = new DescribeStoredQueriesHandler(jaxbBuilder);
 				describeStoredQueriesHandler.doOperation((DescribeStoredQueriesType)wfsRequest, request, response);
 			}
 
@@ -323,7 +317,7 @@ public class WFSService extends HttpServlet {
 		} catch (WFSException e) {
 			if (!response.isCommitted())
 				response.reset();
-			
+
 			exceptionReportHandler.sendErrorResponse(e, request, response);
 		}
 	}

@@ -44,7 +44,9 @@ import org.citydb.api.concurrent.SingleWorkerPool;
 import org.citydb.api.concurrent.Worker;
 import org.citydb.api.concurrent.WorkerFactory;
 import org.citydb.api.concurrent.WorkerPool;
+import org.citydb.api.event.Event;
 import org.citydb.api.event.EventDispatcher;
+import org.citydb.api.event.EventHandler;
 import org.citydb.api.registry.ObjectRegistry;
 import org.citydb.config.Config;
 import org.citydb.database.DatabaseConnectionPool;
@@ -56,6 +58,8 @@ import org.citydb.modules.citygml.exporter.concurrent.DBExportWorkerFactory;
 import org.citydb.modules.citygml.exporter.database.content.DBSplittingResult;
 import org.citydb.modules.citygml.exporter.database.uid.GeometryGmlIdCache;
 import org.citydb.modules.common.concurrent.IOWriterWorkerFactory;
+import org.citydb.modules.common.event.EventType;
+import org.citydb.modules.common.event.InterruptEvent;
 import org.citydb.modules.common.filter.ExportFilter;
 import org.citydb.util.Util;
 import org.citygml4j.builder.jaxb.JAXBBuilder;
@@ -77,20 +81,24 @@ import vcs.citydb.wfs.exception.WFSExceptionCode;
 import vcs.citydb.wfs.util.CacheTableCleanerWorker;
 import vcs.citydb.wfs.util.NullWorker;
 
-public class ExportController {
+public class ExportController implements EventHandler {
 	private final JAXBBuilder jaxbBuilder;
 	private final WFSConfig wfsConfig;
 	private final Config exporterConfig;
 	private final DatabaseConnectionPool connectionPool;
-	private EventDispatcher eventDispatcher;
+	private final EventDispatcher eventDispatcher;
 
-	public ExportController(JAXBBuilder cityGMLBuilder, WFSConfig wfsConfig, Config exporterConfig) {
-		this.jaxbBuilder = cityGMLBuilder;
+	private final Object eventChannel = new Object();
+	private WFSException wfsException;
+
+	public ExportController(JAXBBuilder jaxbBuilder, WFSConfig wfsConfig, Config exporterConfig) {
+		this.jaxbBuilder = jaxbBuilder;
 		this.wfsConfig = wfsConfig;
 		this.exporterConfig = exporterConfig;
 
 		connectionPool = DatabaseConnectionPool.getInstance();
 		eventDispatcher = ObjectRegistry.getInstance().getEventDispatcher();
+		eventDispatcher.addEventHandler(EventType.INTERRUPT, this);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -127,10 +135,10 @@ public class ExportController {
 			throw new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "Failed to initialize XML response writer.", e);
 		}
 
-		// set WFS prefix and schema location
+		// set WFS prefix and schema location in case we do not have to return the bare feature
 		if (queryExpressions.size() > 1 || !queryExpressions.get(0).isGetFeatureById()) {
-		saxWriter.setPrefix(Constants.WFS_NAMESPACE_PREFIX, Constants.WFS_NAMESPACE_URI);
-		saxWriter.setSchemaLocation(Constants.WFS_NAMESPACE_URI, Constants.WFS_SCHEMA_LOCATION);
+			saxWriter.setPrefix(Constants.WFS_NAMESPACE_PREFIX, Constants.WFS_NAMESPACE_URI);
+			saxWriter.setSchemaLocation(Constants.WFS_NAMESPACE_URI, Constants.WFS_SCHEMA_LOCATION);
 		}
 
 		// set CityGML prefixes and schema locations
@@ -183,7 +191,7 @@ public class ExportController {
 
 			// create instance of gml:id lookup server manager...
 			uidCacheManager = new UIDCacheManager();
-			
+
 			// create export filter
 			// TODO: replace with new filter layer
 			ExportFilter exportFilter = new ExportFilter(exporterConfig);
@@ -229,7 +237,8 @@ public class ExportController {
 					1,
 					false);
 
-			FeatureMemberWriter featureMemberWriter = new FeatureMemberWriter(writerPool, uidCacheManager, jaxbBuilder, exporterConfig);
+			FeatureMemberWriterFactory writerFactory = new FeatureMemberWriterFactory(writerPool, uidCacheManager, jaxbBuilder, wfsConfig, exporterConfig);
+
 			databaseWorkerPool = new WorkerPool<DBSplittingResult>(
 					"db_exporter_pool",
 					exporterConfig.getProject().getExporter().getResources().getThreadPool().getDefaultPool().getMinThreads(), 
@@ -238,7 +247,7 @@ public class ExportController {
 					new DBExportWorkerFactory(
 							connectionPool, 
 							jaxbBuilder,
-							featureMemberWriter, 
+							writerFactory, 
 							xlinkPool,
 							uidCacheManager,
 							cacheTableManager,
@@ -248,6 +257,11 @@ public class ExportController {
 							queueSize,
 							false);
 
+			// set virtual channel for events triggered by worker
+			writerPool.setEventSource(eventChannel);
+			xlinkPool.setEventSource(eventChannel);
+			databaseWorkerPool.setEventSource(eventChannel);
+			
 			// start worker pools with a single worker
 			writerPool.prestartCoreWorker();
 			xlinkPool.prestartCoreWorker();
@@ -258,12 +272,13 @@ public class ExportController {
 			try {
 				queryExecuter = new QueryExecuter(wfsRequest, 
 						queryExpressions,
-						featureMemberWriter,
+						writerFactory,
 						databaseWorkerPool,
 						writerPool,
 						connectionPool,
 						jaxbBuilder,
 						exportFilter,
+						wfsConfig,
 						exporterConfig);
 			} catch (JAXBException e) {
 				throw new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "Failed to initialize internal query executer.", e);			
@@ -289,6 +304,10 @@ public class ExportController {
 			} catch (SAXException e) {
 				throw new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "Failed to close the SAX writer.", e);
 			}
+
+			// abort if a worker pool has thrown an error 
+			if (wfsException != null)
+				throw wfsException;
 
 		} finally {
 			// clean up...
@@ -319,6 +338,13 @@ public class ExportController {
 
 			if (cacheTableManager != null)
 				((WorkerPool<CacheTableManager>)ObjectRegistry.getInstance().lookup(CacheTableCleanerWorker.class.getName())).addWork(cacheTableManager);
+		}
+	}
+
+	@Override
+	public void handleEvent(Event event) throws Exception {
+		if (event.getChannel() == eventChannel) {
+			wfsException = new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, ((InterruptEvent)event).getLogMessage(), ((InterruptEvent)event).getCause());
 		}
 	}
 

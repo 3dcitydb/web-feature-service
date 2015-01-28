@@ -43,8 +43,14 @@ import org.citygml4j.builder.jaxb.JAXBBuilder;
 import org.citygml4j.builder.jaxb.marshal.JAXBMarshaller;
 import org.citygml4j.model.citygml.CityGMLClass;
 import org.citygml4j.model.gml.feature.AbstractFeature;
+import org.citygml4j.model.gml.geometry.AbstractGeometry;
+import org.citygml4j.model.gml.geometry.GeometryArrayProperty;
+import org.citygml4j.model.gml.geometry.GeometryProperty;
 import org.citygml4j.model.module.citygml.CityGMLVersion;
+import org.citygml4j.util.walker.GMLWalker;
 import org.citygml4j.util.xml.SAXEventBuffer;
+
+import vcs.citydb.wfs.config.WFSConfig;
 
 public class FeatureMemberWriter implements FeatureProcessor {
 	private final SingleWorkerPool<SAXEventBuffer> writerPool;
@@ -54,43 +60,55 @@ public class FeatureMemberWriter implements FeatureProcessor {
 	private final ObjectFactory wfsFactory;	
 	private final JAXBMarshaller jaxbMarshaller;
 	
+	private final GeometryStripper geometryStripper;
 	private boolean writeMemberProperty;
 
 	public FeatureMemberWriter(SingleWorkerPool<SAXEventBuffer> writerPool, 
 			UIDCacheManager lookupServerManager, 
 			JAXBBuilder jaxbBuilder, 
+			WFSConfig wfsConfig,
 			Config exporterConfig) {
 		this.writerPool = writerPool;
 		this.lookupServerManager = lookupServerManager;
 		this.jaxbBuilder = jaxbBuilder;
 		this.exporterConfig = exporterConfig;
+		
+		geometryStripper = wfsConfig.getSecurity().isStripGeometry() ? new GeometryStripper() : null;			
 
 		wfsFactory = new ObjectFactory();		
 		CityGMLVersion version = Util.toCityGMLVersion(exporterConfig.getProject().getExporter().getCityGMLVersion());
 		jaxbMarshaller = jaxbBuilder.createJAXBMarshaller(version);
 	}
 
-	public boolean isWriteMemberProperty() {
-		return writeMemberProperty;
-	}
 	public void setWriteMemberProperty(boolean writeMemberProperty) {
 		this.writeMemberProperty = writeMemberProperty;
 	}
+
 	@Override
 	public void process(AbstractFeature abstractFeature) throws FeatureProcessException {
-		JAXBElement<?> output = null;
-		if (writeMemberProperty) {
-		MemberPropertyType memberProperty = new MemberPropertyType();
 
-		if (!exporterConfig.getInternal().isRegisterGmlIdInCache() || !isFeatureAlreadyExported(abstractFeature)) {
-			// TODO: CityGML 1.0 Appearance elements are not global and hence must be wrapped by an AppearanceProperty 
-			memberProperty.getContent().add(jaxbMarshaller.marshalJAXBElement(abstractFeature));
-		} else
-			memberProperty.setHref("#" + abstractFeature.getId());
+		// security feature: strip geometry from features
+		if (geometryStripper != null) {
+			abstractFeature.accept(geometryStripper);
+			geometryStripper.reset();
+		}
+
+		JAXBElement<?> output = null;
+		
+		if (writeMemberProperty) {
+			MemberPropertyType memberProperty = new MemberPropertyType();
+
+			if (!exporterConfig.getInternal().isRegisterGmlIdInCache() || !isFeatureAlreadyExported(abstractFeature)) {
+				// TODO: CityGML 1.0 Appearance elements are not global and hence must be wrapped by an AppearanceProperty 
+				memberProperty.getContent().add(jaxbMarshaller.marshalJAXBElement(abstractFeature));
+			} else
+				memberProperty.setHref("#" + abstractFeature.getId());
+			
 			output = wfsFactory.createMember(memberProperty);
 		} else {
 			output = jaxbMarshaller.marshalJAXBElement(abstractFeature);
 		}
+		
 		try {
 			SAXEventBuffer buffer = new SAXEventBuffer();
 			Marshaller marshaller = jaxbBuilder.getJAXBContext().createMarshaller();
@@ -116,6 +134,25 @@ public class FeatureMemberWriter implements FeatureProcessor {
 
 		UIDCache server = lookupServerManager.getCache(CityGMLClass.ABSTRACT_CITY_OBJECT);
 		return server.get(abstractFeature.getId()) != null;
+	}
+	
+	private final class GeometryStripper extends GMLWalker {
+		
+		@Override
+		public <T extends AbstractGeometry> void visit(GeometryArrayProperty<T> arrayProperty) {
+			arrayProperty.unsetGeometry();
+		}
+
+		@Override
+		public <T extends AbstractGeometry> void visit(GeometryProperty<T> geometryProperty) {
+			if (geometryProperty.isSetGeometry()) {
+				String gmlId = geometryProperty.getGeometry().getId();
+				if (gmlId != null)
+					geometryProperty.setHref("#" + gmlId);
+				
+				geometryProperty.unsetGeometry();
+			}
+		}
 	}
 
 }
