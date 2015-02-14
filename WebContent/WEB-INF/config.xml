@@ -44,11 +44,11 @@
       minEvictableIdleTimeMillis="60000">
       <description/>
       <type>PostGIS</type>
-      <server>localhost</server>
+      <server/>
       <port>5432</port>
-      <sid>devel3</sid>
-      <user>cnagel</user>
-      <password>cn759344</password>
+      <sid/>
+      <user/>
+      <password/>
     </connection>
   </database>
   <server>
@@ -59,9 +59,6 @@
   <uidCache>
     <mode>database</mode>
   </uidCache>
-  <security>
-    <maxFeatureCount>100</maxFeatureCount>
-  </security>
   <logging>
     <file logLevel="info"/>
   </logging>
