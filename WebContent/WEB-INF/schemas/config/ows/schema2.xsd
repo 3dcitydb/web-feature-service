@@ -1,17 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <xs:schema version="1.0" targetNamespace="http://www.w3.org/1999/xlink" xmlns:tns="http://www.w3.org/1999/xlink" xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
-  <xs:simpleType name="typeType">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="simple"/>
-      <xs:enumeration value="extended"/>
-      <xs:enumeration value="title"/>
-      <xs:enumeration value="resource"/>
-      <xs:enumeration value="locator"/>
-      <xs:enumeration value="arc"/>
-    </xs:restriction>
-  </xs:simpleType>
-
   <xs:simpleType name="showType">
     <xs:restriction base="xs:string">
       <xs:enumeration value="new"/>
@@ -28,6 +17,17 @@
       <xs:enumeration value="onRequest"/>
       <xs:enumeration value="other"/>
       <xs:enumeration value="none"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="typeType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="simple"/>
+      <xs:enumeration value="extended"/>
+      <xs:enumeration value="title"/>
+      <xs:enumeration value="resource"/>
+      <xs:enumeration value="locator"/>
+      <xs:enumeration value="arc"/>
     </xs:restriction>
   </xs:simpleType>
 

@@ -114,7 +114,6 @@ public class WebServiceInitializer implements ServletContextListener {
 
 		// map from WFS to 3DCityDB configuration
 		exporterConfig.getProject().getDatabase().setActiveConnection(wfsConfig.getDatabase().getConnection());
-		exporterConfig.getProject().getDatabase().setReferenceSystems(wfsConfig.getDatabase().getReferenceSystems());
 		exporterConfig.getProject().getGlobal().setCache(wfsConfig.getUIDCache());
 
 		// init internationalized labels 

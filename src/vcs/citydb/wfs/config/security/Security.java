@@ -19,6 +19,10 @@ public class Security {
 	public void setMaxFeatureCount(long maxFeatureCount) {
 		this.maxFeatureCount = maxFeatureCount;
 	}
+	
+	public boolean isSetMaxFeatureCount() {
+		return maxFeatureCount != Long.MAX_VALUE;
+	}
 
 	public boolean isStripGeometry() {		
 		return stripGeometry;

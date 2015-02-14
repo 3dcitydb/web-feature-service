@@ -112,7 +112,7 @@ public class FeatureMemberWriter implements FeatureProcessor {
 		try {
 			SAXEventBuffer buffer = new SAXEventBuffer();
 			Marshaller marshaller = jaxbBuilder.getJAXBContext().createMarshaller();
-			marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);				
+			marshaller.setProperty(Marshaller.JAXB_FRAGMENT, writeMemberProperty);				
 
 			if (output != null)
 				marshaller.marshal(output, buffer);

@@ -325,6 +325,24 @@ public class GetCapabilitiesHandler {
 		}
 
 		// optional constraints
+		// default count
+		if (wfsConfig.getSecurity().isSetMaxFeatureCount()) {
+			DomainType countDefault = new DomainType();
+			countDefault.setName("CountDefault");
+			ValueType countDefaultValue = new ValueType();
+			countDefaultValue.setValue(String.valueOf(wfsConfig.getSecurity().getMaxFeatureCount()));
+			countDefault.setDefaultValue(countDefaultValue);
+			countDefault.setNoValues(new NoValues());
+			operationsMetadata.getConstraint().add(countDefault);
+		}
+		
+		// we do not preserve sibling order
+		DomainType siblingOrder = new DomainType();
+		siblingOrder.setName("PreservesSiblingOrder");
+		siblingOrder.setDefaultValue(falseValue);
+		siblingOrder.setNoValues(new NoValues());
+		operationsMetadata.getConstraint().add(siblingOrder);
+		
 		// announce supported query types
 		DomainType queryExpressions = new DomainType();
 		queryExpressions.setName("QueryExpressions");
@@ -350,14 +368,11 @@ public class GetCapabilitiesHandler {
 				// create list of supported SRS
 				List<DatabaseSrs> srsList = new ArrayList<>();
 				srsList.add(connectionPool.getActiveDatabaseAdapter().getConnectionMetaData().getReferenceSystem());
-				for (DatabaseSrs srs: wfsConfig.getDatabase().getReferenceSystems())
-					if (srs.isSupported())
-						srsList.add(srs);
 
 				for (DatabaseSrs srs : srsList) {
 					String srsName = srs.getGMLSrsName();
 					if (srsName == null || srsName.trim().length() == 0)
-						srsName = "urn:ogc:def:crs:EPSG::" + srs.getSrid();
+						srsName = "http://www.opengis.net/def/crs/epsg/0/" + srs.getSrid();
 
 					if (srs == connectionPool.getActiveDatabaseAdapter().getConnectionMetaData().getReferenceSystem())
 						type.setDefaultCRS(srsName);

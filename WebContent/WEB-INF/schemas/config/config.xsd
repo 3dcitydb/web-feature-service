@@ -3,8 +3,6 @@
 
   <xs:import namespace="http://www.opengis.net/ows/1.1" schemaLocation="ows/schema4.xsd"/>
 
-  <xs:element name="referenceSystems" type="databaseSrsList"/>
-
   <xs:element name="wfs" type="WFSConfigType"/>
 
   <xs:complexType name="WFSConfigType">
@@ -80,24 +78,8 @@
 
   <xs:complexType name="WFSDatabaseType">
     <xs:sequence>
-      <xs:element ref="referenceSystems" minOccurs="0"/>
       <xs:element name="connection" type="ConnectionType"/>
     </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="databaseSrsList">
-    <xs:sequence>
-      <xs:element name="referenceSystem" type="DatabaseSrsType" minOccurs="0" maxOccurs="unbounded"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="DatabaseSrsType" final="extension restriction">
-    <xs:sequence>
-      <xs:element name="srid" type="xs:int"/>
-      <xs:element name="gmlSrsName" type="xs:string" minOccurs="0"/>
-      <xs:element name="description" type="xs:string" minOccurs="0"/>
-    </xs:sequence>
-    <xs:attribute name="id" type="xs:ID"/>
   </xs:complexType>
 
   <xs:complexType name="ConnectionType">

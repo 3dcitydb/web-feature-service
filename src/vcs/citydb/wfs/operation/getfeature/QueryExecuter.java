@@ -122,7 +122,9 @@ public class QueryExecuter {
 		int currentQuery = -1;
 
 		boolean purgeConnectionPool = false;
-		boolean isWriteBareFeature = !isMultipleQueryRequest && queryExpressions.get(0).isGetFeatureById();
+		boolean isWriteBareFeature = !isMultipleQueryRequest 
+				&& queryExpressions.get(0).isGetFeatureById() 
+				&& resultType == ResultTypeType.RESULTS;
 		writerFactory.setWriteMemberProperty(!isWriteBareFeature);
 
 		Connection connection = null;
@@ -136,7 +138,12 @@ public class QueryExecuter {
 
 			if (rs.next()) {
 				long matchAll = rs.getLong("match_all");
-				long returnAll = resultType == ResultTypeType.RESULTS ? Math.min(matchAll, count) : 0;		
+				long returnAll = resultType == ResultTypeType.RESULTS ? Math.min(matchAll, count) : 0;	
+				
+				if (isWriteBareFeature && returnAll != 1) {
+					isWriteBareFeature = false;
+					writerFactory.setWriteMemberProperty(true);
+				}
 
 				if (!isWriteBareFeature)
 					startFeatureCollection(matchAll, returnAll, false);

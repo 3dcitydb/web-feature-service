@@ -277,12 +277,111 @@
     <xs:attribute name="dimensions" type="xs:positiveInteger"/>
   </xs:complexType>
 
-  <xs:complexType name="ExceptionType">
+  <xs:complexType name="AbstractReferenceBaseType">
+    <xs:sequence/>
+    <xs:attribute ref="tns:type"/>
+    <xs:attribute ref="ns1:href" use="required"/>
+    <xs:attribute ref="ns1:role"/>
+    <xs:attribute ref="ns1:arcrole"/>
+    <xs:attribute ref="ns1:title"/>
+    <xs:attribute ref="ns1:show"/>
+    <xs:attribute ref="ns1:actuate"/>
+  </xs:complexType>
+
+  <xs:complexType name="ReferenceType">
+    <xs:complexContent>
+      <xs:extension base="tns:AbstractReferenceBaseType">
+        <xs:sequence>
+          <xs:element name="Identifier" type="tns:CodeType" minOccurs="0"/>
+          <xs:element name="Abstract" type="tns:LanguageStringType" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="Format" type="xs:string" minOccurs="0"/>
+          <xs:element name="Metadata" type="tns:MetadataType" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="MetadataType">
     <xs:sequence>
-      <xs:element name="ExceptionText" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="AbstractMetaData" type="xs:anyType" minOccurs="0"/>
     </xs:sequence>
-    <xs:attribute name="exceptionCode" type="xs:string" use="required"/>
-    <xs:attribute name="locator" type="xs:string"/>
+    <xs:attribute name="about" type="xs:anyURI"/>
+    <xs:attribute ref="ns1:type"/>
+    <xs:attribute ref="ns1:href"/>
+    <xs:attribute ref="ns1:role"/>
+    <xs:attribute ref="ns1:arcrole"/>
+    <xs:attribute ref="ns1:title"/>
+    <xs:attribute ref="ns1:show"/>
+    <xs:attribute ref="ns1:actuate"/>
+  </xs:complexType>
+
+  <xs:complexType name="ServiceReferenceType">
+    <xs:complexContent>
+      <xs:extension base="tns:ReferenceType">
+        <xs:sequence>
+          <xs:element name="RequestMessage" type="xs:anyType" minOccurs="0"/>
+          <xs:element name="RequestMessageReference" type="xs:anyURI" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="ResponsiblePartySubsetType">
+    <xs:sequence>
+      <xs:element name="IndividualName" type="xs:string" minOccurs="0"/>
+      <xs:element name="PositionName" type="xs:string" minOccurs="0"/>
+      <xs:element name="ContactInfo" type="tns:ContactType" minOccurs="0"/>
+      <xs:element name="Role" type="tns:CodeType" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ContactType">
+    <xs:sequence>
+      <xs:element name="Phone" type="tns:TelephoneType" minOccurs="0"/>
+      <xs:element name="Address" type="tns:AddressType" minOccurs="0"/>
+      <xs:element name="OnlineResource" type="tns:OnlineResourceType" minOccurs="0"/>
+      <xs:element name="HoursOfService" type="xs:string" minOccurs="0"/>
+      <xs:element name="ContactInstructions" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="TelephoneType">
+    <xs:sequence>
+      <xs:element name="Voice" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="Facsimile" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="AddressType">
+    <xs:sequence>
+      <xs:element name="DeliveryPoint" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="City" type="xs:string" minOccurs="0"/>
+      <xs:element name="AdministrativeArea" type="xs:string" minOccurs="0"/>
+      <xs:element name="PostalCode" type="xs:string" minOccurs="0"/>
+      <xs:element name="Country" type="xs:string" minOccurs="0"/>
+      <xs:element name="ElectronicMailAddress" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="OnlineResourceType">
+    <xs:sequence/>
+    <xs:attribute ref="ns1:type"/>
+    <xs:attribute ref="ns1:href"/>
+    <xs:attribute ref="ns1:role"/>
+    <xs:attribute ref="ns1:arcrole"/>
+    <xs:attribute ref="ns1:title"/>
+    <xs:attribute ref="ns1:show"/>
+    <xs:attribute ref="ns1:actuate"/>
+  </xs:complexType>
+
+  <xs:complexType name="RequestMethodType">
+    <xs:complexContent>
+      <xs:extension base="tns:OnlineResourceType">
+        <xs:sequence>
+          <xs:element name="Constraint" type="tns:DomainType" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
 
   <xs:complexType name="DomainType">
@@ -330,39 +429,12 @@
     </xs:simpleContent>
   </xs:complexType>
 
-  <xs:complexType name="MetadataType">
+  <xs:complexType name="ExceptionType">
     <xs:sequence>
-      <xs:element name="AbstractMetaData" type="xs:anyType" minOccurs="0"/>
+      <xs:element name="ExceptionText" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
-    <xs:attribute name="about" type="xs:anyURI"/>
-    <xs:attribute ref="ns1:type"/>
-    <xs:attribute ref="ns1:href"/>
-    <xs:attribute ref="ns1:role"/>
-    <xs:attribute ref="ns1:arcrole"/>
-    <xs:attribute ref="ns1:title"/>
-    <xs:attribute ref="ns1:show"/>
-    <xs:attribute ref="ns1:actuate"/>
-  </xs:complexType>
-
-  <xs:complexType name="RequestMethodType">
-    <xs:complexContent>
-      <xs:extension base="tns:OnlineResourceType">
-        <xs:sequence>
-          <xs:element name="Constraint" type="tns:DomainType" minOccurs="0" maxOccurs="unbounded"/>
-        </xs:sequence>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-
-  <xs:complexType name="OnlineResourceType">
-    <xs:sequence/>
-    <xs:attribute ref="ns1:type"/>
-    <xs:attribute ref="ns1:href"/>
-    <xs:attribute ref="ns1:role"/>
-    <xs:attribute ref="ns1:arcrole"/>
-    <xs:attribute ref="ns1:title"/>
-    <xs:attribute ref="ns1:show"/>
-    <xs:attribute ref="ns1:actuate"/>
+    <xs:attribute name="exceptionCode" type="xs:string" use="required"/>
+    <xs:attribute name="locator" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="ManifestType">
@@ -425,78 +497,6 @@
       <xs:element name="PositionName" type="xs:string" minOccurs="0"/>
       <xs:element name="ContactInfo" type="tns:ContactType" minOccurs="0"/>
       <xs:element name="Role" type="tns:CodeType"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="ContactType">
-    <xs:sequence>
-      <xs:element name="Phone" type="tns:TelephoneType" minOccurs="0"/>
-      <xs:element name="Address" type="tns:AddressType" minOccurs="0"/>
-      <xs:element name="OnlineResource" type="tns:OnlineResourceType" minOccurs="0"/>
-      <xs:element name="HoursOfService" type="xs:string" minOccurs="0"/>
-      <xs:element name="ContactInstructions" type="xs:string" minOccurs="0"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="TelephoneType">
-    <xs:sequence>
-      <xs:element name="Voice" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
-      <xs:element name="Facsimile" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="AddressType">
-    <xs:sequence>
-      <xs:element name="DeliveryPoint" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
-      <xs:element name="City" type="xs:string" minOccurs="0"/>
-      <xs:element name="AdministrativeArea" type="xs:string" minOccurs="0"/>
-      <xs:element name="PostalCode" type="xs:string" minOccurs="0"/>
-      <xs:element name="Country" type="xs:string" minOccurs="0"/>
-      <xs:element name="ElectronicMailAddress" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="ReferenceType">
-    <xs:complexContent>
-      <xs:extension base="tns:AbstractReferenceBaseType">
-        <xs:sequence>
-          <xs:element name="Identifier" type="tns:CodeType" minOccurs="0"/>
-          <xs:element name="Abstract" type="tns:LanguageStringType" minOccurs="0" maxOccurs="unbounded"/>
-          <xs:element name="Format" type="xs:string" minOccurs="0"/>
-          <xs:element name="Metadata" type="tns:MetadataType" minOccurs="0" maxOccurs="unbounded"/>
-        </xs:sequence>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-
-  <xs:complexType name="AbstractReferenceBaseType">
-    <xs:sequence/>
-    <xs:attribute ref="tns:type"/>
-    <xs:attribute ref="ns1:href" use="required"/>
-    <xs:attribute ref="ns1:role"/>
-    <xs:attribute ref="ns1:arcrole"/>
-    <xs:attribute ref="ns1:title"/>
-    <xs:attribute ref="ns1:show"/>
-    <xs:attribute ref="ns1:actuate"/>
-  </xs:complexType>
-
-  <xs:complexType name="ServiceReferenceType">
-    <xs:complexContent>
-      <xs:extension base="tns:ReferenceType">
-        <xs:sequence>
-          <xs:element name="RequestMessage" type="xs:anyType" minOccurs="0"/>
-          <xs:element name="RequestMessageReference" type="xs:anyURI" minOccurs="0"/>
-        </xs:sequence>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-
-  <xs:complexType name="ResponsiblePartySubsetType">
-    <xs:sequence>
-      <xs:element name="IndividualName" type="xs:string" minOccurs="0"/>
-      <xs:element name="PositionName" type="xs:string" minOccurs="0"/>
-      <xs:element name="ContactInfo" type="tns:ContactType" minOccurs="0"/>
-      <xs:element name="Role" type="tns:CodeType" minOccurs="0"/>
     </xs:sequence>
   </xs:complexType>
 
