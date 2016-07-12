@@ -16,6 +16,16 @@ The latest stable release of the 3D City Database Importer/Exporter is 3.2.0.
 
 Download a WAR file of the WFS [here](https://github.com/3dcitydb/web-feature-service/releases/download/v3.2.0/citydb-wfs-3.2.war). Previous releases are available from the [releases section](https://github.com/3dcitydb/web-feature-service/releases).
 
+System requirements
+-------------------
+
+The 3D City Database WFS is implemented as Java web application based on the Java Servlet technology. It therefore must be run in a Java servlet container on a web server. The following minimum software requirements have to be met:
+
+* Java servlet container supporting the Java Servlet 3.0 specification
+* Java 7 or 8 Runtime Environment (Java 6 or earlier versions are not supported)  
+
+The WFS implementation has been successfully deployed and tested on [Apache Tomcat](http://tomcat.apache.org/) versions 7 and 8. 
+
 Documentation
 -------------
 A complete and comprehensive documentation on the Web Feature Service is installed with the [3D City Database Importer/Exporter](https://github.com/3dcitydb/importer-exporter) and is available [online](http://www.3dcitydb.org/3dcitydb/documentation/).
