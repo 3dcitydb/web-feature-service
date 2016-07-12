@@ -25,3 +25,11 @@ Contributing
 * To file bugs found in the software create a GitHub issue.
 * To contribute code for fixing filed issues create a pull request with the issue id.
 * To propose a new feature create a GitHub issue and open a discussion.
+
+Developers
+----------
+
+The 3D City Database Web Feature Service has been developed by: 
+
+* Claus Nagel 
+<br>[virtualcitySYSTEMS GmbH, Berlin](http://www.virtualcitysystems.de/)
