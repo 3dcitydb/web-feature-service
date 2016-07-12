@@ -1,5 +1,5 @@
-Web Feature Service
-===================
+3DCityDB Web Feature Service Interface
+======================================
 The OGC Web Feature Service (WFS) interface for the 3D City Database enables web-based access to the city objects stored in the database. WFS clients can directly connect to this standardized and open interface for requesting 3D content across the web using platform-independent calls. Users of the 3D City Database are therefore no longer limited to using the [Importer/Exporter](https://github.com/3dcitydb/importer-exporter) tool for data retrieval. The Web feature services allows clients to only retrieve the city objects they are seeking, rather than retrieving a file that contains the data they are seeking and possibly much more. 
 
 The 3D City Database WFS interface is implemented against the latest version 2.0 of the [OGC Web Feature Service standard](http://www.opengeospatial.org/standards/wfs) and hence is compliant with ISO 19142:2010. Previous versions of the WFS standard are not supported. The implementation currently satisfies the `Simple WFS` conformance class. The development of the WFS is led by the company [virtualcitySYSTEMS](http://www.virtualcitysystems.de/) which offers an extended version of the WFS with additional functionalities that go beyond the Simple WFS class (e.g., thematic and spatial filter capabilities and transaction support). This additional functionality may be fed back to the open source project in future releases.
