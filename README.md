@@ -1,6 +1,6 @@
-web-feature-service
+Web Feature Service
 ===================
-OGC Web Feature Service 2.0 implementation for the 3D City Database.
+OGC Web Feature Service 2.0 interface for the 3D City Database.
 
 License
 -------
