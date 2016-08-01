@@ -40,18 +40,13 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
 
-import net.opengis.wfs._2.FeatureCollectionType;
-import net.opengis.wfs._2.GetFeatureType;
-import net.opengis.wfs._2.MemberPropertyType;
-import net.opengis.wfs._2.ObjectFactory;
-import net.opengis.wfs._2.ResultTypeType;
-
 import org.citydb.api.concurrent.SingleWorkerPool;
 import org.citydb.api.concurrent.WorkerPool;
 import org.citydb.config.Config;
 import org.citydb.database.DatabaseConnectionPool;
 import org.citydb.modules.citygml.exporter.database.content.DBSplittingResult;
 import org.citydb.modules.common.filter.ExportFilter;
+import org.citydb.modules.common.filter.feature.GmlIdFilter;
 import org.citydb.util.Util;
 import org.citygml4j.builder.jaxb.JAXBBuilder;
 import org.citygml4j.model.citygml.CityGMLClass;
@@ -60,6 +55,11 @@ import org.citygml4j.util.xml.SAXFragmentWriter;
 import org.citygml4j.util.xml.SAXFragmentWriter.WriteMode;
 import org.xml.sax.SAXException;
 
+import net.opengis.wfs._2.FeatureCollectionType;
+import net.opengis.wfs._2.GetFeatureType;
+import net.opengis.wfs._2.MemberPropertyType;
+import net.opengis.wfs._2.ObjectFactory;
+import net.opengis.wfs._2.ResultTypeType;
 import vcs.citydb.wfs.config.Constants;
 import vcs.citydb.wfs.config.WFSConfig;
 import vcs.citydb.wfs.exception.WFSException;
@@ -131,12 +131,13 @@ public class QueryExecuter {
 		try {
 			connection = initConnection();			
 			stmt = connection.prepareStatement(query.toString());
+			fillPlaceHolders(queryExpressions, stmt);			
 			rs = stmt.executeQuery();
 
 			if (rs.next()) {
 				long matchAll = rs.getLong("match_all");
 				long returnAll = resultType == ResultTypeType.RESULTS ? Math.min(matchAll, count) : 0;	
-				
+
 				if (isWriteBareFeature && returnAll != 1) {
 					isWriteBareFeature = false;
 					writerFactory.setWriteMemberProperty(true);
@@ -277,6 +278,22 @@ public class QueryExecuter {
 			// purge connection pool to remove possibly defect connections
 			if (purgeConnectionPool)
 				connectionPool.purge();
+		}
+	}
+
+	private void fillPlaceHolders(List<QueryExpression> queryExpressions, PreparedStatement stmt) throws SQLException {
+		int i = 1;
+		
+		for (QueryExpression queryExpression : queryExpressions) {
+			GmlIdFilter filter = queryExpression.getGmlIdFilter();
+
+			if (filter != null) {
+				List<String> ids = filter.getFilterState();
+				if (ids != null && !ids.isEmpty()) {
+					for (String id : ids)
+						stmt.setString(i++, id);
+				}
+			}
 		}
 	}
 

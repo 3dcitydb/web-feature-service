@@ -76,7 +76,7 @@ public class QueryBuilder {
 		}
 
 		if (isMultipleQueryRequest)
-			query.append(" order by query_no, id) as query");
+			query.append(") query order by query_no, id");
 
 		return query.toString();
 	}
@@ -122,7 +122,20 @@ public class QueryBuilder {
 			List<String> ids = filter.getFilterState();
 			if (ids != null && !ids.isEmpty()) {
 				StringBuilder builder = new StringBuilder();
-				builder.append("co.gmlid in ('").append(Util.collection2string(ids, "', '")).append("')");
+				
+				if (ids.size() == 1)
+					builder.append("co.gmlid = ?");
+				else {
+					builder.append("co.gmlid in (");
+					for (int i = 0; i < ids.size(); i++) {
+						builder.append("?");
+						if (i < ids.size() - 1)
+							builder.append(", ");
+						else
+							builder.append(")");
+					}
+				}
+				
 				return builder.toString();
 			}
 		}
