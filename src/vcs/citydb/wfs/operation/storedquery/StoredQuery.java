@@ -84,7 +84,7 @@ public class StoredQuery {
 	public NamespaceFilter getNamespaceFilter() {
 		return namespaceFilter;
 	}
-	
+
 	public List<QName> getReturnFeatureTypeNames() {
 		Set<QName> featureTypeNames = new HashSet<QName>();
 		for (QueryExpressionTextType queryExpression : description.getQueryExpressionText())
@@ -100,7 +100,7 @@ public class StoredQuery {
 	public void validate(String handle) throws WFSException {
 		// TODO: implement
 	}
-	
+
 	public List<AbstractQueryExpressionType> compile(StoredQueryType storedQuery, NamespaceFilter namespaceFilter) throws WFSException {
 		if (description.getQueryExpressionText().isEmpty())
 			throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "The stored query '" + getId() + "' does not specify any query expression texts.", storedQuery.getHandle());
@@ -132,6 +132,14 @@ public class StoredQuery {
 				parameterMap.put(parameter.getName(), value.toString());
 			}
 
+			// check for missing parameters
+			if (description.getParameter().size() != parameterMap.size()) {
+				for (ParameterExpressionType parameter : description.getParameter()) {
+					if (!parameterMap.containsKey(parameter.getName()))
+						throw new WFSException(WFSExceptionCode.MISSING_PARAMETER_VALUE, "The parameter '" + parameter.getName() + "' of the stored query lacks a value.", storedQuery.getHandle());
+				}
+			}
+
 			// iterate over query expressions and replace tokens with parameter values
 			for (QueryExpressionTextType expressionText : description.getQueryExpressionText()) {
 				if (expressionText.getContent().isEmpty())
@@ -142,7 +150,7 @@ public class StoredQuery {
 				// we need to embrace the query expression with a GetFeature request since
 				// the expression text can contain multiple query elements.
 				template.append('<').append(Constants.WFS_NAMESPACE_PREFIX).append(':').append("GetFeature xmlns:").append(Constants.WFS_NAMESPACE_PREFIX).append("=\"").append(Constants.WFS_NAMESPACE_URI).append("\">");
-				
+
 				// get string representation of query expression
 				for (Object content : expressionText.getContent())
 					template.append(toString(content));
@@ -158,7 +166,7 @@ public class StoredQuery {
 						index = template.indexOf(token, index + token.length());
 					}
 				}
-				
+
 				// close GetFeature 
 				template.append("</").append(Constants.WFS_NAMESPACE_PREFIX).append(':').append("GetFeature>");
 
@@ -170,11 +178,11 @@ public class StoredQuery {
 				JAXBElement<?> jaxbElement = (JAXBElement<?>)result;
 				if (!(jaxbElement.getValue() instanceof GetFeatureType))
 					throw new WFSException(WFSExceptionCode.OPERATION_PARSING_FAILED, "The query expression text of the stored query '" + storedQuery.getId() + "' cannot be compiled to a valid set of query elements.", storedQuery.getHandle());						
-			
+
 				GetFeatureType getFeature = (GetFeatureType)jaxbElement.getValue();
 				for (JAXBElement<? extends AbstractQueryExpressionType> queryElement: getFeature.getAbstractQueryExpression())
 					queries.add(queryElement.getValue());
-				
+
 				// finally propagate namespace bindings of the stored query
 				Iterator<String> iter = this.namespaceFilter.getPrefixes();
 				while (iter.hasNext()) {
