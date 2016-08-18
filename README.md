@@ -12,7 +12,7 @@ Note that releases of the software before version 3.3.0 continue to be licensed 
 
 Latest release
 --------------
-The latest stable release of the 3D City Database Importer/Exporter is 3.2.0.
+The latest stable release of the 3D City Database WFS interface is 3.2.0.
 
 Download a WAR file of the WFS [here](https://github.com/3dcitydb/web-feature-service/releases/download/v3.2.0/citydb-wfs-3.2.war). Previous releases are available from the [releases section](https://github.com/3dcitydb/web-feature-service/releases).
 
