@@ -2,7 +2,7 @@
  * 3D City Database Web Feature Service
  * http://www.3dcitydb.org/
  * 
- * Copyright 2014 - 2016
+ * Copyright 2014 - 2017
  * virtualcitySYSTEMS GmbH
  * Tauentzienstrasse 7b/c
  * 10789 Berlin, Germany
