@@ -219,7 +219,7 @@ public class ExportController implements EventHandler {
 			// create worker pools
 			writerPool = new SingleWorkerPool<SAXEventBuffer>(
 					"citygml_writer_pool",
-					new IOWriterWorkerFactory(saxWriter),
+					new IOWriterWorkerFactory(saxWriter, eventDispatcher),
 					queueSize,
 					false);
 
