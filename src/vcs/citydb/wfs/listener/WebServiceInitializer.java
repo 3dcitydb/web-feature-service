@@ -23,7 +23,6 @@
 package vcs.citydb.wfs.listener;
 
 import java.io.File;
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -38,15 +37,10 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
-import org.citydb.api.database.DatabaseConfigurationException;
-import org.citydb.api.database.DatabaseSrs;
-import org.citydb.api.database.DatabaseVersionException;
 import org.citydb.api.event.EventDispatcher;
 import org.citydb.api.registry.ObjectRegistry;
 import org.citydb.config.Config;
 import org.citydb.config.language.Language;
-import org.citydb.config.project.database.DBConnection;
-import org.citydb.config.project.database.Database;
 import org.citydb.config.project.global.LanguageType;
 import org.citydb.database.DatabaseConnectionPool;
 import org.citydb.log.Logger;
@@ -58,6 +52,8 @@ import vcs.citydb.wfs.config.Constants;
 import vcs.citydb.wfs.config.WFSConfig;
 import vcs.citydb.wfs.config.system.ConsoleLog;
 import vcs.citydb.wfs.config.system.FileLog;
+import vcs.citydb.wfs.exception.WFSException;
+import vcs.citydb.wfs.util.DatabaseConnector;
 
 @WebListener
 public class WebServiceInitializer implements ServletContextListener {
@@ -121,15 +117,21 @@ public class WebServiceInitializer implements ServletContextListener {
 		// start new event dispatcher thread
 		registry.setEventDispatcher(new EventDispatcher());
 
+		// initialize logging
 		try {			
-			// initialize logging and database connection pool
 			initLogging(wfsConfig, context);
-			initDatabaseConnectionPool(exporterConfig);		
 		} catch (ServletException e) {
 			context.setAttribute(Constants.INIT_ERROR_ATTRNAME, e);
 			registry.getEventDispatcher().shutdownNow();
 			registry.cleanup();
 			return;
+		}
+
+		// initialize database connection pool
+		try {
+			DatabaseConnector.connect(exporterConfig);
+		} catch (WFSException e) {
+			e.getExceptionMessages().forEach(msg -> msg.getExceptionTexts().forEach(log::error));
 		}
 	}
 
@@ -186,7 +188,7 @@ public class WebServiceInitializer implements ServletContextListener {
 
 			logFileName = logPath + File.separator + "wfs.log";
 		}
-		
+
 		// log to console
 		log.logToConsole(consoleLog != null);
 		if (consoleLog != null)
@@ -195,41 +197,9 @@ public class WebServiceInitializer implements ServletContextListener {
 		// log to file
 		log.setDefaultFileLogLevel(fileLog.getLogLevel());
 		log.appendLogFile(logFileName, false);
-		
+
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		log.info("*** Starting new log file session on " + dateFormat.format(new Date()) + " ***");		
 	}
 
-	private void initDatabaseConnectionPool(Config exporterConfig) throws ServletException {
-		Database databaseConfig = exporterConfig.getProject().getDatabase();
-		if (databaseConfig.getActiveConnection() == null) {
-			String message = "No database connection provided in " + Constants.CONFIG_PATH + '/' + Constants.CONFIG_FILE + '.';
-			log.error(message);
-			throw new ServletException(message);
-		}
-
-		DBConnection connection = databaseConfig.getActiveConnection();
-		connection.setInternalPassword(connection.getPassword());		
-
-		DatabaseConnectionPool connectionPool = DatabaseConnectionPool.getInstance();
-		try {
-			connectionPool.connect(exporterConfig);
-		} catch (DatabaseConfigurationException | SQLException | DatabaseVersionException e) {
-			String message = "Failed to connect to database.";
-			log.error(message);
-			log.error(e.getMessage());
-			throw new ServletException(message, e);
-		}
-
-		log.info("Database connection established.");
-		connectionPool.getActiveDatabaseAdapter().getConnectionMetaData().printToConsole();
-		
-		// log whether user-defined SRSs are supported
-		for (DatabaseSrs refSys : exporterConfig.getProject().getDatabase().getReferenceSystems()) {
-			if (refSys.isSupported())
-				log.info("Reference system '" + refSys.getDescription() + "' (SRID: " + refSys.getSrid() + ") supported.");
-			else
-				log.warn("Reference system '" + refSys.getDescription() + "' (SRID: " + refSys.getSrid() + ") NOT supported.");
-		}
-	}
 }

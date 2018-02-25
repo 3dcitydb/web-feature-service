@@ -58,6 +58,7 @@ import org.citydb.api.concurrent.Worker;
 import org.citydb.api.concurrent.WorkerFactory;
 import org.citydb.api.registry.ObjectRegistry;
 import org.citydb.config.Config;
+import org.citydb.database.DatabaseConnectionPool;
 import org.citydb.log.Logger;
 import org.citydb.modules.citygml.common.database.cache.CacheTableManager;
 import org.citygml4j.builder.jaxb.JAXBBuilder;
@@ -78,6 +79,7 @@ import vcs.citydb.wfs.operation.storedquery.DescribeStoredQueriesHandler;
 import vcs.citydb.wfs.operation.storedquery.ListStoredQueriesHandler;
 import vcs.citydb.wfs.operation.storedquery.StoredQueryManager;
 import vcs.citydb.wfs.util.CacheTableCleanerWorker;
+import vcs.citydb.wfs.util.DatabaseConnector;
 import vcs.citydb.wfs.xml.NamespaceFilter;
 import vcs.citydb.wfs.xml.ValidationEventHandlerImpl;
 
@@ -85,6 +87,7 @@ import vcs.citydb.wfs.xml.ValidationEventHandlerImpl;
 public class WFSService extends HttpServlet { 
 	private static final long serialVersionUID = 1L;
 	private final Logger log = Logger.getInstance();
+	private final DatabaseConnectionPool connectionPool = DatabaseConnectionPool.getInstance();
 
 	private WFSConfig wfsConfig;
 	private Config exporterConfig;
@@ -181,6 +184,10 @@ public class WFSService extends HttpServlet {
 			parameterMap.put(entry.getKey().toUpperCase(), entry.getValue());
 
 		try {
+			// check database connection
+			if (!connectionPool.isConnected())
+				DatabaseConnector.connect(exporterConfig);
+
 			if (parameterMap.containsKey("REQUEST")) {
 				if (parameterMap.get("REQUEST").length > 1)
 					throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "Multiple REQUEST keywords are not allowed.");
@@ -215,13 +222,17 @@ public class WFSService extends HttpServlet {
 
 		} catch (JAXBException e) {
 			exceptionReportHandler.sendErrorResponse(new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "Failed to unmarshal the XML message.", e), request, response); 
-		}catch (WFSException e) {
+		} catch (WFSException e) {
 			exceptionReportHandler.sendErrorResponse(e, request, response);
 		}
 	}
 
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {	
 		try {
+			// check database connection
+			if (!connectionPool.isConnected())
+				DatabaseConnector.connect(exporterConfig);
+
 			// set CORS http headers
 			if (wfsConfig.getServer().isEnableCORS())
 				response.addHeader("Access-Control-Allow-Origin", "*");
