@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema elementFormDefault="qualified" version="1.0" targetNamespace="http://www.opengis.net/wfs/2.0" xmlns:wfs="http://www.opengis.net/wfs/2.0" xmlns:tns="http://www.opengis.net/wfs/2.0" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ns2="http://www.w3.org/1999/xlink" xmlns:ns1="http://www.opengis.net/ows/1.1" xmlns:ns3="http://www.opengis.net/fes/2.0">
+
+  <xs:import namespace="http://www.opengis.net/ows/1.1" schemaLocation="schema4.xsd"/>
+
+  <xs:import namespace="http://www.w3.org/1999/xlink" schemaLocation="schema2.xsd"/>
+
+  <xs:import namespace="http://www.opengis.net/fes/2.0" schemaLocation="schema5.xsd"/>
+
+  <xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="schema1.xsd"/>
+
+  <xs:element name="Abstract">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute ref="xml:lang"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="ExtendedDescription" type="tns:ExtendedDescriptionType"/>
+
+  <xs:element name="MetadataURL" type="tns:MetadataURLType"/>
+
+  <xs:element name="Title">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute ref="xml:lang"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:complexType name="GetCapabilitiesType">
+    <xs:complexContent>
+      <xs:extension base="ns1:GetCapabilitiesType">
+        <xs:sequence/>
+        <xs:attribute name="service" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="WFS_CapabilitiesType">
+    <xs:complexContent>
+      <xs:extension base="ns1:CapabilitiesBaseType">
+        <xs:sequence>
+          <xs:element name="WSDL" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence/>
+              <xs:attribute ref="ns2:type"/>
+              <xs:attribute ref="ns2:href"/>
+              <xs:attribute ref="ns2:role"/>
+              <xs:attribute ref="ns2:arcrole"/>
+              <xs:attribute ref="ns2:title"/>
+              <xs:attribute ref="ns2:show"/>
+              <xs:attribute ref="ns2:actuate"/>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="FeatureTypeList" type="tns:FeatureTypeListType" minOccurs="0"/>
+          <xs:element ref="ns3:Filter_Capabilities" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="FeatureTypeListType">
+    <xs:sequence>
+      <xs:element name="FeatureType" type="tns:FeatureTypeType" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="FeatureTypeType">
+    <xs:sequence>
+      <xs:element name="Name" type="xs:QName"/>
+      <xs:element ref="tns:Title" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element ref="tns:Abstract" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element ref="ns1:Keywords" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="DefaultCRS" type="xs:anyURI" minOccurs="0"/>
+      <xs:element name="OtherCRS" type="xs:anyURI" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="NoCRS" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence/>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="OutputFormats" type="tns:OutputFormatListType" minOccurs="0"/>
+      <xs:element ref="ns1:WGS84BoundingBox" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="MetadataURL" type="tns:MetadataURLType" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="ExtendedDescription" type="tns:ExtendedDescriptionType" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="OutputFormatListType">
+    <xs:sequence>
+      <xs:element name="Format" type="xs:string" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="MetadataURLType">
+    <xs:sequence/>
+    <xs:attribute name="about" type="xs:anyURI"/>
+    <xs:attribute ref="ns2:type"/>
+    <xs:attribute ref="ns2:href"/>
+    <xs:attribute ref="ns2:role"/>
+    <xs:attribute ref="ns2:arcrole"/>
+    <xs:attribute ref="ns2:title"/>
+    <xs:attribute ref="ns2:show"/>
+    <xs:attribute ref="ns2:actuate"/>
+  </xs:complexType>
+
+  <xs:complexType name="ExtendedDescriptionType">
+    <xs:sequence>
+      <xs:element name="Element" type="tns:ElementType" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ElementType">
+    <xs:sequence>
+      <xs:element ref="ns1:Metadata"/>
+      <xs:element name="ValueList" type="tns:ValueListType"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string" use="required"/>
+    <xs:attribute name="type" type="xs:QName" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="ValueListType">
+    <xs:sequence>
+      <xs:element name="Value" type="xs:anyType" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>
+

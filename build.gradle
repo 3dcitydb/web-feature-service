@@ -1,0 +1,134 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
+group 'org.citydb.wfs'
+version '4.0.0-SNAPSHOT'
+
+apply plugin: 'java'
+apply plugin: 'war'
+apply plugin: 'distribution'
+apply from: 'properties.gradle'
+
+sourceCompatibility = 1.8
+
+ext {
+    genSrcDir = 'src-gen/main/java'
+}
+
+sourceSets {
+    main.java.srcDir genSrcDir
+}
+
+configurations {
+    jdbc
+    jaxb
+}
+
+repositories {
+    maven {
+        url 'http://download.osgeo.org/webdav/geotools'
+    }
+    maven {
+        url 'https://dl.bintray.com/3dcitydb/maven'
+    }
+    maven {
+        url 'https://maven.imagej.net/content/repositories/thirdparty'
+    }
+    jcenter()
+}
+
+dependencies {
+    compile('org.citydb:impexp-core:4.0.0-PRE-9') {
+        jdbc 'org.postgresql:postgresql:+'
+        jdbc 'net.postgis:postgis-jdbc:+'
+
+        exclude group: 'org.postgresql', module: 'postgresql'
+        exclude group: 'net.postgis', module: 'postgis-jdbc'
+    }
+    compile files('lib/sdoapi-12.1.0.2.jar')
+    providedCompile files('lib/ojdbc7-12.1.0.2.jar')
+    providedCompile 'javax.servlet:javax.servlet-api:3.1.0'
+
+    jaxb 'com.sun.xml.bind:jaxb-xjc:2.2.7'
+    jaxb 'org.jvnet.jaxb2_commons:jaxb2-basics:0.11.1'
+    jaxb 'org.jvnet.jaxb2_commons:jaxb2-namespace-prefix:1.3'
+    jaxb 'org.slf4j:slf4j-simple:1.7.25'
+}
+
+task processLicense(type: Copy) {
+    from("resources/license/LICENSE.txt") {
+        filteringCharset = 'UTF-8'
+        filter(ReplaceTokens, tokens: [
+                name: project.citydbWfsName,
+                vendorName: project.vendorName,
+                vendorStreet: project.vendorStreet,
+                vendorTown: project.vendorTown,
+                vendorCountry: project.vendorCountry,
+                vendorCopyright: project.vendorCopyright,
+                vendorWebsiteUrl: project.vendorWebsiteUrl
+        ])
+    }
+    into "$buildDir/tmp/license"
+}
+
+task generateJaxb(group: 'jaxb') {
+    outputs.dir genSrcDir
+
+    doLast {
+        mkdir genSrcDir
+
+        System.setProperty('javax.xml.accessExternalSchema', 'file')
+        ant.taskdef(name: 'xjc', classname: 'com.sun.tools.xjc.XJC2Task', classpath: configurations.jaxb.asPath)
+        ant.xjc(destdir: genSrcDir,
+                schema: 'resources/jaxb/wfs-jaxb.xsd',
+                binding: 'resources/jaxb/binding.xjb',
+                extension: 'true',
+                encoding: 'UTF-8') {
+            produces(dir: genSrcDir, includes: '**/*.java')
+            arg(line: '-Xnamespace-prefix -Xsetters -Xsetters-mode=direct -Xinheritance')
+        }
+
+        delete "$genSrcDir/net/opengis/citygml"
+        delete "$genSrcDir/net/opengis/gml"
+        delete "$genSrcDir/org"
+        delete "$genSrcDir/oasis"
+    }
+}
+
+task cleanJaxb(type: Delete, group: 'jaxb') {
+    delete 'src-gen'
+}
+
+distributions.main {
+    baseName = project.appName
+    contents {
+        from war
+        into('lib') {
+            from configurations.jdbc
+            from 'lib/ojdbc7-12.1.0.2.jar'
+        }
+        into('manual') {
+            from 'resources/manual'
+        }
+        into('license') {
+            from "$rootDir/resources/license/APACHE-2.0.txt"
+            from processLicense
+        }
+    }
+}
+
+war {
+    archiveName = project.name + '.war'
+    manifest {
+        attributes('Implementation-Title': project.appName,
+                'Implementation-Version': project.version,
+                'Implementation-Vendor': project.vendorName + ', ' + project.vendorWebsiteUrl
+        )
+    }
+    into('META-INF') {
+        from processLicense
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.7'
+}

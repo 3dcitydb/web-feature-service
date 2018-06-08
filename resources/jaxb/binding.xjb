@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jaxb:bindings version="2.1" xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" xmlns:namespace="http://jaxb2-commons.dev.java.net/namespace-prefix"
+	xmlns:inheritance="http://jaxb2-commons.dev.java.net/basic/inheritance" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+	<!-- Specific settings for the wfs mapping file -->
+	<jaxb:bindings schemaLocation="wfs/2.0.2/wfs.xsd" node="/xs:schema">
+		<jaxb:globalBindings generateIsSetMethod="true" underscoreBinding="asCharInWord"/>
+		<jaxb:bindings>
+			<namespace:prefix name="wfs"/>
+		</jaxb:bindings>
+
+		<!-- JAXB fails to set the inheritance relation, so we use a plugin here -->
+		<jaxb:bindings node="//xs:complexType[@name='NativeType']">
+			<inheritance:extends>net.opengis.wfs._2.AbstractTransactionActionType</inheritance:extends>
+		</jaxb:bindings>
+		<jaxb:bindings node="//xs:simpleType[@name='StarStringType']//xs:enumeration[@value='*']">
+			<jaxb:typesafeEnumMember name="STAR"/>
+		</jaxb:bindings>
+	</jaxb:bindings>
+
+	<!-- ========== -->
+	<!-- OWS 1.1.0 -->
+	<!-- ========== -->
+
+	<!-- Specific settings for the OWS 1.1.0 schema file -->
+	<jaxb:bindings schemaLocation="ows/1.1.0/owsAll.xsd" node="/xs:schema">
+		<jaxb:bindings>
+			<namespace:prefix name="ows"/>
+		</jaxb:bindings>
+	</jaxb:bindings>
+
+	<!-- ========== -->
+	<!-- FES 2.0.3 -->
+	<!-- ========== -->
+
+	<!-- Specific settings for the FES 2..0 schema file -->
+	<jaxb:bindings schemaLocation="filter/2.0.3/filter.xsd" node="/xs:schema">
+		<jaxb:bindings>
+			<namespace:prefix name="fes"/>
+		</jaxb:bindings>
+	</jaxb:bindings>
+
+	<!-- ========== -->
+	<!-- XLink 1999 -->
+	<!-- ========== -->
+
+	<!-- Specific settings for the XLink schema file -->
+	<jaxb:bindings schemaLocation="gml/3.1.1/xlink/xlink.xsd" node="/xs:schema">
+		<jaxb:bindings>
+			<namespace:prefix name="xlink"/>
+		</jaxb:bindings>
+
+		<jaxb:bindings schemaLocation="gml/3.1.1/xlink/xlink.xsd" node="/xs:schema">
+			<!-- 'title' property is referenced both as attribute and as element. -->
+			<jaxb:bindings node="//xs:group[@name='locatorModel']">
+				<jaxb:bindings node=".//xs:element[@ref='xlink:title']">
+					<jaxb:property name="titleElement"/>
+				</jaxb:bindings>
+			</jaxb:bindings>
+			<jaxb:bindings node="//xs:group[@name='arcModel']">
+				<jaxb:bindings node=".//xs:element[@ref='xlink:title']">
+					<jaxb:property name="titleElement"/>
+				</jaxb:bindings>
+			</jaxb:bindings>
+		</jaxb:bindings>
+	</jaxb:bindings>
+
+</jaxb:bindings>

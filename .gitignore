@@ -1,3 +1,15 @@
-build
+.gradle/
+gradle.properties
+build/
+
+# Eclipse
+.classpath
 .project
-.settings
+.settings/
+bin/
+
+# Intellij
+.idea/
+*.iml
+*.iws
+out/

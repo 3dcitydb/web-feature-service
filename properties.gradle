@@ -1,0 +1,19 @@
+ext {
+    date = new Date()
+
+    // vendor information
+    vendorName = 'virtualcitySYSTEMS GmbH'
+    vendorStreet = 'Tauentzienstraße 7 b/c'
+    vendorTown = '10789 Berlin'
+    vendorCountry = 'Germany'
+    vendorWebsiteUrl = 'http://www.virtualcitysystems.de'
+    vendorCopyright = '2015-' + date.format('yyyy')
+
+    // 3D City Database
+    citydbShortName = '3DCityDB'
+    citydbName = '3D City Database'
+
+    // 3D City Database WFS
+    citydbWfsName = citydbName + ' Web Feature Service'
+    appName = citydbShortName + '-Web-Feature-Service'
+}

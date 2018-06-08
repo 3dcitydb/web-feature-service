@@ -1,0 +1,229 @@
+/*****************************/
+/******virtualcityMAP*********/
+/*****************************/
+
+
+/* reset styles */
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, font, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	outline: 0;
+	font-weight: inherit;
+	font-style: inherit;
+	font-size: 100%;
+	font-family: inherit;
+	vertical-align: baseline;
+	font-family:Verdana, Geneva, sans-serif;
+}
+body {
+	color: black;
+	background-color: #A8C02A;
+	background-image: url("../img/bg_global.gif");
+	background-repeat: repeat-x;
+	background-attachment: fixed;
+	margin: 0 0 0 20px;
+	padding: 0;
+}
+/* remember to define focus styles! */
+:focus {
+	outline: 0;
+}
+body {
+	/*line-height: 1;*/
+	color: black;
+}
+ol, ul {
+	list-style: none;
+}
+/* tables still need 'cellspacing="0"' in the markup */
+table {
+	border-collapse: separate;
+	border-spacing: 0;
+}
+caption, th, td {
+	text-align: left;
+	font-weight: normal;
+}
+blockquote:before, blockquote:after, q:before, q:after {
+	content: "";
+}
+blockquote, q {
+	quotes: "" "";
+}
+/* end reset */
+
+/*
+body{ font: 62.5% "Arial", sans-serif; margin:5px; padding:0px;}
+*/
+
+body {
+	font: 10px "Arial", sans-serif;
+	margin:5px;
+	padding:0px;
+}
+a {
+	text-decoration:none;
+	border:none
+}
+a:hover {
+	text-decoration:underline;
+}
+h2 {
+font-size: 14px;
+font-weight: bold;
+border-bottom: 1px solid #ccc;
+margin: 5px 0px;
+}
+
+#rightnav {
+	float: right;
+	width: 500px;
+	top:0px;
+}
+#content {
+	position: absolute;
+	float: left;
+	left: 6px;
+	top: 0px;
+	z-index: 100;
+	width: 100%;
+}
+.thumb {
+	float:left;
+	margin:5px;
+	width:100%;
+}
+#container {
+	background: url(../img/bg_global.gif) no-repeat;
+	color: #000000;
+	min-width: 790px;
+	position: absolute;
+	top: 10px;
+	right: 2%;
+	bottom: 10px;
+	left: 2%;
+}
+#Header {
+	position:absolute;
+	background: url(../img/BG_500x100.png) repeat-x;
+	color: #ffffff;
+	font-weight: bold;
+	height: 100px;
+	width: 100%;
+}
+#CompanyLogo {
+	position: absolute;
+	top: 5px;
+	bottom: 0px;
+	left: 45px;
+	height: 95px;
+	z-index: 5;
+	padding: 10px 0px 0px 10px;
+}
+#CompanyLogo h1 {
+	position: absolute;
+	top: 64px;
+	bottom: 0px;
+	left: 350px;
+	z-index: 5;
+	color: black;
+	width: 600px;
+	font-size: 2.5em;
+	text-shadow: 0px 3px 5px #CCC;
+}
+#leftcolumn {
+	position: absolute;
+	top: 100px;/*95px;*/
+	right: 0px;
+	bottom: 90px;
+	left: 0px;
+	background:url(../img/bg_content.gif) repeat-y;
+}
+
+#extendedTab .ui-tabs-nav.ui-helper-reset.ui-helper-clearfix.ui-widget-header.ui-corner-all {
+	border-bottom: 1px solid #CCC;
+	-moz-border-radius: 0px;
+	-webkit-border-radius: 0px;
+	border-radius: 0px;
+}
+
+.ui-widget-header {
+	border: none;
+	background: none;
+}
+#footer {
+	position: absolute;
+	background: url(../img/bg_footer.gif) no-repeat;
+	color: #ffffff;
+	font-weight: bold;
+	width: 100%;
+	height: 85px;
+	left: 0px;
+	bottom: 5px;
+}
+#copyright {
+	position: absolute;
+	font-weight: normal;
+	color: #999;
+	font-size: 9px;
+	font-family: Verdana;
+	line-height: 100px;
+	text-align: right;
+	width: 343px;
+}
+.fillparent {
+	width: 100%;
+	height: 100%;
+	background: white;
+}
+.input_field{
+	padding: 2px;
+	margin: 3px 0px;
+	border: #CCC 1px solid;
+	width: 100%;
+}
+#Query, #Result {
+	padding: 20px 46px;
+}
+#response, #wfsrequest {
+	overflow: auto;
+	min-height: 250px;
+	max-height:300px;
+	width:100%;
+	border: 1px solid #ccc;
+	background:#fff;
+	font-size: 11px;
+	font-family: Verdana, Geneva, sans-serif;
+}
+/***********BUTTON*******************/
+#wfsbutton {
+	background-color: #b6ca4e;
+	background-repeat: repeat-x;
+	background-image: -khtml-gradient(linear,left top,left bottom,from(#e6efb0),to(#b6ca4e));
+	background-image: -moz-linear-gradient(#e6efb0,#b6ca4e);
+	background-image: -ms-linear-gradient(#e6efb0,#b6ca4e);
+	background-image: -webkit-gradient(linear,left top,left bottom,color-stop(0%,#e6efb0),color-stop(100%,#b6ca4e));
+	background-image: -webkit-linear-gradient(#e6efb0,#b6ca4e);
+	background-image: -o-linear-gradient(#e6efb0,#b6ca4e);
+	background-image: linear-gradient(#e6efb0,#b6ca4e);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#e6efb0',endColorstr='#b6ca4e');
+	cursor: pointer;
+	padding: 5px 25px;
+}
+#wfsbutton:hover{
+	color: #ffffff;
+	text-shadow: 0px 1px 10px black;
+	background-color: #b6ca4e;
+	background-repeat: repeat-x;
+	background-image: -khtml-gradient(linear,left top,left bottom,from(#e6efb0),to(#b6ca4e));
+	background-image: -moz-linear-gradient(#e6efb0,#b6ca4e);
+	background-image: -ms-linear-gradient(#e6efb0,#b6ca4e);
+	background-image: -webkit-gradient(linear,left top,left bottom,color-stop(0%,#e6efb0),color-stop(100%,#b6ca4e));
+	background-image: -webkit-linear-gradient(#e6efb0,#b6ca4e);
+	background-image: -o-linear-gradient(#e6efb0,#b6ca4e);
+	background-image: linear-gradient(#e6efb0,#b6ca4e);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#e6efb0',endColorstr='#b6ca4e');
+	cursor: pointer;
+	padding: 5px 25px;
+}
