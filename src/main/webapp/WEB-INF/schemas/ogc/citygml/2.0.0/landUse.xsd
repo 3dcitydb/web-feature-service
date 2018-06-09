@@ -14,14 +14,14 @@
 	To obtain additional rights of use, visit http://www.opengeospatial.org/legal/ .
 		</xs:documentation>
 	</xs:annotation>
-	<xs:import namespace="http://www.opengis.net/gml" schemaLocation="../../gml/3.1.1/base/gml.xsd"/>
-	<xs:import namespace="http://www.opengis.net/citygml/2.0" schemaLocation="cityGMLBase.xsd"/>
+	<xs:import namespace="http://www.opengis.net/gml" schemaLocation="http://schemas.opengis.net/gml/3.1.1/base/gml.xsd"/>
+	<xs:import namespace="http://www.opengis.net/citygml/2.0" schemaLocation="http://schemas.opengis.net/citygml/2.0/cityGMLBase.xsd"/>
 	<!-- ========================================================================================= -->
 	<!-- ==================================CityGML LandUse module ================================== -->
 	<!-- ========================================================================================= -->
 	<xs:complexType name="LandUseType">
 		<xs:annotation>
-			<xs:documentation>Type describing the class for Land Use in all LOD. LandUse objects describe areas of the earth’s surface
+			<xs:documentation>Type describing the class for Land Use in all LOD. LandUse objects describe areas of the earth's surface
 				dedicated to a specific land use. The geometry must consist of 3-D surfaces. As subclass of _CityObject, a LandUse
 				inherits all attributes and relations, in particular an id, names, external references, and generalization relations.
 			</xs:documentation>

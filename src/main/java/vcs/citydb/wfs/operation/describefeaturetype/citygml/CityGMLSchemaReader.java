@@ -1,15 +1,5 @@
 package vcs.citydb.wfs.operation.describefeaturetype.citygml;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.servlet.ServletContext;
-import javax.xml.namespace.QName;
-
 import org.citydb.ade.ADEExtension;
 import org.citydb.ade.ADEExtensionManager;
 import org.citydb.database.schema.mapping.FeatureType;
@@ -20,10 +10,18 @@ import org.citygml4j.model.module.Modules;
 import org.citygml4j.model.module.ade.ADEModule;
 import org.citygml4j.model.module.citygml.CityGMLModule;
 import org.citygml4j.model.module.citygml.CityGMLVersion;
-
 import vcs.citydb.wfs.config.Constants;
 import vcs.citydb.wfs.exception.SchemaReaderException;
 import vcs.citydb.wfs.operation.describefeaturetype.SchemaReader;
+
+import javax.servlet.ServletContext;
+import javax.xml.namespace.QName;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
+import java.util.Set;
 
 public class CityGMLSchemaReader implements SchemaReader {
 	private Set<FeatureType> featureTypes;
@@ -64,7 +62,7 @@ public class CityGMLSchemaReader implements SchemaReader {
 			if (module instanceof CityGMLModule) {
 				String fileName = module.getSchemaLocation();
 				fileName = fileName.substring(fileName.lastIndexOf("/"), fileName.length());				
-				return servletContext.getResourceAsStream(new StringBuilder(localSchemaPath).append(fileName).toString());
+				return servletContext.getResourceAsStream(localSchemaPath + fileName);
 			} else if (module instanceof ADEModule)
 				return ((ADEModule)module).getSchemaResource().openStream();
 		}

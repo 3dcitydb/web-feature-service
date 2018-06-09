@@ -118,7 +118,6 @@ public class WFSService extends HttpServlet {
 			try {
 				SchemaHandler schemaHandler = (SchemaHandler)registry.lookup(SchemaHandler.class.getName());
 				schemaHandler.parseSchema(new File(getServletContext().getRealPath(Constants.SCHEMAS_PATH + "/ogc/wfs/2.0.2/wfs.xsd")));
-				schemaHandler.parseSchema(new File(getServletContext().getRealPath(Constants.SCHEMAS_PATH + "/ogc/wfs/extensions/wfs-vcs.xsd")));
 				SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
 				wfsSchema = schemaFactory.newSchema(schemaHandler.getSchemaSources());
 			} catch (SAXException e) {

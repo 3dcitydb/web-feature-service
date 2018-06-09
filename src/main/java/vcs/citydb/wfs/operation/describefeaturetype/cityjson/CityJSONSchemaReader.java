@@ -1,5 +1,18 @@
 package vcs.citydb.wfs.operation.describefeaturetype.cityjson;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.stream.JsonReader;
+import org.citydb.database.schema.mapping.FeatureType;
+import org.citygml4j.model.module.citygml.CityGMLVersion;
+import vcs.citydb.wfs.config.Constants;
+import vcs.citydb.wfs.exception.SchemaReaderException;
+import vcs.citydb.wfs.operation.describefeaturetype.SchemaReader;
+
+import javax.servlet.ServletContext;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,28 +20,11 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import javax.servlet.ServletContext;
-
-import org.citydb.database.schema.mapping.FeatureType;
-import org.citygml4j.model.module.citygml.CityGMLVersion;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.stream.JsonReader;
-
-import vcs.citydb.wfs.config.Constants;
-import vcs.citydb.wfs.exception.SchemaReaderException;
-import vcs.citydb.wfs.operation.describefeaturetype.SchemaReader;
 
 public class CityJSONSchemaReader implements SchemaReader {
 	private Set<FeatureType> featureTypes;
@@ -44,7 +40,7 @@ public class CityJSONSchemaReader implements SchemaReader {
 		this.featureTypes = featureTypes;
 		this.servletContext = servletContext;
 		
-		List<String> unsupported = Arrays.asList("TransportationComplex", "Track", "CityObjectGroup");
+		List<String> unsupported = Arrays.asList("TransportationComplex", "Track");
 		for (FeatureType featureType : featureTypes) {
 			if (unsupported.contains(featureType.getPath()))
 				throw new SchemaReaderException("The feature type '" + featureType.getPath() + "' is not supported by CityJSON.");
@@ -64,7 +60,7 @@ public class CityJSONSchemaReader implements SchemaReader {
 				hierarchies.put("Tunnel", Arrays.asList("TunnelPart", "TunnelInstallation"));
 
 				Gson gson = new GsonBuilder().setPrettyPrinting().create();
-				JsonReader reader = new JsonReader(new InputStreamReader(servletContext.getResourceAsStream(new StringBuilder(Constants.CITYJSON_SCHEMA_PATH).append("/cityjson-v05.schema.json").toString())));
+				JsonReader reader = new JsonReader(new InputStreamReader(servletContext.getResourceAsStream(Constants.CITYJSON_SCHEMA_PATH + "/cityjson-v06.schema.json")));
 				JsonObject schema = gson.fromJson(reader, JsonObject.class);
 
 				JsonObject definitions = schema.get("definitions").getAsJsonObject();
@@ -74,10 +70,10 @@ public class CityJSONSchemaReader implements SchemaReader {
 						.get("oneOf").getAsJsonArray();			
 
 				Map<String, JsonElement> cityObjects = new HashMap<>();
-				for (Iterator<JsonElement> iter = references.iterator(); iter.hasNext(); ) {
-					JsonObject reference = iter.next().getAsJsonObject();
+				for (JsonElement reference1 : references) {
+					JsonObject reference = reference1.getAsJsonObject();
 					String value = reference.get("$ref").getAsString();
-					String typeName = value.substring(value.lastIndexOf("/") + 1, value.length());					
+					String typeName = value.substring(value.lastIndexOf("/") + 1, value.length());
 					cityObjects.put(typeName, reference);
 				}
 				
@@ -116,7 +112,7 @@ public class CityJSONSchemaReader implements SchemaReader {
 			}
 		}
 
-		return servletContext.getResourceAsStream(new StringBuilder(Constants.CITYJSON_SCHEMA_PATH).append("/cityjson-v05.schema.json").toString());
+		return servletContext.getResourceAsStream(Constants.CITYJSON_SCHEMA_PATH + "/cityjson-v06.schema.json");
 	}
 
 

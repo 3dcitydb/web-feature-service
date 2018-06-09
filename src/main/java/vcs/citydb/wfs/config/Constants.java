@@ -13,8 +13,8 @@ public class Constants {
 	public static final String CONFIG_SCHEMA_FILE = CONFIG_SCHEMA_PATH + "/config.xsd";
 	public static final String ADE_EXTENSIONS_PATH = "/WEB-INF/ade-extensions";
 	public static final String SCHEMAS_PATH = "/WEB-INF/schemas";
-	public static final String CITYGML_1_0_SCHEMAS_PATH = SCHEMAS_PATH + "/citygml/1.0";
-	public static final String CITYGML_2_0_SCHEMAS_PATH = SCHEMAS_PATH + "/citygml/2.0";
+	public static final String CITYGML_1_0_SCHEMAS_PATH = SCHEMAS_PATH + "/ogc/citygml/1.0.0";
+	public static final String CITYGML_2_0_SCHEMAS_PATH = SCHEMAS_PATH + "/ogc/citygml/2.0.0";
 	public static final String CITYJSON_SCHEMA_PATH = SCHEMAS_PATH + "/cityjson";
 	public static final String LOG_PATH = "/WEB-INF";
 	public static final String LOG_FILE = "wfs.log";
