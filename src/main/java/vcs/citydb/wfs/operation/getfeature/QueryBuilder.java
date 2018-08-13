@@ -1,16 +1,10 @@
 package vcs.citydb.wfs.operation.getfeature;
 
-import java.util.List;
-
 import org.citydb.database.adapter.AbstractDatabaseAdapter;
 import org.citydb.database.schema.mapping.MappingConstants;
 import org.citydb.database.schema.mapping.SchemaMapping;
 import org.citydb.query.builder.QueryBuildException;
 import org.citydb.query.builder.sql.SQLQueryBuilder;
-
-import vcs.citydb.wfs.exception.WFSException;
-import vcs.citydb.wfs.exception.WFSExceptionCode;
-import vcs.citydb.wfs.exception.WFSExceptionMessage;
 import org.citydb.sqlbuilder.expression.IntegerLiteral;
 import org.citydb.sqlbuilder.schema.Column;
 import org.citydb.sqlbuilder.schema.Table;
@@ -21,12 +15,17 @@ import org.citydb.sqlbuilder.select.operator.set.SetOperationFactory;
 import org.citydb.sqlbuilder.select.projection.ConstantColumn;
 import org.citydb.sqlbuilder.select.projection.Function;
 import org.citydb.sqlbuilder.select.projection.WildCardColumn;
+import vcs.citydb.wfs.exception.WFSException;
+import vcs.citydb.wfs.exception.WFSExceptionCode;
+import vcs.citydb.wfs.exception.WFSExceptionMessage;
+
+import java.util.List;
 
 public class QueryBuilder {	
 	private final SQLQueryBuilder builder;
 
 	public QueryBuilder(AbstractDatabaseAdapter databaseAdapter, SchemaMapping schemaMapping) {
-		builder = new SQLQueryBuilder(schemaMapping, databaseAdapter, databaseAdapter.getConnectionDetails().getSchema());
+		builder = new SQLQueryBuilder(schemaMapping, databaseAdapter);
 	}
 
 	public Select buildQuery(List<QueryExpression> queryExpressions) throws WFSException {

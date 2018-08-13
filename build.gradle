@@ -37,15 +37,15 @@ repositories {
 }
 
 dependencies {
-    compile('org.citydb:impexp-core:4.0.0-PRE-9') {
+    compile('org.citydb:impexp-core:4.0.0-pre.20180813.1402') {
         jdbc 'org.postgresql:postgresql:+'
         jdbc 'net.postgis:postgis-jdbc:+'
 
         exclude group: 'org.postgresql', module: 'postgresql'
         exclude group: 'net.postgis', module: 'postgis-jdbc'
     }
-    compile files('lib/sdoapi-12.1.0.2.jar')
-    providedCompile files('lib/ojdbc7-12.1.0.2.jar')
+    compile files('lib/sdoapi-18.3.0.0.jar')
+    providedCompile files('lib/ojdbc8-18.3.0.0.jar')
     providedCompile 'javax.servlet:javax.servlet-api:3.1.0'
 
     jaxb 'com.sun.xml.bind:jaxb-xjc:2.2.7'
@@ -104,7 +104,7 @@ distributions.main {
         from war
         into('lib') {
             from configurations.jdbc
-            from 'lib/ojdbc7-12.1.0.2.jar'
+            from 'lib/ojdbc8-18.3.0.0.jar'
         }
         into('manual') {
             from 'resources/manual'
