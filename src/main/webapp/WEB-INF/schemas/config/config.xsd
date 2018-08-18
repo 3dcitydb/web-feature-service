@@ -16,6 +16,7 @@
       <xs:element name="capabilities" type="CapabilitiesType"/>
       <xs:element name="featureTypes" type="FeatureTypesType"/>
       <xs:element name="operations" type="OperationsType" minOccurs="0"/>
+      <xs:element name="postProcessing" type="PostProcessingType" minOccurs="0"/>
       <xs:element name="database" type="WFSDatabaseType"/>
       <xs:element name="server" type="ServiceType"/>
       <xs:element name="uidCache" type="CacheType" minOccurs="0"/>
@@ -88,6 +89,7 @@
   <xs:complexType name="OperationsType">
     <xs:sequence>
       <xs:element name="requestEncoding" type="RequestEncodingType" minOccurs="0"/>
+      <xs:element name="useCityDBADE" type="xs:boolean" minOccurs="0"/>
       <xs:element name="DescribeFeatureType" type="DescribeFeatureTypeOperationType" minOccurs="0"/>
       <xs:element name="GetFeature" type="GetFeatureOperationType" minOccurs="0"/>
     </xs:sequence>
@@ -136,8 +138,20 @@
   <xs:complexType name="GetFeatureOperationType">
     <xs:sequence>
       <xs:element name="outputFormats" type="OutputFormatListType" minOccurs="0"/>
-      <xs:element name="useCityDBADE" type="xs:boolean" minOccurs="0"/>
     </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="PostProcessingType">
+    <xs:sequence>
+      <xs:element name="xslTransformation" type="XSLTransformationType" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="XSLTransformationType">
+    <xs:sequence>
+      <xs:element name="stylesheet" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="isEnabled" type="xs:boolean" use="required"/>
   </xs:complexType>
 
   <xs:complexType name="WFSDatabaseType">

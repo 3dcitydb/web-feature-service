@@ -5,11 +5,13 @@ import javax.xml.bind.annotation.XmlType;
 
 @XmlType(name="OperationsType", propOrder={
 		"requestEncoding",
+		"useCityDBADE",
 		"describeFeatureType",
 		"getFeature"
 })
 public class Operations {
 	private RequestEncoding requestEncoding;
+	private Boolean useCityDBADE = false;
 	@XmlElement(name="DescribeFeatureType")
 	private DescribeFeatureTypeOperation describeFeatureType;
 	@XmlElement(name="GetFeature")
@@ -27,6 +29,15 @@ public class Operations {
 
 	public void setRequestEncoding(RequestEncoding requestEncoding) {
 		this.requestEncoding = requestEncoding;
+	}
+
+
+	public boolean isUseCityDBADE() {
+		return useCityDBADE;
+	}
+
+	public void setUseCityDBADE(boolean useCityDBADE) {
+		this.useCityDBADE = useCityDBADE;
 	}
 
 	public DescribeFeatureTypeOperation getDescribeFeatureType() {

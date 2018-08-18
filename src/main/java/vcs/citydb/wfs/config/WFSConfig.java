@@ -6,6 +6,7 @@ import vcs.citydb.wfs.config.constraints.Constraints;
 import vcs.citydb.wfs.config.database.Database;
 import vcs.citydb.wfs.config.feature.FeatureTypes;
 import vcs.citydb.wfs.config.operation.Operations;
+import vcs.citydb.wfs.config.processing.PostProcessing;
 import vcs.citydb.wfs.config.system.Logging;
 import vcs.citydb.wfs.config.system.Server;
 
@@ -18,6 +19,7 @@ import javax.xml.bind.annotation.XmlType;
 		"capabilities",
 		"featureTypes",
 		"operations",
+		"postProcessing",
 		"database",
 		"server",
 		"uidCache",
@@ -30,6 +32,7 @@ public class WFSConfig {
 	@XmlElement(required=true)
 	private FeatureTypes featureTypes;
 	private Operations operations;
+	private PostProcessing postProcessing;
 	@XmlElement(required=true)
 	private Database database;
 	@XmlElement(required=true)	
@@ -42,6 +45,7 @@ public class WFSConfig {
 		capabilities = new Capabilities();
 		featureTypes = new FeatureTypes();
 		operations = new Operations();
+		postProcessing = new PostProcessing();
 		database = new Database();
 		server = new Server();
 		uidCache = new Cache();
@@ -79,6 +83,14 @@ public class WFSConfig {
 
 	public void setOperations(Operations operations) {
 		this.operations = operations;
+	}
+
+	public PostProcessing getPostProcessing() {
+		return postProcessing;
+	}
+
+	public void setPostProcessing(PostProcessing postProcessing) {
+		this.postProcessing = postProcessing;
 	}
 
 	public Database getDatabase() {

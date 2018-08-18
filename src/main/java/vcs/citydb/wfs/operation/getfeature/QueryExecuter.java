@@ -29,8 +29,6 @@ import vcs.citydb.wfs.exception.WFSExceptionCode;
 import vcs.citydb.wfs.exception.WFSExceptionReportHandler;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.xml.bind.JAXBException;
-import javax.xml.datatype.DatatypeConfigurationException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -45,7 +43,7 @@ public class QueryExecuter implements EventHandler {
 	private final Object eventChannel;
 	private final DatabaseConnectionPool connectionPool;
 	private final CityGMLBuilder cityGMLBuilder;
-	private final Config exporterConfig;
+	private final Config config;
 
 	private final SchemaMapping schemaMapping;
 	private final QueryBuilder queryBuilder;
@@ -61,13 +59,13 @@ public class QueryExecuter implements EventHandler {
 			DatabaseConnectionPool connectionPool,
 			CityGMLBuilder cityGMLBuilder,
 			WFSConfig wfsConfig,
-			Config exporterConfig) throws JAXBException, DatatypeConfigurationException {
+			Config config) {
 		this.writer = writer;
 		this.databaseWorkerPool = databaseWorkerPool;
 		this.eventChannel = eventChannel;
 		this.connectionPool = connectionPool;
 		this.cityGMLBuilder = cityGMLBuilder;
-		this.exporterConfig = exporterConfig;
+		this.config = config;
 
 		// get standard request parameters
 		long maxFeatureCount = Long.MAX_VALUE;
@@ -95,14 +93,9 @@ public class QueryExecuter implements EventHandler {
 				&& resultType == ResultTypeType.RESULTS;
 		writer.setWriteSingleFeature(isWriteSingleFeature);
 
-		Connection connection = null;
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-
-		try {
-			connection = initConnection();			
-			stmt = connectionPool.getActiveDatabaseAdapter().getSQLAdapter().prepareStatement(query, connection);		
-			rs = stmt.executeQuery();
+		try (Connection connection = initConnection();
+			 PreparedStatement stmt = connectionPool.getActiveDatabaseAdapter().getSQLAdapter().prepareStatement(query, connection);
+			 ResultSet rs = stmt.executeQuery()) {
 
 			if (rs.next()) {
 				long matchAll = rs.getLong("match_all");
@@ -110,7 +103,7 @@ public class QueryExecuter implements EventHandler {
 
 				if (isWriteSingleFeature && returnAll != 1) {
 					isWriteSingleFeature = false;
-					writer.setWriteSingleFeature(isWriteSingleFeature);
+					writer.setWriteSingleFeature(false);
 				}
 
 				if (!isWriteSingleFeature)
@@ -167,8 +160,8 @@ public class QueryExecuter implements EventHandler {
 
 					} while (shouldRun && rs.next());
 
-					// shutdown database worker pool
-					databaseWorkerPool.shutdownAndWait();
+					// join database workers
+					databaseWorkerPool.join();
 
 					if (isMultipleQueryRequest) {
 						writer.endFeatureCollection();
@@ -178,14 +171,13 @@ public class QueryExecuter implements EventHandler {
 							long matchQuery = 0;
 
 							if (countBreak) {
-								rs.close();
-								stmt.close();
-
 								Select hitsQuery = queryBuilder.buildHitsQuery(queryExpressions.get(currentQuery));
-								stmt = connectionPool.getActiveDatabaseAdapter().getSQLAdapter().prepareStatement(hitsQuery, connection);
-								rs = stmt.executeQuery();
-								if (rs.next())
-									matchQuery = rs.getLong(1);
+
+								try (PreparedStatement hitsStmt = connectionPool.getActiveDatabaseAdapter().getSQLAdapter().prepareStatement(hitsQuery, connection);
+									 ResultSet hitsRs = hitsStmt.executeQuery()) {
+									if (hitsRs.next())
+										matchQuery = hitsRs.getLong(1);
+								}
 							}
 
 							writer.startFeatureCollection(matchQuery, 0);
@@ -195,8 +187,9 @@ public class QueryExecuter implements EventHandler {
 				}
 				
 				if (!isWriteSingleFeature) {
-					// handle additional objects separately
+					// write additional objects
 					writer.writeAdditionalObjects();
+					writer.endAdditionalObjects();
 
 					// write truncated response if a worker pool has thrown an error 
 					if (wfsException != null)
@@ -238,35 +231,9 @@ public class QueryExecuter implements EventHandler {
 		} catch (SQLException e) {
 			purgeConnectionPool = true;
 			throw new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "A fatal SQL error occurred whilst querying the database.", e);		
-		} catch (FeatureWriteException e) {
-			throw new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "A fatal error occurred whilst marshalling the response document.", e);
-		} catch (InterruptedException e) {
+		} catch (FeatureWriteException | InterruptedException e) {
 			throw new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "A fatal error occurred whilst marshalling the response document.", e);
 		} finally {
-			if (rs != null) {
-				try {
-					rs.close();
-				} catch (SQLException e) {
-					throw new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "Failed to close database resource", e);
-				}
-			}
-
-			if (stmt != null) {
-				try {
-					stmt.close();
-				} catch (SQLException e) {
-					throw new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "Failed to close database resource", e);
-				}
-			}
-
-			if (connection != null) {
-				try {
-					connection.close();
-				} catch (SQLException e) {
-					throw new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "Failed to close database resource", e);
-				}
-			}
-
 			// purge connection pool to remove possibly defect connections
 			if (purgeConnectionPool)
 				connectionPool.purge();
@@ -277,10 +244,10 @@ public class QueryExecuter implements EventHandler {
 
 	private void setExporterContext(QueryExpression queryExpression, Query dummy, boolean isMultipleQueryRequest) {
 		// enable xlink references in multiple query responses
-		exporterConfig.getInternal().setRegisterGmlIdInCache(isMultipleQueryRequest);				
+		config.getInternal().setRegisterGmlIdInCache(isMultipleQueryRequest);
 
 		// set flag for coordinate transformation
-		exporterConfig.getInternal().setTransformCoordinates(queryExpression.getTargetSRS().getSrid() != connectionPool.getActiveDatabaseAdapter().getConnectionMetaData().getReferenceSystem().getSrid());
+		config.getInternal().setTransformCoordinates(queryExpression.getTargetSRS().getSrid() != connectionPool.getActiveDatabaseAdapter().getConnectionMetaData().getReferenceSystem().getSrid());
 
 		// update filter configuration
 		dummy.copyFrom(queryExpression);
@@ -299,15 +266,6 @@ public class QueryExecuter implements EventHandler {
 	private Connection initConnection() throws SQLException {
 		Connection connection = connectionPool.getConnection();
 		connection.setAutoCommit(false);
-
-		// try and change workspace for connection
-		if (connectionPool.getActiveDatabaseAdapter().hasVersioningSupport()) {
-			connectionPool.getActiveDatabaseAdapter().getWorkspaceManager().gotoWorkspace(
-					connection, 
-					exporterConfig.getProject().getDatabase().getWorkspaces().getExportWorkspace());
-		}
-
-		// TODO: create temporary table for global appearances if needed
 
 		return connection;
 	}

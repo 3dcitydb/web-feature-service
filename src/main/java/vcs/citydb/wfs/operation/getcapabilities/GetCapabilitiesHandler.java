@@ -43,7 +43,6 @@ import vcs.citydb.wfs.exception.WFSExceptionMessage;
 import vcs.citydb.wfs.kvp.KVPConstants;
 import vcs.citydb.wfs.util.LoggerUtil;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.JAXBElement;
@@ -78,7 +77,6 @@ public class GetCapabilitiesHandler {
 	}
 
 	public void doOperation(GetCapabilitiesType wfsRequest,
-			ServletContext servletContext,
 			HttpServletRequest request,
 			HttpServletResponse response) throws WFSException {
 		log.info(LoggerUtil.getLogMessage(request, "Accepting GetCapabilities request."));

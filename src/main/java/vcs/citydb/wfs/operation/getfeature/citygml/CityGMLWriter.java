@@ -15,12 +15,17 @@ import org.citydb.util.CoreConstants;
 import org.citydb.writer.XMLWriterWorkerFactory;
 import org.citygml4j.builder.jaxb.CityGMLBuilder;
 import org.citygml4j.builder.jaxb.marshal.JAXBMarshaller;
+import org.citygml4j.model.citygml.appearance.Appearance;
+import org.citygml4j.model.citygml.appearance.AppearanceMember;
 import org.citygml4j.model.gml.feature.AbstractFeature;
 import org.citygml4j.model.module.citygml.CityGMLVersion;
+import org.citygml4j.util.internal.xml.TransformerChain;
+import org.citygml4j.util.internal.xml.TransformerChainFactory;
 import org.citygml4j.util.xml.SAXEventBuffer;
 import org.citygml4j.util.xml.SAXFragmentWriter;
 import org.citygml4j.util.xml.SAXFragmentWriter.WriteMode;
 import org.citygml4j.util.xml.SAXWriter;
+import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 import vcs.citydb.wfs.config.Constants;
 import vcs.citydb.wfs.operation.getfeature.FeatureWriter;
@@ -34,14 +39,18 @@ import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.sax.SAXResult;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 
 public class CityGMLWriter implements FeatureWriter {
 	private final SAXWriter saxWriter;
+	private final CityGMLVersion version;
+	private final TransformerChainFactory transformerChainFactory;
 	private final GeometryStripper geometryStripper;
 	private final UIDCacheManager uidCacheManager;
-	private final Config exporterConfig;
+	private final Config config;
 	
 	private final SingleWorkerPool<SAXEventBuffer> writerPool;
 	private final CityGMLBuilder cityGMLBuilder;
@@ -54,24 +63,26 @@ public class CityGMLWriter implements FeatureWriter {
 	private boolean isWriteSingleFeature;
 	private boolean checkForDuplicates;
 	
-	public CityGMLWriter(SAXWriter saxWriter, CityGMLVersion version, GeometryStripper geometryStripper, UIDCacheManager uidCacheManager, Object eventChannel, Config exporterConfig) throws DatatypeConfigurationException {
+	public CityGMLWriter(SAXWriter saxWriter, CityGMLVersion version, TransformerChainFactory transformerChainFactory, GeometryStripper geometryStripper, UIDCacheManager uidCacheManager, Object eventChannel, Config config) throws DatatypeConfigurationException {
 		this.saxWriter = saxWriter;
+		this.version = version;
+		this.transformerChainFactory = transformerChainFactory;
 		this.geometryStripper = geometryStripper;
 		this.uidCacheManager = uidCacheManager;
-		this.exporterConfig = exporterConfig;
+		this.config = config;
 		
 		cityGMLBuilder = ObjectRegistry.getInstance().getCityGMLBuilder();
 		jaxbMarshaller = cityGMLBuilder.createJAXBMarshaller(version);
 		wfsFactory = new ObjectFactory();
 		datatypeFactory = DatatypeFactory.newInstance();
-		additionalObjectsHandler = new AdditionalObjectsHandler(saxWriter, version, cityGMLBuilder, eventChannel);
+		additionalObjectsHandler = new AdditionalObjectsHandler(saxWriter, version, cityGMLBuilder, transformerChainFactory, eventChannel);
 		
-		int queueSize = exporterConfig.getProject().getExporter().getResources().getThreadPool().getDefaultPool().getMaxThreads() * 2;
+		int queueSize = config.getProject().getExporter().getResources().getThreadPool().getDefaultPool().getMaxThreads() * 2;
 		
-		writerPool = new SingleWorkerPool<SAXEventBuffer>(
-				"citygml_writer_pool", 
-				new XMLWriterWorkerFactory(saxWriter, ObjectRegistry.getInstance().getEventDispatcher()), 
-				queueSize, 
+		writerPool = new SingleWorkerPool<>(
+				"citygml_writer_pool",
+				new XMLWriterWorkerFactory(saxWriter, ObjectRegistry.getInstance().getEventDispatcher()),
+				queueSize,
 				false);
 
 		writerPool.setEventSource(eventChannel);
@@ -100,7 +111,26 @@ public class CityGMLWriter implements FeatureWriter {
 		level--;
 		
 		// we only have to check for duplicates after the first set of features
-		checkForDuplicates = exporterConfig.getInternal().isRegisterGmlIdInCache();
+		checkForDuplicates = config.getInternal().isRegisterGmlIdInCache();
+	}
+
+	@Override
+	public void startAdditionalObjects() throws FeatureWriteException {
+		try {
+			writerPool.join();
+			additionalObjectsHandler.startAdditionalObjects();
+		} catch (SAXException | InterruptedException e) {
+			throw new FeatureWriteException("Failed to marshal additional objects collection element.", e);
+		}
+	}
+
+	@Override
+	public void endAdditionalObjects() throws FeatureWriteException {
+		try {
+			additionalObjectsHandler.endAdditionalObjects();
+		} catch (SAXException e) {
+			throw new FeatureWriteException("Failed to marshal additional objects collection element.", e);
+		}
 	}
 
 	@Override
@@ -118,35 +148,55 @@ public class CityGMLWriter implements FeatureWriter {
 		}
 
 		JAXBElement<?> output = null;
-
 		if (!isWriteSingleFeature) {
 			MemberPropertyType memberProperty = new MemberPropertyType();
 
 			if (!checkForDuplicates || !isFeatureAlreadyExported(feature)) {
-				// TODO: CityGML 1.0 Appearance elements are not global and hence must be wrapped by an AppearanceProperty 
-				memberProperty.getContent().add(jaxbMarshaller.marshalJAXBElement(feature));
-			} else
-				memberProperty.setHref("#" + feature.getId());
+				if (!(feature instanceof Appearance) || version == CityGMLVersion.v2_0_0) {
+					JAXBElement<?> element = jaxbMarshaller.marshalJAXBElement(feature);
+					if (element != null)
+						memberProperty.getContent().add(element);
+				} else {
+					// appearance elements are not global XML elements in CityGML 1.0. Thus, we have
+					// to wrap them with a property element and use an intermediate DOM element.
+					Element element = jaxbMarshaller.marshalDOMElement(new AppearanceMember((Appearance) feature));
+					if (element != null && element.hasChildNodes())
+						memberProperty.getContent().add(element.getFirstChild());
+				}
 
-			output = wfsFactory.createMember(memberProperty);
+				if (memberProperty.isSetContent())
+					output = wfsFactory.createMember(memberProperty);
+			} else {
+				memberProperty.setHref("#" + feature.getId());
+				output = wfsFactory.createMember(memberProperty);
+			}
 		} else
 			output = jaxbMarshaller.marshalJAXBElement(feature);
 
 		try {
 			SAXEventBuffer buffer = new SAXEventBuffer();
-			Marshaller marshaller = cityGMLBuilder.getJAXBContext().createMarshaller();
-			marshaller.setProperty(Marshaller.JAXB_FRAGMENT, !isWriteSingleFeature);				
 
-			if (output != null)
-				marshaller.marshal(output, buffer);
-			else
+			if (output != null) {
+				Marshaller marshaller = cityGMLBuilder.getJAXBContext().createMarshaller();
+				marshaller.setProperty(Marshaller.JAXB_FRAGMENT, !isWriteSingleFeature);
+
+				if (transformerChainFactory == null)
+					marshaller.marshal(output, buffer);
+				else {
+					TransformerChain chain = transformerChainFactory.buildChain();
+					chain.tail().setResult(new SAXResult(buffer));
+					chain.head().startDocument();
+					marshaller.marshal(output, chain.head());
+					chain.head().endDocument();
+				}
+			} else
 				throw new FeatureWriteException("Failed to write feature with gml:id '" + feature.getId() + "'.");
 
 			if (!buffer.isEmpty())
 				writerPool.addWork(buffer);
 			else
 				throw new FeatureWriteException("Failed to write feature with gml:id '" + feature.getId() + "'.");
-		} catch (JAXBException e) {
+		} catch (JAXBException | SAXException | TransformerConfigurationException e) {
 			throw new FeatureWriteException("Failed to write feature with gml:id '" + feature.getId() + "'.", e);
 		}
 	}
@@ -201,13 +251,12 @@ public class CityGMLWriter implements FeatureWriter {
 
 	private void writeFeatureCollection(long matchNo, long returnNo, WriteMode writeMode) throws FeatureWriteException {
 		try {
-			JAXBElement<?> output = null;
-			
 			FeatureCollectionType featureCollection = new FeatureCollectionType();
 			featureCollection.setTimeStamp(getTimeStamp());
 			featureCollection.setNumberMatched(String.valueOf(matchNo));
 			featureCollection.setNumberReturned(BigInteger.valueOf(returnNo));
 
+			JAXBElement<?> output;
 			if (level == 1) {
 				output = wfsFactory.createFeatureCollection(featureCollection);
 			} else {
@@ -218,9 +267,9 @@ public class CityGMLWriter implements FeatureWriter {
 
 			SAXEventBuffer buffer = new SAXEventBuffer();
 			SAXFragmentWriter fragmentWriter = new SAXFragmentWriter(new QName(Constants.WFS_NAMESPACE_URI, "FeatureCollection"), buffer, writeMode);
-
 			Marshaller marshaller = cityGMLBuilder.getJAXBContext().createMarshaller();
-			marshaller.marshal(output, fragmentWriter); 
+			marshaller.marshal(output, fragmentWriter);
+
 			writerPool.addWork(buffer);
 		} catch (JAXBException e) {
 			throw new FeatureWriteException("Failed to marshal feature collection element.", e);

@@ -2,6 +2,11 @@ package vcs.citydb.wfs.listener;
 
 import org.citydb.ade.ADEExtensionManager;
 import org.citydb.config.Config;
+import org.citydb.config.project.Project;
+import org.citydb.config.project.database.Database;
+import org.citydb.config.project.exporter.Exporter;
+import org.citydb.config.project.general.XSLTransformation;
+import org.citydb.config.project.global.Global;
 import org.citydb.database.connection.DatabaseConnectionPool;
 import org.citydb.database.schema.mapping.SchemaMapping;
 import org.citydb.database.schema.mapping.SchemaMappingException;
@@ -66,7 +71,7 @@ public class WebServiceInitializer implements ServletContextListener {
 		SchemaMapping schemaMapping;
 		CityGMLBuilder cityGMLBuilder;
 		WFSConfig wfsConfig;
-		Config exporterConfig;
+		Config config;
 
 		// read 3DCityDB schema mapping and register with ObjectRegistry
 		try {
@@ -121,7 +126,7 @@ public class WebServiceInitializer implements ServletContextListener {
 			Unmarshaller um = configContext.createUnmarshaller();
 			um.setListener(new WFSConfigListener());
 
-			Object wfs = um.unmarshal(event.getServletContext().getResourceAsStream(Constants.CONFIG_PATH + '/' + Constants.CONFIG_FILE));
+			Object wfs = um.unmarshal(context.getResourceAsStream(Constants.CONFIG_PATH + '/' + Constants.CONFIG_FILE));
 			if (wfs instanceof WFSConfig) {
 				wfsConfig = (WFSConfig)wfs;
 				registry.register(WFSConfig.class.getName(), wfs);
@@ -129,19 +134,21 @@ public class WebServiceInitializer implements ServletContextListener {
 				context.setAttribute(Constants.INIT_ERROR_ATTRNAME, new ServletException("Failed to load WFS config from " + Constants.CONFIG_PATH + '/' + Constants.CONFIG_FILE + '.'));
 				return;
 			}
+
+			// adapt paths to XSLT stylesheets if required
+			XSLTransformation xslTransformation = wfsConfig.getPostProcessing().getXSLTransformation();
+			if (xslTransformation.isEnabled() && xslTransformation.isSetStylesheets()) {
+				xslTransformation.getStylesheets().replaceAll(stylesheet -> !Paths.get(stylesheet).isAbsolute() ?
+						context.getRealPath(Constants.XSLT_STYLESHEETS_PATH + "/" + stylesheet) : stylesheet);
+			}
 		} catch (JAXBException e) {
 			context.setAttribute(Constants.INIT_ERROR_ATTRNAME, new ServletException("Failed to parse WFS config file.", e));
 			return;
 		}
 
-		// create 3DCityDB configuration file and register with ObjectRegistry
-		exporterConfig = new Config();
-		registry.register(Config.class.getName(), exporterConfig);
-
-		// map from WFS to 3DCityDB configuration
-		exporterConfig.getProject().getDatabase().setActiveConnection(wfsConfig.getDatabase().getConnection());
-		exporterConfig.getProject().getDatabase().setReferenceSystems(wfsConfig.getDatabase().getReferenceSystems());
-		exporterConfig.getProject().getGlobal().setCache(wfsConfig.getUIDCache());
+		// create 3DCityDB dummy configuration and register with ObjectRegistry
+        config = initConfig(wfsConfig);
+		registry.register(Config.class.getName(), config);
 
 		// start new event dispatcher thread
 		registry.setEventDispatcher(new EventDispatcher());
@@ -158,7 +165,7 @@ public class WebServiceInitializer implements ServletContextListener {
 
 		// initialize database connection pool
 		try {
-			DatabaseConnector.connect(exporterConfig);
+			DatabaseConnector.connect(config);
 		} catch (WFSException e) {
 			e.getExceptionMessages().forEach(msg -> msg.getExceptionTexts().forEach(log::error));
 		}
@@ -209,7 +216,7 @@ public class WebServiceInitializer implements ServletContextListener {
 		while (drivers.hasMoreElements()) {
 			Driver driver = drivers.nextElement();
 			ClassLoader driverLoader = driver.getClass().getClassLoader();
-			if (driverLoader != null && loader.equals(driverLoader))
+			if (loader.equals(driverLoader))
 				driversToUnload.add(driver);
 		}
 
@@ -237,6 +244,26 @@ public class WebServiceInitializer implements ServletContextListener {
 
 		// detach log file
 		log.detachLogFile();
+	}
+
+	private Config initConfig(WFSConfig wfsConfig) {
+		// database settings
+		Database database = new Database();
+		database.setActiveConnection(wfsConfig.getDatabase().getConnection());
+		database.setReferenceSystems(wfsConfig.getDatabase().getReferenceSystems());
+
+		// global settings
+		Global global = new Global();
+		global.setCache(wfsConfig.getUIDCache());
+
+		// export settings
+		Exporter exporter = new Exporter();
+		exporter.getCityDBADE().setExportMetadata(wfsConfig.getOperations().isUseCityDBADE());
+		exporter.getCityObjectGroup().setExportMemberAsXLinks(true);
+		exporter.getAppearances().setExportAppearances(false);
+		exporter.getAppearances().setExportTextureFiles(false);
+
+		return new Config(new Project(database, null, exporter, null, global), null, null);
 	}
 
 	private void initLogging(WFSConfig wfsConfig, ServletContext context) throws ServletException {

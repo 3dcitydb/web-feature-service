@@ -9,18 +9,14 @@ import org.citydb.config.Config;
 import org.citydb.database.adapter.AbstractDatabaseAdapter;
 import org.citydb.database.connection.DatabaseConnectionPool;
 import org.citydb.database.schema.mapping.FeatureType;
-import org.citydb.database.schema.mapping.SchemaMapping;
 import org.citydb.log.Logger;
 import org.citydb.query.builder.config.LodFilterBuilder;
 import org.citydb.query.filter.FilterException;
 import org.citydb.query.filter.lod.LodFilter;
 import org.citydb.query.filter.type.FeatureTypeFilter;
-import org.citydb.query.geometry.DatabaseSrsParser;
 import org.citydb.registry.ObjectRegistry;
 import org.citygml4j.builder.jaxb.CityGMLBuilder;
-import org.citygml4j.builder.jaxb.unmarshal.JAXBUnmarshaller;
 import org.citygml4j.model.module.citygml.CityGMLVersion;
-import org.citygml4j.xml.schema.SchemaHandler;
 import vcs.citydb.wfs.config.WFSConfig;
 import vcs.citydb.wfs.exception.WFSException;
 import vcs.citydb.wfs.exception.WFSExceptionCode;
@@ -45,27 +41,20 @@ public class GetFeatureHandler {
 
 	private final AbstractDatabaseAdapter databaseAdapter;
 	private final ExportController controller;
-	private final JAXBUnmarshaller unmarshaller;
 	private final BaseRequestHandler baseRequestHandler;
 	private final FeatureTypeHandler featureTypeHandler;
-	private final DatabaseSrsParser srsNameParser;
 	private final FilterHandler filterHandler;
-	private final SchemaMapping schemaMapping;
 	private final StoredQueryManager storedQueryManager;
 
-	public GetFeatureHandler(CityGMLBuilder cityGMLBuilder, WFSConfig wfsConfig, Config exporterConfig) {
+	public GetFeatureHandler(CityGMLBuilder cityGMLBuilder, WFSConfig wfsConfig, Config config) {
 		this.wfsConfig = wfsConfig;
 
 		databaseAdapter = DatabaseConnectionPool.getInstance().getActiveDatabaseAdapter();
-		controller = new ExportController(cityGMLBuilder, wfsConfig, exporterConfig);
-		unmarshaller = cityGMLBuilder.createJAXBUnmarshaller((SchemaHandler)ObjectRegistry.getInstance().lookup(SchemaHandler.class.getName()));
+		controller = new ExportController(cityGMLBuilder, wfsConfig, config);
 		baseRequestHandler = new BaseRequestHandler(wfsConfig);
 		featureTypeHandler = new FeatureTypeHandler();
-		srsNameParser = new DatabaseSrsParser(databaseAdapter, exporterConfig);
-		filterHandler = new FilterHandler();
-
-		schemaMapping = ObjectRegistry.getInstance().getSchemaMapping();
 		storedQueryManager = (StoredQueryManager)ObjectRegistry.getInstance().lookup(StoredQueryManager.class.getName());
+		filterHandler = new FilterHandler();
 	}
 
 	public void doOperation(GetFeatureType wfsRequest,
@@ -74,7 +63,7 @@ public class GetFeatureHandler {
 			HttpServletResponse response) throws WFSException {
 
 		log.info(LoggerUtil.getLogMessage(request, "Accepting GetFeature request."));
-		final List<QueryExpression> queryExpressions = new ArrayList<QueryExpression>();
+		final List<QueryExpression> queryExpressions = new ArrayList<>();
 		final String operationHandle = wfsRequest.getHandle();
 		CityGMLVersion version = null;
 		LodFilter lodFilter = null;
@@ -105,7 +94,7 @@ public class GetFeatureHandler {
 			throw new WFSException(WFSExceptionCode.OPERATION_PARSING_FAILED, "No query provided.", operationHandle);
 
 		// compile queries to be executed from ad-hoc and stored queries
-		List<QueryType> queries = new ArrayList<QueryType>();
+		List<QueryType> queries = new ArrayList<>();
 		for (JAXBElement<? extends AbstractQueryExpressionType> queryElem : wfsRequest.getAbstractQueryExpression()) {
 			if (!(queryElem.getValue() instanceof StoredQueryType))
 				throw new WFSException(WFSExceptionCode.OPTION_NOT_SUPPORTED, "Only stored query expressions are supported in a GetFeature request.", operationHandle);

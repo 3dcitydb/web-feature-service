@@ -25,21 +25,21 @@ public class CityJSONWriter implements FeatureWriter {
 	private final CityJSONChunkWriter writer;
 	private final GeometryStripper geometryStripper;
 	private final UIDCacheManager uidCacheManager;
-	private final Config exporterConfig;
+	private final Config config;
 
 	private final SingleWorkerPool<AbstractCityObjectType> writerPool;
 	private final CityJSONMarshaller marshaller;
 
 	private boolean checkForDuplicates;
 
-	public CityJSONWriter(CityJSONChunkWriter writer, GeometryStripper geometryStripper, UIDCacheManager uidCacheManager, Object eventChannel, Config exporterConfig) {
+	public CityJSONWriter(CityJSONChunkWriter writer, GeometryStripper geometryStripper, UIDCacheManager uidCacheManager, Object eventChannel, Config config) {
 		this.writer = writer;
 		this.geometryStripper = geometryStripper;
 		this.uidCacheManager = uidCacheManager;
-		this.exporterConfig = exporterConfig;
+		this.config = config;
 
 		marshaller = writer.getCityJSONMarshaller();
-		int queueSize = exporterConfig.getProject().getExporter().getResources().getThreadPool().getDefaultPool().getMaxThreads() * 2;
+		int queueSize = config.getProject().getExporter().getResources().getThreadPool().getDefaultPool().getMaxThreads() * 2;
 
 		writerPool = new SingleWorkerPool<AbstractCityObjectType>(
 				"cityjson_writer_pool", 
@@ -62,9 +62,19 @@ public class CityJSONWriter implements FeatureWriter {
 	}
 
 	@Override
+	public void startAdditionalObjects() throws FeatureWriteException {
+		// nothing to do here...
+	}
+
+	@Override
+	public void endAdditionalObjects() throws FeatureWriteException {
+		// nothing to do here...
+	}
+
+	@Override
 	public void endFeatureCollection() throws FeatureWriteException {
 		// we only have to check for duplicates after the first set of features
-		checkForDuplicates = exporterConfig.getInternal().isRegisterGmlIdInCache();
+		checkForDuplicates = config.getInternal().isRegisterGmlIdInCache();
 	}
 
 	@Override

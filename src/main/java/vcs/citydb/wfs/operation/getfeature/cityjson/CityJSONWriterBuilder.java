@@ -16,7 +16,6 @@ import org.citygml4j.builder.cityjson.CityJSONBuilder;
 import org.citygml4j.builder.cityjson.CityJSONBuilderException;
 import org.citygml4j.builder.cityjson.json.io.writer.CityJSONChunkWriter;
 import org.citygml4j.builder.cityjson.json.io.writer.CityJSONOutputFactory;
-import org.citygml4j.builder.cityjson.json.io.writer.CityJSONWriteException;
 import org.citygml4j.builder.cityjson.marshal.util.DefaultTextureVerticesBuilder;
 import org.citygml4j.builder.cityjson.marshal.util.DefaultVerticesBuilder;
 import org.citygml4j.builder.cityjson.marshal.util.DefaultVerticesTransformer;
@@ -40,7 +39,7 @@ public class CityJSONWriterBuilder implements GetFeatureResponseBuilder {
 	private GeometryStripper geometryStripper;
 	private UIDCacheManager uidCacheManager;
 	private Object eventChannel;
-	private Config exporterConfig;
+	private Config config;
 
 	private MetadataType metadata;
 
@@ -62,12 +61,12 @@ public class CityJSONWriterBuilder implements GetFeatureResponseBuilder {
 			UIDCacheManager uidCacheManager,
 			Object eventChannel, 
 			WFSConfig wfsConfig, 
-			Config exporterConfig) throws FeatureWriteException {
+			Config config) throws FeatureWriteException {
 		this.formatOptions = formatOptions;
 		this.geometryStripper = geometryStripper;
 		this.uidCacheManager = uidCacheManager;
 		this.eventChannel = eventChannel;
-		this.exporterConfig = exporterConfig;
+		this.config = config;
 
 		try {
 			CityJSONBuilder builder = CityGMLContext.getInstance().createCityJSONBuilder();
@@ -121,7 +120,7 @@ public class CityJSONWriterBuilder implements GetFeatureResponseBuilder {
 		if ("true".equals(formatOptions.get(PRETTY_PRINT)))
 			writer.setIndent(" ");
 
-		return new CityJSONWriter(writer, geometryStripper, uidCacheManager, eventChannel, exporterConfig);
+		return new CityJSONWriter(writer, geometryStripper, uidCacheManager, eventChannel, config);
 	}
 
 }

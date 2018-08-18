@@ -15,6 +15,6 @@ import vcs.citydb.wfs.util.GeometryStripper;
 public interface GetFeatureResponseBuilder {
 	public String getMimeType();
 	public boolean supportsHitsResponse();
-	public void initializeContext(GetFeatureType wfsRequest, List<QueryExpression> queryExpressions, Map<String, String> formatOptions, GeometryStripper geometryStripper, UIDCacheManager uidCacheManager, Object eventChannel, WFSConfig wfsConfig, Config exporterConfig) throws FeatureWriteException;
+	public void initializeContext(GetFeatureType wfsRequest, List<QueryExpression> queryExpressions, Map<String, String> formatOptions, GeometryStripper geometryStripper, UIDCacheManager uidCacheManager, Object eventChannel, WFSConfig wfsConfig, Config config) throws FeatureWriteException;
 	public FeatureWriter buildFeatureWriter(OutputStream stream, String encoding) throws FeatureWriteException;
 }

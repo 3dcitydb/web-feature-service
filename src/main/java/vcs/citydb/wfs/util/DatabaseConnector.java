@@ -24,7 +24,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class DatabaseConnector {
     private static final ReentrantLock lock = new ReentrantLock();
 
-    public static void connect(Config exporterConfig) throws WFSException {
+    public static void connect(Config config) throws WFSException {
         DatabaseConnectionPool connectionPool = DatabaseConnectionPool.getInstance();
         if (connectionPool.isConnected())
             return;
@@ -35,7 +35,7 @@ public class DatabaseConnector {
                     return;
 
                 Logger log = Logger.getInstance();
-                Database databaseConfig = exporterConfig.getProject().getDatabase();
+                Database databaseConfig = config.getProject().getDatabase();
                 if (databaseConfig.getActiveConnection() == null) {
                     WFSExceptionMessage message = new WFSExceptionMessage(WFSExceptionCode.INTERNAL_SERVER_ERROR);
                     message.addExceptionText("Failed to connect to the database.");
@@ -48,7 +48,7 @@ public class DatabaseConnector {
 
                 try {
                     connectionPool.setDatabaseVersionChecker(new DatabaseVersionChecker());
-                    connectionPool.connect(exporterConfig);
+                    connectionPool.connect(config);
                 } catch (DatabaseConfigurationException | SQLException e) {
                     throw new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "Failed to connect to the database.", e);
                 } catch (DatabaseVersionException e) {
@@ -74,7 +74,7 @@ public class DatabaseConnector {
                 }
 
                 // log whether user-defined SRSs are supported
-                for (DatabaseSrs refSys : exporterConfig.getProject().getDatabase().getReferenceSystems()) {
+                for (DatabaseSrs refSys : config.getProject().getDatabase().getReferenceSystems()) {
                     try {
                         adapter.getUtil().decodeDatabaseSrs(refSys);
                     } catch (FactoryException e) {

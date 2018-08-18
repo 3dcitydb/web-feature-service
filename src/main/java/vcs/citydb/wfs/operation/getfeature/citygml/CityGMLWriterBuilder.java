@@ -7,6 +7,7 @@ import org.citydb.citygml.exporter.writer.FeatureWriteException;
 import org.citydb.config.Config;
 import org.citydb.database.schema.mapping.FeatureType;
 import org.citydb.database.schema.mapping.MappingConstants;
+import org.citydb.log.Logger;
 import org.citygml4j.model.module.Module;
 import org.citygml4j.model.module.ModuleContext;
 import org.citygml4j.model.module.Modules;
@@ -14,6 +15,7 @@ import org.citygml4j.model.module.ade.ADEModule;
 import org.citygml4j.model.module.citygml.CityGMLModule;
 import org.citygml4j.model.module.citygml.CityGMLModuleType;
 import org.citygml4j.model.module.citygml.CityGMLVersion;
+import org.citygml4j.util.internal.xml.TransformerChainFactory;
 import org.citygml4j.util.xml.SAXWriter;
 import vcs.citydb.wfs.config.Constants;
 import vcs.citydb.wfs.config.WFSConfig;
@@ -23,21 +25,29 @@ import vcs.citydb.wfs.operation.getfeature.QueryExpression;
 import vcs.citydb.wfs.util.GeometryStripper;
 
 import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.transform.Templates;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.sax.SAXTransformerFactory;
+import javax.xml.transform.stream.StreamSource;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 
 public class CityGMLWriterBuilder implements GetFeatureResponseBuilder {
+	private final Logger log = Logger.getInstance();
 	private final String PRETTY_PRINT = "prettyPrint";
 
 	private CityGMLVersion version;
 	private GeometryStripper geometryStripper;
 	private UIDCacheManager uidCacheManager;
-	private Config exporterConfig;
+	private Config config;
 	private Object eventChannel;
 
 	private SAXWriter saxWriter;
+	private TransformerChainFactory transformerChainFactory;
 
 	@Override
 	public String getMimeType() {
@@ -57,11 +67,11 @@ public class CityGMLWriterBuilder implements GetFeatureResponseBuilder {
 			UIDCacheManager uidCacheManager,
 			Object eventChannel,
 			WFSConfig wfsConfig,
-			Config exporterConfig) throws FeatureWriteException {
+			Config config) throws FeatureWriteException {
 		this.geometryStripper = geometryStripper;
 		this.uidCacheManager = uidCacheManager;
 		this.eventChannel = eventChannel;
-		this.exporterConfig = exporterConfig;		
+		this.config = config;
 		version = queryExpressions.get(0).getTargetVersion();
 
 		saxWriter = new SAXWriter();
@@ -109,8 +119,29 @@ public class CityGMLWriterBuilder implements GetFeatureResponseBuilder {
 				}
 			}
 
+			// build XSLT transformer chain
+			if (wfsConfig.getPostProcessing().getXSLTransformation().isEnabled()
+					&& wfsConfig.getPostProcessing().getXSLTransformation().isSetStylesheets()) {
+				try {
+					List<String> stylesheets = wfsConfig.getPostProcessing().getXSLTransformation().getStylesheets();
+					SAXTransformerFactory factory = (SAXTransformerFactory) TransformerFactory.newInstance();
+					Templates[] templates = new Templates[stylesheets.size()];
+
+					for (int i = 0; i < stylesheets.size(); i++) {
+						Templates template = factory.newTemplates(new StreamSource(new File(stylesheets.get(i))));
+						templates[i] = template;
+					}
+
+					transformerChainFactory = new TransformerChainFactory(templates);
+				} catch (TransformerConfigurationException e) {
+					log.error("Failed to compile XSLT stylesheets.");
+					log.error("Cause: " + e.getMessage());
+					throw new FeatureWriteException("Failed to configure the XSL transformation.");
+				}
+			}
+
 			// add CityDB ADE namespace and schema location if required
-			if (wfsConfig.getOperations().getGetFeature().isUseCityDBADE()) {
+			if (wfsConfig.getOperations().isUseCityDBADE()) {
 				saxWriter.setPrefix(MappingConstants.CITYDB_ADE_NAMESPACE_PREFIX, MappingConstants.CITYDB_ADE_NAMESPACE_URI);
 				saxWriter.setSchemaLocation(MappingConstants.CITYDB_ADE_NAMESPACE_URI, MappingConstants.CITYDB_ADE_SCHEMA_LOCATIONS.get(version));
 			}
@@ -121,7 +152,7 @@ public class CityGMLWriterBuilder implements GetFeatureResponseBuilder {
 	public FeatureWriter buildFeatureWriter(OutputStream stream, String encoding) throws FeatureWriteException {
 		try {
 			saxWriter.setOutput(stream, encoding);
-			return new CityGMLWriter(saxWriter, version, geometryStripper, uidCacheManager, eventChannel, exporterConfig);			
+			return new CityGMLWriter(saxWriter, version, transformerChainFactory, geometryStripper, uidCacheManager, eventChannel, config);
 		} catch (IOException | DatatypeConfigurationException e) {
 			throw new FeatureWriteException("Failed to create CityGML response writer.", e);
 		}

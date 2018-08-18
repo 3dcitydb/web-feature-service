@@ -1,32 +1,29 @@
 package vcs.citydb.wfs.config.operation;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Set;
+import vcs.citydb.wfs.config.operation.OutputFormat.OutputFormatList;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
-import vcs.citydb.wfs.config.operation.OutputFormat.OutputFormatList;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Set;
 
 @XmlType(name="GetFeatureOperationType", propOrder={
-		"outputFormats",
-		"useCityDBADE"
+		"outputFormats"
 })
 public class GetFeatureOperation {
 	@XmlJavaTypeAdapter(OutputFormatAdapter.class)
 	@XmlElement(nillable=false)
 	private LinkedHashMap<String, OutputFormat> outputFormats;
-	private Boolean useCityDBADE = false;
 
 	public GetFeatureOperation() {
 		outputFormats = new LinkedHashMap<>();
 		outputFormats.put(GetFeatureOutputFormat.GML3_1.value(), new OutputFormat(GetFeatureOutputFormat.GML3_1.value()));
 	}
-	
+
 	public Collection<OutputFormat> getOutputFormats() {
 		return outputFormats.values();
 	}
@@ -41,19 +38,11 @@ public class GetFeatureOperation {
 
 	public boolean supportsOutputFormat(String outputFormat) {
 		GetFeatureOutputFormat candidate = GetFeatureOutputFormat.fromValue(outputFormat);
-		return candidate != null ? supportsOutputFormat(candidate) : false;
+		return candidate != null && supportsOutputFormat(candidate);
 	}
 
 	public OutputFormat getOutputFormat(String outputFormat) {
 		return outputFormats.get(outputFormat);
-	}
-
-	public boolean isUseCityDBADE() {
-		return useCityDBADE;
-	}
-
-	public void setUseCityDBADE(boolean useCityDBADE) {
-		this.useCityDBADE = useCityDBADE;
 	}
 
 	private final static class OutputFormatAdapter extends XmlAdapter<OutputFormatList, LinkedHashMap<String, OutputFormat>> {

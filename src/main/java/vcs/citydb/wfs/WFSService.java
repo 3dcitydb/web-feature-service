@@ -6,9 +6,9 @@ import net.opengis.wfs._2.GetCapabilitiesType;
 import net.opengis.wfs._2.GetFeatureType;
 import net.opengis.wfs._2.ListStoredQueriesType;
 import org.citydb.concurrent.SingleWorkerPool;
-import org.citydb.concurrent.Worker;
-import org.citydb.concurrent.WorkerFactory;
 import org.citydb.config.Config;
+import org.citydb.config.internal.Internal;
+import org.citydb.config.project.Project;
 import org.citydb.database.connection.DatabaseConnectionPool;
 import org.citydb.log.Logger;
 import org.citydb.registry.ObjectRegistry;
@@ -75,7 +75,7 @@ public class WFSService extends HttpServlet {
 	private final DatabaseConnectionPool connectionPool = DatabaseConnectionPool.getInstance();
 
 	private WFSConfig wfsConfig;
-	private Config exporterConfig;
+	private Config config;
 	private CityGMLBuilder cityGMLBuilder;
 	private SAXParserFactory saxParserFactory;
 	private Schema wfsSchema;
@@ -96,8 +96,8 @@ public class WFSService extends HttpServlet {
 		ObjectRegistry registry = ObjectRegistry.getInstance();
 		cityGMLBuilder = registry.getCityGMLBuilder();
 		wfsConfig = (WFSConfig)registry.lookup(WFSConfig.class.getName());
-		exporterConfig = (Config)registry.lookup(Config.class.getName());
-		requestQueue = new ArrayBlockingQueue<String>(wfsConfig.getServer().getMaxParallelRequests(), true);
+		config = (Config)registry.lookup(Config.class.getName());
+		requestQueue = new ArrayBlockingQueue<>(wfsConfig.getServer().getMaxParallelRequests(), true);
 		exceptionReportHandler = new WFSExceptionReportHandler(cityGMLBuilder);
 
 		saxParserFactory = SAXParserFactory.newInstance();
@@ -129,13 +129,9 @@ public class WFSService extends HttpServlet {
 		}
 
 		// register cache table cleaner pool
-		cacheCleanerPool = new SingleWorkerPool<CacheCleanerWork>(
+		cacheCleanerPool = new SingleWorkerPool<>(
 				"cache_cleaner",
-				new WorkerFactory<CacheCleanerWork>() {
-					public Worker<CacheCleanerWork> createWorker() {
-						return new CacheCleanerWorker();
-					}
-				}, 
+				CacheCleanerWorker::new,
 				wfsConfig.getServer().getMaxParallelRequests());
 
 		cacheCleanerPool.prestartCoreWorker();
@@ -166,7 +162,7 @@ public class WFSService extends HttpServlet {
 			if (wfsConfig.getOperations().getRequestEncoding().getMethod() == EncodingMethod.XML)
 				throw new WFSException(WFSExceptionCode.OPTION_NOT_SUPPORTED, "KVP encoding of requests is not advertised.");
 
-			Map<String, String> parameters = new HashMap<String, String>();
+			Map<String, String> parameters = new HashMap<>();
 
 			// check for invalid parameters
 			for (Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
@@ -274,7 +270,13 @@ public class WFSService extends HttpServlet {
 	private void handleRequest(Object wfsRequest, String operationName, NamespaceFilter namespaceFilter, HttpServletRequest request, HttpServletResponse response) throws WFSException {
 		// check database connection
 		if (!connectionPool.isConnected())
-			DatabaseConnector.connect(exporterConfig);
+			DatabaseConnector.connect(config);
+
+		// create copy of the 3DCityDB configuration
+		Project project = config.getProject();
+		Config config = new Config(
+				new Project(project.getDatabase(), project.getImporter(), project.getExporter(), null, project.getGlobal()),
+				null, new Internal());
 
 		try {
 			if (wfsRequest instanceof GetFeatureType) {
@@ -283,7 +285,7 @@ public class WFSService extends HttpServlet {
 
 				try {
 					// handle GetFeature request
-					GetFeatureHandler getFeatureHandler = new GetFeatureHandler(cityGMLBuilder, wfsConfig, exporterConfig);
+					GetFeatureHandler getFeatureHandler = new GetFeatureHandler(cityGMLBuilder, wfsConfig, config);
 					getFeatureHandler.doOperation((GetFeatureType)wfsRequest, namespaceFilter, request, response);
 				} finally {
 					// free slot from the request queue
@@ -298,7 +300,7 @@ public class WFSService extends HttpServlet {
 
 			else if (wfsRequest instanceof GetCapabilitiesType) {				
 				GetCapabilitiesHandler getCapabilitiesHandler = new GetCapabilitiesHandler(cityGMLBuilder, wfsConfig);
-				getCapabilitiesHandler.doOperation((GetCapabilitiesType)wfsRequest, getServletContext(), request, response);
+				getCapabilitiesHandler.doOperation((GetCapabilitiesType)wfsRequest, request, response);
 			}
 
 			else if (wfsRequest instanceof ListStoredQueriesType) {
@@ -318,7 +320,7 @@ public class WFSService extends HttpServlet {
 				throw new WFSException(WFSExceptionCode.OPERATION_PARSING_FAILED, "Failed to parse the requested operation.");
 
 		} catch (JAXBException e) {
-			throw new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "A fatal JAXB error occured whilst processing the request.", e);
+			throw new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "A fatal JAXB error occurred whilst processing the request.", e);
 		}
 	}
 

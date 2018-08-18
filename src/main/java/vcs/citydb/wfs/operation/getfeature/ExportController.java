@@ -12,8 +12,6 @@ import org.citydb.citygml.exporter.database.uid.GeometryGmlIdCache;
 import org.citydb.citygml.exporter.writer.FeatureWriteException;
 import org.citydb.concurrent.PoolSizeAdaptationStrategy;
 import org.citydb.concurrent.SingleWorkerPool;
-import org.citydb.concurrent.Worker;
-import org.citydb.concurrent.WorkerFactory;
 import org.citydb.concurrent.WorkerPool;
 import org.citydb.config.Config;
 import org.citydb.database.connection.DatabaseConnectionPool;
@@ -36,8 +34,6 @@ import vcs.citydb.wfs.util.NullWorker;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.bind.JAXBException;
-import javax.xml.datatype.DatatypeConfigurationException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
@@ -46,16 +42,16 @@ import java.util.List;
 public class ExportController {
 	private final CityGMLBuilder cityGMLBuilder;
 	private final WFSConfig wfsConfig;
-	private final Config exporterConfig;
+	private final Config config;
 	private final DatabaseConnectionPool connectionPool;
 	private final EventDispatcher eventDispatcher;
 
 	private final Object eventChannel = new Object();
 
-	public ExportController(CityGMLBuilder cityGMLBuilder, WFSConfig wfsConfig, Config exporterConfig) {
+	public ExportController(CityGMLBuilder cityGMLBuilder, WFSConfig wfsConfig, Config config) {
 		this.cityGMLBuilder = cityGMLBuilder;
 		this.wfsConfig = wfsConfig;
-		this.exporterConfig = exporterConfig;
+		this.config = config;
 
 		connectionPool = DatabaseConnectionPool.getInstance();
 		eventDispatcher = ObjectRegistry.getInstance().getEventDispatcher();
@@ -68,18 +64,10 @@ public class ExportController {
 			HttpServletResponse response) throws WFSException {
 
 		// define queue size for worker pools
-		int queueSize = exporterConfig.getProject().getExporter().getResources().getThreadPool().getDefaultPool().getMaxThreads() * 2;
-
-		// 3DCityDB ADE settings
-		exporterConfig.getProject().getExporter().getCityDBADE().setExportMetadata(wfsConfig.getOperations().getGetFeature().isUseCityDBADE());
-
-		// general cityobjectgroup settings
-		exporterConfig.getProject().getExporter().getCityObjectGroup().setExportMemberAsXLinks(true);
+		int queueSize = config.getProject().getExporter().getResources().getThreadPool().getDefaultPool().getMaxThreads() * 2;
 
 		// general appearance settings
-		exporterConfig.getProject().getExporter().getAppearances().setExportAppearances(false);
-		exporterConfig.getProject().getExporter().getAppearances().setExportTextureFiles(false);
-		exporterConfig.getInternal().setExportGlobalAppearances(false);
+		config.getInternal().setExportGlobalAppearances(false);
 
 		UIDCacheManager uidCacheManager = null;
 		CacheTableManager cacheTableManager = null;
@@ -91,11 +79,9 @@ public class ExportController {
 			// create instance of cache table manager
 			try {
 				cacheTableManager = new CacheTableManager(
-						exporterConfig.getProject().getExporter().getResources().getThreadPool().getDefaultPool().getMaxThreads(),
-						exporterConfig);
-			} catch (SQLException e) {
-				throw new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "Failed to initialize internal cache manager.", e);
-			} catch (IOException e) {
+						config.getProject().getExporter().getResources().getThreadPool().getDefaultPool().getMaxThreads(),
+						config);
+			} catch (SQLException | IOException e) {
 				throw new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "Failed to initialize internal cache manager.", e);
 			}
 
@@ -107,33 +93,29 @@ public class ExportController {
 				uidCacheManager.initCache(
 						UIDCacheType.GEOMETRY,
 						new GeometryGmlIdCache(cacheTableManager, 
-								exporterConfig.getProject().getExporter().getResources().getGmlIdCache().getGeometry().getPartitions(),
-								exporterConfig.getProject().getDatabase().getUpdateBatching().getGmlIdCacheBatchValue()),
-						exporterConfig.getProject().getExporter().getResources().getGmlIdCache().getGeometry().getCacheSize(),
-						exporterConfig.getProject().getExporter().getResources().getGmlIdCache().getGeometry().getPageFactor(),
-						exporterConfig.getProject().getExporter().getResources().getThreadPool().getDefaultPool().getMaxThreads());
+								config.getProject().getExporter().getResources().getGmlIdCache().getGeometry().getPartitions(),
+								config.getProject().getDatabase().getUpdateBatching().getGmlIdCacheBatchValue()),
+						config.getProject().getExporter().getResources().getGmlIdCache().getGeometry().getCacheSize(),
+						config.getProject().getExporter().getResources().getGmlIdCache().getGeometry().getPageFactor(),
+						config.getProject().getExporter().getResources().getThreadPool().getDefaultPool().getMaxThreads());
 
 				uidCacheManager.initCache(
 						UIDCacheType.OBJECT,
 						new GeometryGmlIdCache(cacheTableManager, 
-								exporterConfig.getProject().getExporter().getResources().getGmlIdCache().getFeature().getPartitions(), 
-								exporterConfig.getProject().getDatabase().getUpdateBatching().getGmlIdCacheBatchValue()),
-						exporterConfig.getProject().getExporter().getResources().getGmlIdCache().getFeature().getCacheSize(),
-						exporterConfig.getProject().getExporter().getResources().getGmlIdCache().getFeature().getPageFactor(),
-						exporterConfig.getProject().getExporter().getResources().getThreadPool().getDefaultPool().getMaxThreads());
+								config.getProject().getExporter().getResources().getGmlIdCache().getFeature().getPartitions(),
+								config.getProject().getDatabase().getUpdateBatching().getGmlIdCacheBatchValue()),
+						config.getProject().getExporter().getResources().getGmlIdCache().getFeature().getCacheSize(),
+						config.getProject().getExporter().getResources().getGmlIdCache().getFeature().getPageFactor(),
+						config.getProject().getExporter().getResources().getThreadPool().getDefaultPool().getMaxThreads());
 			} catch (SQLException e) {
 				throw new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "Failed to initialize internal gml:id caches.", e);
 			}
 
 			// create worker pools
 			// TODO: currently XLinks to texture images and library objects are not resolved
-			xlinkPool = new SingleWorkerPool<DBXlink>(
+			xlinkPool = new SingleWorkerPool<>(
 					"xlink_exporter_pool",
-					new WorkerFactory<DBXlink>() {
-						public Worker<DBXlink> createWorker() {
-							return new NullWorker<DBXlink>();
-						}
-					},
+					NullWorker::new,
 					1,
 					false);
 
@@ -154,10 +136,10 @@ public class ExportController {
 				throw new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "Failed to initialize the response writer.", e);
 			}
 
-			databaseWorkerPool = new WorkerPool<DBSplittingResult>(
+			databaseWorkerPool = new WorkerPool<>(
 					"db_exporter_pool",
-					exporterConfig.getProject().getExporter().getResources().getThreadPool().getDefaultPool().getMinThreads(), 
-					exporterConfig.getProject().getExporter().getResources().getThreadPool().getDefaultPool().getMaxThreads(),
+					config.getProject().getExporter().getResources().getThreadPool().getDefaultPool().getMinThreads(),
+					config.getProject().getExporter().getResources().getThreadPool().getDefaultPool().getMaxThreads(),
 					PoolSizeAdaptationStrategy.AGGRESSIVE,
 					new DBExportWorkerFactory(
 							schemaMapping,
@@ -167,7 +149,7 @@ public class ExportController {
 							uidCacheManager,
 							cacheTableManager,
 							dummy,
-							exporterConfig,
+							config,
 							eventDispatcher), 
 					queueSize,
 					false);
@@ -181,21 +163,14 @@ public class ExportController {
 			databaseWorkerPool.prestartCoreWorker();
 
 			// ok, preparation done, start database query
-			QueryExecuter queryExecuter = null;
-			try {
-				queryExecuter = new QueryExecuter(wfsRequest, 
-						writer,
-						databaseWorkerPool,
-						eventChannel,
-						connectionPool,
-						cityGMLBuilder,
-						wfsConfig,
-						exporterConfig);
-			} catch (JAXBException e) {
-				throw new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "Failed to initialize internal query executer.", e);			
-			} catch (DatatypeConfigurationException e) {
-				throw new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "Failed to initialize internal query executer.", e);			
-			}
+			QueryExecuter queryExecuter = new QueryExecuter(wfsRequest,
+					writer,
+					databaseWorkerPool,
+					eventChannel,
+					connectionPool,
+					cityGMLBuilder,
+					wfsConfig,
+					config);
 
 			// execute database query
 			queryExecuter.executeQuery(queryExpressions, dummy, request);
@@ -246,7 +221,7 @@ public class ExportController {
 		GeometryStripper geometryStripper = wfsConfig.getConstraints().isStripGeometry() ? new GeometryStripper() : null;
 
 		// create response builder for requested output format
-		GetFeatureResponseBuilder builder = null;
+		GetFeatureResponseBuilder builder;
 		switch (outputFormat.getName()) {
 		case "application/gml+xml; version=3.1":
 			builder = new CityGMLWriterBuilder();
@@ -262,7 +237,7 @@ public class ExportController {
 			builder = new CityGMLWriterBuilder();
 		
 		// initialize builder
-		builder.initializeContext(wfsRequest, queryExpressions, outputFormat.getOptions(), geometryStripper, uidCacheManager, builder, wfsConfig, exporterConfig);
+		builder.initializeContext(wfsRequest, queryExpressions, outputFormat.getOptions(), geometryStripper, uidCacheManager, builder, wfsConfig, config);
 
 		return builder;
 	}
