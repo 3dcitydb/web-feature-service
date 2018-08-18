@@ -32,11 +32,11 @@
       <method>KVP+XML</method>
       <useXMLValidation>true</useXMLValidation>
     </requestEncoding>
+    <useCityDBADE>false</useCityDBADE>
     <GetFeature>
       <outputFormats>
         <outputFormat name="application/gml+xml; version=3.1"/>
-      </outputFormats>
-      <useCityDBADE>false</useCityDBADE>
+      </outputFormats>      
     </GetFeature>
   </operations>
   <database>
