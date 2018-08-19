@@ -235,6 +235,7 @@
 
   <xs:complexType name="ConstraintsType">
     <xs:sequence>
+      <xs:element name="countDefault" type="xs:long" minOccurs="0"/>
       <xs:element name="stripGeometry" type="xs:boolean" default="false" minOccurs="0"/>
       <xs:element name="lodFilter" type="LodFilterType" minOccurs="0"/>
     </xs:sequence>

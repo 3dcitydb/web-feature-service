@@ -68,7 +68,7 @@ public class QueryExecuter implements EventHandler {
 		this.config = config;
 
 		// get standard request parameters
-		long maxFeatureCount = Long.MAX_VALUE;
+		long maxFeatureCount = wfsConfig.getConstraints().getCountDefault();
 		count = wfsRequest.isSetCount() && wfsRequest.getCount().longValue() < maxFeatureCount ? wfsRequest.getCount().longValue() : maxFeatureCount;		
 		resultType = wfsRequest.getResultType();
 

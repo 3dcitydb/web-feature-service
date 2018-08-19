@@ -287,6 +287,17 @@ public class GetCapabilitiesHandler {
 		}
 
 		// optional constraints
+		// default count
+		if (wfsConfig.getConstraints().isSetCountDefault()) {
+			DomainType countDefault = new DomainType();
+			countDefault.setName("CountDefault");
+			ValueType countDefaultValue = new ValueType();
+			countDefaultValue.setValue(String.valueOf(wfsConfig.getConstraints().getCountDefault()));
+			countDefault.setDefaultValue(countDefaultValue);
+			countDefault.setNoValues(new NoValues());
+			operationsMetadata.getConstraint().add(countDefault);
+		}
+
 		// announce supported query types
 		DomainType queryExpressions = new DomainType();
 		queryExpressions.setName("QueryExpressions");
