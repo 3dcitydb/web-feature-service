@@ -99,7 +99,6 @@ public class DescribeFeatureTypeHandler {
 		OutputFormat outputFormat = wfsConfig.getOperations().getDescribeFeatureType().getOutputFormat(wfsRequest.isSetOutputFormat() ? 
 				wfsRequest.getOutputFormat() : DescribeFeatureTypeOutputFormat.GML3_1.value());
 		
-
 		SchemaReader schemaReader = null;
 		switch (outputFormat.getName()) {
 		case "application/gml+xml; version=3.1":
