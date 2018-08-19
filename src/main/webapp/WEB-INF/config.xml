@@ -9,7 +9,6 @@
         <ows:Title>3D City Database Web Feature Service</ows:Title>
         <ows:ServiceType>WFS</ows:ServiceType>
         <ows:ServiceTypeVersion>2.0.2</ows:ServiceTypeVersion>
-        <ows:ServiceTypeVersion>2.0.0</ows:ServiceTypeVersion>
       </ows:ServiceIdentification>
       <ows:ServiceProvider>
         <ows:ProviderName/>
@@ -36,7 +35,8 @@
     <GetFeature>
       <outputFormats>
         <outputFormat name="application/gml+xml; version=3.1"/>
-      </outputFormats>      
+        <outputFormat name="application/json"/>
+      </outputFormats>
     </GetFeature>
   </operations>
   <database>
