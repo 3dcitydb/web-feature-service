@@ -56,6 +56,7 @@ public class AdditionalObjectsHandler {
     private volatile boolean shouldRun = true;
     private boolean isInitialized;
 
+    @SuppressWarnings("unchecked")
     protected AdditionalObjectsHandler(SAXWriter saxWriter, CityGMLVersion version, CityGMLBuilder cityGMLBuilder, TransformerChainFactory transformerChainFactory, Object eventChannel) {
         this.saxWriter = saxWriter;
         this.version = version;
