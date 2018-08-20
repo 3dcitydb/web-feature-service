@@ -1,11 +1,14 @@
 import org.apache.tools.ant.filters.ReplaceTokens
 
+plugins {
+    id 'java'
+    id 'war'
+    id 'distribution'
+}
+
 group 'org.citydb.wfs'
 version '4.0.0-SNAPSHOT'
 
-apply plugin: 'java'
-apply plugin: 'war'
-apply plugin: 'distribution'
 apply from: 'properties.gradle'
 
 sourceCompatibility = 1.8
@@ -127,8 +130,4 @@ war {
     into('META-INF') {
         from processLicense
     }
-}
-
-task wrapper(type: Wrapper) {
-    gradleVersion = '4.7'
 }
