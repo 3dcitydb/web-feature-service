@@ -47,8 +47,8 @@ dependencies {
         exclude group: 'org.postgresql', module: 'postgresql'
         exclude group: 'net.postgis', module: 'postgis-jdbc'
     }
-    compile files('lib/sdoapi-18.3.0.0.jar')
-    providedCompile files('lib/ojdbc8-18.3.0.0.jar')
+    compile files('lib/sdoapi-12.2.0.1.jar')
+    providedCompile files('lib/ojdbc8-12.2.0.1.jar')
     providedCompile 'javax.servlet:javax.servlet-api:3.1.0'
 
     jaxb 'com.sun.xml.bind:jaxb-xjc:2.2.7'
@@ -107,7 +107,7 @@ distributions.main {
         from war
         into('lib') {
             from configurations.jdbc
-            from 'lib/ojdbc8-18.3.0.0.jar'
+            from 'lib/ojdbc8-12.2.0.1.jar'
         }
         into('manual') {
             from 'resources/manual'
