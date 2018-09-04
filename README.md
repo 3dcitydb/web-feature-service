@@ -24,7 +24,7 @@ The 3D City Database WFS is implemented as Java web application based on the Jav
 * Java servlet container supporting the Java Servlet 3.1/3.0 specification
 * Java 8 Runtime Environment (Java 7 or earlier versions are not supported)  
 
-The WFS implementation has been successfully deployed and tested on [Apache Tomcat](http://tomcat.apache.org/) versions 8 and 7. 
+The WFS implementation has been successfully deployed and tested on [Apache Tomcat](http://tomcat.apache.org/) versions 9, 8 and 7. 
 
 Documentation
 -------------
