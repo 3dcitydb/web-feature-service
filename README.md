@@ -14,7 +14,7 @@ Latest release
 --------------
 The latest stable release of the 3D City Database WFS interface is 3.3.2.
 
-Download a WAR file of the WFS [here](https://github.com/3dcitydb/web-feature-service/releases/download/v3.3.2/citydb-wfs-3.3.2.zip). Previous releases are available from the [releases section](https://github.com/3dcitydb/web-feature-service/releases).
+Download a ZIP file of the WFS [here](https://github.com/3dcitydb/web-feature-service/releases/download/v3.3.2/citydb-wfs-3.3.2.zip). Previous releases are available from the [releases section](https://github.com/3dcitydb/web-feature-service/releases).
 
 System requirements
 -------------------
@@ -28,13 +28,23 @@ The WFS implementation has been successfully deployed and tested on [Apache Tomc
 
 Documentation
 -------------
-A complete and comprehensive documentation on the Web Feature Service is installed with the [3D City Database Importer/Exporter](https://github.com/3dcitydb/importer-exporter) and is available [online](http://www.3dcitydb.org/3dcitydb/documentation/).
+A complete and comprehensive documentation on the Web Feature Service is contained in the ZIP file from the [releases section](https://github.com/3dcitydb/web-feature-service/releases) and is available [online](http://www.3dcitydb.org/3dcitydb/documentation/).
+
+The documentation contains a step-by-step guide for deploying the WFS on a servlet container.
 
 Contributing
 ------------
 * To file bugs found in the software create a GitHub issue.
 * To contribute code for fixing filed issues create a pull request with the issue id.
 * To propose a new feature create a GitHub issue and open a discussion.
+
+Building
+--------
+The project uses [Gradle](https://gradle.org/) as build system. To build the WFS from source, clone the repository to your local machine and run the following command from the root of the repository.
+
+    > gradlew installDist
+    
+The build process will produce the WFS software package under `build/install`.
 
 Developers
 ----------
