@@ -28,7 +28,7 @@ The WFS implementation has been successfully deployed and tested on [Apache Tomc
 
 Documentation
 -------------
-A complete and comprehensive documentation on the Web Feature Service is contained in the ZIP file from the [releases section](https://github.com/3dcitydb/web-feature-service/releases) and is available [online](http://www.3dcitydb.org/3dcitydb/documentation/).
+A complete and comprehensive documentation on the Web Feature Service is contained in the ZIP file from the [releases section](https://github.com/3dcitydb/web-feature-service/releases) and is available [online](https://www.3dcitydb.org/3dcitydb/documentation/).
 
 The documentation contains a step-by-step guide for deploying the WFS on a servlet container.
 
