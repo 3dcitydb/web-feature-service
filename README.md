@@ -12,9 +12,9 @@ Note that releases of the software before version 3.3.0 continue to be licensed 
 
 Latest release
 --------------
-The latest stable release of the 3D City Database WFS interface is 3.3.2.
+The latest stable release of the 3D City Database WFS interface is 4.0.
 
-Download a ZIP file of the WFS [here](https://github.com/3dcitydb/web-feature-service/releases/download/v3.3.2/citydb-wfs-3.3.2.zip). Previous releases are available from the [releases section](https://github.com/3dcitydb/web-feature-service/releases).
+Download a ZIP file of the WFS [here](https://github.com/3dcitydb/web-feature-service/releases/tag/v4.0.0). Previous releases are available from the [releases section](https://github.com/3dcitydb/web-feature-service/releases).
 
 System requirements
 -------------------
