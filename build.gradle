@@ -104,7 +104,7 @@ distributions.main {
         from war
         into('lib') {
             from configurations.jdbc
-            from 'lib/ojdbc8-12.2.0.1.jar'
+            from 'lib/ojdbc8-18.3.0.0.jar'
         }
         into('manual') {
             from 'resources/manual'
