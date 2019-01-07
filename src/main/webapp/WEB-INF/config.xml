@@ -31,7 +31,7 @@
       <method>KVP+XML</method>
       <useXMLValidation>true</useXMLValidation>
     </requestEncoding>
-    <useCityDBADE>false</useCityDBADE>
+    <exportCityDBMetadata>false</exportCityDBMetadata>
     <GetFeature>
       <outputFormats>
         <outputFormat name="application/gml+xml; version=3.1"/>

@@ -37,7 +37,7 @@ repositories {
 }
 
 dependencies {
-    compile('org.citydb:impexp-core:4.1.0-b190107-1122') {
+    compile('org.citydb:impexp-core:4.1.0') {
         jdbc 'org.postgresql:postgresql:+'
         jdbc 'net.postgis:postgis-jdbc:+'
 
