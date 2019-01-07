@@ -1,8 +1,8 @@
 //
-// Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.2.7 generiert 
-// Siehe <a href="http://java.sun.com/xml/jaxb">http://java.sun.com/xml/jaxb</a> 
+// Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.3.1 generiert 
+// Siehe <a href="https://javaee.github.io/jaxb-v2/">https://javaee.github.io/jaxb-v2/</a> 
 // Änderungen an dieser Datei gehen bei einer Neukompilierung des Quellschemas verloren. 
-// Generiert: 2018.06.08 um 12:13:24 PM CEST 
+// Generiert: 2019.01.07 um 11:42:07 AM CET 
 //
 
 
@@ -31,19 +31,19 @@ import org.w3c.dom.Element;
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
  * 
  * <pre>
- * &lt;complexType name="MemberPropertyType">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;choice minOccurs="0">
- *         &lt;any processContents='lax' namespace='##other'/>
- *         &lt;element ref="{http://www.opengis.net/wfs/2.0}Tuple"/>
- *         &lt;element ref="{http://www.opengis.net/wfs/2.0}SimpleFeatureCollection"/>
- *       &lt;/choice>
- *       &lt;attGroup ref="{http://www.w3.org/1999/xlink}simpleAttrs"/>
- *       &lt;attribute name="state" type="{http://www.opengis.net/wfs/2.0}StateValueType" />
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="MemberPropertyType"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;choice minOccurs="0"&gt;
+ *         &lt;any processContents='lax' namespace='##other'/&gt;
+ *         &lt;element ref="{http://www.opengis.net/wfs/2.0}Tuple"/&gt;
+ *         &lt;element ref="{http://www.opengis.net/wfs/2.0}SimpleFeatureCollection"/&gt;
+ *       &lt;/choice&gt;
+ *       &lt;attGroup ref="{http://www.w3.org/1999/xlink}simpleAttrs"/&gt;
+ *       &lt;attribute name="state" type="{http://www.opengis.net/wfs/2.0}StateValueType" /&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  * 
  * 
@@ -96,12 +96,12 @@ public class MemberPropertyType {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link Element }
-     * {@link String }
      * {@link JAXBElement }{@code <}{@link TupleType }{@code >}
-     * {@link JAXBElement }{@code <}{@link SimpleFeatureCollectionType }{@code >}
      * {@link JAXBElement }{@code <}{@link FeatureCollectionType }{@code >}
+     * {@link JAXBElement }{@code <}{@link SimpleFeatureCollectionType }{@code >}
+     * {@link Element }
      * {@link Object }
+     * {@link String }
      * 
      * 
      */

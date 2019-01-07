@@ -1,8 +1,8 @@
 //
-// Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.2.7 generiert 
-// Siehe <a href="http://java.sun.com/xml/jaxb">http://java.sun.com/xml/jaxb</a> 
+// Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.3.1 generiert 
+// Siehe <a href="https://javaee.github.io/jaxb-v2/">https://javaee.github.io/jaxb-v2/</a> 
 // Änderungen an dieser Datei gehen bei einer Neukompilierung des Quellschemas verloren. 
-// Generiert: 2018.06.08 um 12:13:24 PM CEST 
+// Generiert: 2019.01.07 um 11:42:07 AM CET 
 //
 
 
@@ -26,19 +26,19 @@ import net.opengis.fes._2.AbstractQueryExpressionType;
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
  * 
  * <pre>
- * &lt;complexType name="GetPropertyValueType">
- *   &lt;complexContent>
- *     &lt;extension base="{http://www.opengis.net/wfs/2.0}BaseRequestType">
- *       &lt;sequence>
- *         &lt;element ref="{http://www.opengis.net/fes/2.0}AbstractQueryExpression"/>
- *       &lt;/sequence>
- *       &lt;attGroup ref="{http://www.opengis.net/wfs/2.0}StandardResolveParameters"/>
- *       &lt;attGroup ref="{http://www.opengis.net/wfs/2.0}StandardPresentationParameters"/>
- *       &lt;attribute name="valueReference" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="resolvePath" type="{http://www.w3.org/2001/XMLSchema}string" />
- *     &lt;/extension>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="GetPropertyValueType"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;extension base="{http://www.opengis.net/wfs/2.0}BaseRequestType"&gt;
+ *       &lt;sequence&gt;
+ *         &lt;element ref="{http://www.opengis.net/fes/2.0}AbstractQueryExpression"/&gt;
+ *       &lt;/sequence&gt;
+ *       &lt;attGroup ref="{http://www.opengis.net/wfs/2.0}StandardResolveParameters"/&gt;
+ *       &lt;attGroup ref="{http://www.opengis.net/wfs/2.0}StandardPresentationParameters"/&gt;
+ *       &lt;attribute name="valueReference" use="required" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *       &lt;attribute name="resolvePath" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *     &lt;/extension&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  * 
  * 
@@ -80,10 +80,10 @@ public class GetPropertyValueType
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link AbstractQueryExpressionType }{@code >}
-     *     {@link JAXBElement }{@code <}{@link QueryType }{@code >}
      *     {@link JAXBElement }{@code <}{@link StoredQueryType }{@code >}
+     *     {@link JAXBElement }{@code <}{@link QueryType }{@code >}
      *     {@link JAXBElement }{@code <}{@link AbstractAdhocQueryExpressionType }{@code >}
+     *     {@link JAXBElement }{@code <}{@link AbstractQueryExpressionType }{@code >}
      *     
      */
     public JAXBElement<? extends AbstractQueryExpressionType> getAbstractQueryExpression() {
@@ -95,10 +95,10 @@ public class GetPropertyValueType
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link AbstractQueryExpressionType }{@code >}
-     *     {@link JAXBElement }{@code <}{@link QueryType }{@code >}
      *     {@link JAXBElement }{@code <}{@link StoredQueryType }{@code >}
+     *     {@link JAXBElement }{@code <}{@link QueryType }{@code >}
      *     {@link JAXBElement }{@code <}{@link AbstractAdhocQueryExpressionType }{@code >}
+     *     {@link JAXBElement }{@code <}{@link AbstractQueryExpressionType }{@code >}
      *     
      */
     public void setAbstractQueryExpression(JAXBElement<? extends AbstractQueryExpressionType> value) {

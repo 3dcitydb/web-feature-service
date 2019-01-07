@@ -1,8 +1,8 @@
 //
-// Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.2.7 generiert 
-// Siehe <a href="http://java.sun.com/xml/jaxb">http://java.sun.com/xml/jaxb</a> 
+// Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.3.1 generiert 
+// Siehe <a href="https://javaee.github.io/jaxb-v2/">https://javaee.github.io/jaxb-v2/</a> 
 // Änderungen an dieser Datei gehen bei einer Neukompilierung des Quellschemas verloren. 
-// Generiert: 2018.06.08 um 12:13:24 PM CEST 
+// Generiert: 2019.01.07 um 11:42:07 AM CET 
 //
 
 
@@ -25,15 +25,15 @@ import javax.xml.bind.annotation.XmlType;
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
  * 
  * <pre>
- * &lt;complexType name="ReferenceGroupType">
- *   &lt;complexContent>
- *     &lt;extension base="{http://www.opengis.net/ows/1.1}BasicIdentificationType">
- *       &lt;sequence>
- *         &lt;element ref="{http://www.opengis.net/ows/1.1}AbstractReferenceBase" maxOccurs="unbounded"/>
- *       &lt;/sequence>
- *     &lt;/extension>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="ReferenceGroupType"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;extension base="{http://www.opengis.net/ows/1.1}BasicIdentificationType"&gt;
+ *       &lt;sequence&gt;
+ *         &lt;element ref="{http://www.opengis.net/ows/1.1}AbstractReferenceBase" maxOccurs="unbounded"/&gt;
+ *       &lt;/sequence&gt;
+ *     &lt;/extension&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  * 
  * 
@@ -68,8 +68,8 @@ public class ReferenceGroupType
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link JAXBElement }{@code <}{@link ServiceReferenceType }{@code >}
-     * {@link JAXBElement }{@code <}{@link AbstractReferenceBaseType }{@code >}
      * {@link JAXBElement }{@code <}{@link ReferenceType }{@code >}
+     * {@link JAXBElement }{@code <}{@link AbstractReferenceBaseType }{@code >}
      * 
      * 
      */
