@@ -5,13 +5,13 @@ import javax.xml.bind.annotation.XmlType;
 
 @XmlType(name="OperationsType", propOrder={
 		"requestEncoding",
-		"useCityDBADE",
+		"exportCityDBMetadata",
 		"describeFeatureType",
 		"getFeature"
 })
 public class Operations {
 	private RequestEncoding requestEncoding;
-	private Boolean useCityDBADE = false;
+	private Boolean exportCityDBMetadata = false;
 	@XmlElement(name="DescribeFeatureType")
 	private DescribeFeatureTypeOperation describeFeatureType;
 	@XmlElement(name="GetFeature")
@@ -31,13 +31,12 @@ public class Operations {
 		this.requestEncoding = requestEncoding;
 	}
 
-
-	public boolean isUseCityDBADE() {
-		return useCityDBADE;
+	public boolean isExportCityDBMetadata() {
+		return exportCityDBMetadata;
 	}
 
-	public void setUseCityDBADE(boolean useCityDBADE) {
-		this.useCityDBADE = useCityDBADE;
+	public void setExportCityDBMetadata(boolean exportCityDBMetadata) {
+		this.exportCityDBMetadata = exportCityDBMetadata;
 	}
 
 	public DescribeFeatureTypeOperation getDescribeFeatureType() {

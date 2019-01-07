@@ -2,11 +2,12 @@ package vcs.citydb.wfs.operation.getfeature.citygml;
 
 import net.opengis.wfs._2.GetFeatureType;
 import net.opengis.wfs._2.ResultTypeType;
+import org.citydb.ade.model.module.CityDBADE100Module;
+import org.citydb.ade.model.module.CityDBADE200Module;
 import org.citydb.citygml.common.database.uid.UIDCacheManager;
 import org.citydb.citygml.exporter.writer.FeatureWriteException;
 import org.citydb.config.Config;
 import org.citydb.database.schema.mapping.FeatureType;
-import org.citydb.database.schema.mapping.MappingConstants;
 import org.citydb.log.Logger;
 import org.citygml4j.model.module.Module;
 import org.citygml4j.model.module.ModuleContext;
@@ -100,6 +101,11 @@ public class CityGMLWriterBuilder implements GetFeatureResponseBuilder {
 			// add XML prefixes and schema locations for non-CityGML modules
 			for (Module module : moduleContext.getModules()) {
 				if (!(module instanceof CityGMLModule)) {
+					// skip 3DCityDB ADE prefix and namespace if metadata shall not be exported
+					if ((module == CityDBADE200Module.v3_0 || module == CityDBADE100Module.v3_0)
+							&& !wfsConfig.getOperations().isExportCityDBMetadata())
+						continue;
+
 					saxWriter.setPrefix(module.getNamespacePrefix(), module.getNamespaceURI());
 					if (module instanceof ADEModule)
 						saxWriter.setSchemaLocation(module.getNamespaceURI(), module.getSchemaLocation());
@@ -138,12 +144,6 @@ public class CityGMLWriterBuilder implements GetFeatureResponseBuilder {
 					log.error("Cause: " + e.getMessage());
 					throw new FeatureWriteException("Failed to configure the XSL transformation.");
 				}
-			}
-
-			// add CityDB ADE namespace and schema location if required
-			if (wfsConfig.getOperations().isUseCityDBADE()) {
-				saxWriter.setPrefix(MappingConstants.CITYDB_ADE_NAMESPACE_PREFIX, MappingConstants.CITYDB_ADE_NAMESPACE_URI);
-				saxWriter.setSchemaLocation(MappingConstants.CITYDB_ADE_NAMESPACE_URI, MappingConstants.CITYDB_ADE_SCHEMA_LOCATIONS.get(version));
 			}
 		}
 	}

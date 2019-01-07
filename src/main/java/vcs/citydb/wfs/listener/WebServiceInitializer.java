@@ -258,7 +258,7 @@ public class WebServiceInitializer implements ServletContextListener {
 
 		// export settings
 		Exporter exporter = new Exporter();
-		exporter.getCityDBADE().setExportMetadata(wfsConfig.getOperations().isUseCityDBADE());
+		exporter.getContinuation().setExportCityDBMetadata(wfsConfig.getOperations().isExportCityDBMetadata());
 		exporter.getCityObjectGroup().setExportMemberAsXLinks(true);
 		exporter.getAppearances().setExportAppearances(false);
 		exporter.getAppearances().setExportTextureFiles(false);

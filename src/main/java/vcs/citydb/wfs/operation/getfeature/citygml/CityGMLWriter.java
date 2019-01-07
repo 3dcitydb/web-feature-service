@@ -100,6 +100,11 @@ public class CityGMLWriter implements FeatureWriter {
 	}
 
 	@Override
+	public void useIndentation(boolean useIndentation) {
+		saxWriter.setIndentString(useIndentation ? " " : "");
+	}
+
+	@Override
 	public void startFeatureCollection(long matchNo, long returnNo) throws FeatureWriteException {
 		level++;
 		writeFeatureCollection(matchNo, returnNo, WriteMode.HEAD);

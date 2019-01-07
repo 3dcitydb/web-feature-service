@@ -247,7 +247,7 @@ public class QueryExecuter implements EventHandler {
 		config.getInternal().setRegisterGmlIdInCache(isMultipleQueryRequest);
 
 		// set flag for coordinate transformation
-		config.getInternal().setTransformCoordinates(queryExpression.getTargetSRS().getSrid() != connectionPool.getActiveDatabaseAdapter().getConnectionMetaData().getReferenceSystem().getSrid());
+		config.getInternal().setTransformCoordinates(queryExpression.getTargetSrs().getSrid() != connectionPool.getActiveDatabaseAdapter().getConnectionMetaData().getReferenceSystem().getSrid());
 
 		// update filter configuration
 		dummy.copyFrom(queryExpression);

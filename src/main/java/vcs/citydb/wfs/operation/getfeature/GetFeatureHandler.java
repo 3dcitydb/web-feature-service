@@ -10,6 +10,7 @@ import org.citydb.database.adapter.AbstractDatabaseAdapter;
 import org.citydb.database.connection.DatabaseConnectionPool;
 import org.citydb.database.schema.mapping.FeatureType;
 import org.citydb.log.Logger;
+import org.citydb.query.builder.QueryBuildException;
 import org.citydb.query.builder.config.LodFilterBuilder;
 import org.citydb.query.filter.FilterException;
 import org.citydb.query.filter.lod.LodFilter;
@@ -103,8 +104,13 @@ public class GetFeatureHandler {
 		}
 
 		// lod filter constraint
-		if (wfsConfig.getConstraints().isSetLodFilter())
-			lodFilter = new LodFilterBuilder().buildLodFilter(wfsConfig.getConstraints().getLodFilter());
+		if (wfsConfig.getConstraints().isSetLodFilter()) {
+			try {
+				lodFilter = new LodFilterBuilder().buildLodFilter(wfsConfig.getConstraints().getLodFilter());
+			} catch (QueryBuildException e) {
+				throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "Failed to build the LoD filter.", operationHandle, e);
+			}
+		}
 
 		// iterate through queries		
 		for (QueryType query : queries) {
@@ -136,7 +142,7 @@ public class GetFeatureHandler {
 			if (query.isSetSrsName())
 				throw new WFSException(WFSExceptionCode.OPTION_NOT_SUPPORTED, "Coordinate transformation is not supported.", queryHandle);
 			else
-				queryExpression.setTargetSRS(databaseAdapter.getConnectionMetaData().getReferenceSystem());
+				queryExpression.setTargetSrs(databaseAdapter.getConnectionMetaData().getReferenceSystem());
 			
 			// create filter from feature type names
 			Set<FeatureType> featureTypes = featureTypeHandler.getFeatureTypes(query.getTypeNames(), namespaceFilter, false, queryHandle);

@@ -1,9 +1,6 @@
 package vcs.citydb.wfs.operation.getfeature.cityjson;
 
-import java.io.OutputStream;
-import java.util.List;
-import java.util.Map;
-
+import net.opengis.wfs._2.GetFeatureType;
 import org.citydb.citygml.common.database.uid.UIDCacheManager;
 import org.citydb.citygml.exporter.writer.FeatureWriteException;
 import org.citydb.config.Config;
@@ -19,13 +16,15 @@ import org.citygml4j.builder.cityjson.json.io.writer.CityJSONOutputFactory;
 import org.citygml4j.builder.cityjson.marshal.util.DefaultTextureVerticesBuilder;
 import org.citygml4j.builder.cityjson.marshal.util.DefaultVerticesBuilder;
 import org.citygml4j.builder.cityjson.marshal.util.DefaultVerticesTransformer;
-
-import net.opengis.wfs._2.GetFeatureType;
 import vcs.citydb.wfs.config.WFSConfig;
 import vcs.citydb.wfs.operation.getfeature.FeatureWriter;
 import vcs.citydb.wfs.operation.getfeature.GetFeatureResponseBuilder;
 import vcs.citydb.wfs.operation.getfeature.QueryExpression;
 import vcs.citydb.wfs.util.GeometryStripper;
+
+import java.io.OutputStream;
+import java.util.List;
+import java.util.Map;
 
 public class CityJSONWriterBuilder implements GetFeatureResponseBuilder {
 	private final Logger log = Logger.getInstance();
@@ -102,8 +101,8 @@ public class CityJSONWriterBuilder implements GetFeatureResponseBuilder {
 		
 		for (QueryExpression queryExpression : queryExpressions) {
 			if (targetSRS == null)
-				targetSRS = queryExpression.getTargetSRS();
-			else if (targetSRS.getSrid() != queryExpression.getTargetSRS().getSrid())
+				targetSRS = queryExpression.getTargetSrs();
+			else if (targetSRS.getSrid() != queryExpression.getTargetSrs().getSrid())
 				throw new FeatureWriteException("Multiple target coordinate reference systems are not supported by CityJSON.");
 		}
 		

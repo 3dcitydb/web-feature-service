@@ -1,7 +1,6 @@
 package vcs.citydb.wfs.operation.getfeature.cityjson;
 
-import java.util.List;
-
+import net.opengis.wfs._2.TruncatedResponse;
 import org.citydb.citygml.common.database.uid.UIDCache;
 import org.citydb.citygml.common.database.uid.UIDCacheManager;
 import org.citydb.citygml.common.database.uid.UIDCacheType;
@@ -16,10 +15,10 @@ import org.citygml4j.builder.cityjson.json.io.writer.CityJSONWriteException;
 import org.citygml4j.builder.cityjson.marshal.CityJSONMarshaller;
 import org.citygml4j.model.citygml.core.AbstractCityObject;
 import org.citygml4j.model.gml.feature.AbstractFeature;
-
-import net.opengis.wfs._2.TruncatedResponse;
 import vcs.citydb.wfs.operation.getfeature.FeatureWriter;
 import vcs.citydb.wfs.util.GeometryStripper;
+
+import java.util.List;
 
 public class CityJSONWriter implements FeatureWriter {
 	private final CityJSONChunkWriter writer;
@@ -49,6 +48,11 @@ public class CityJSONWriter implements FeatureWriter {
 
 		writerPool.setEventSource(eventChannel);
 		writerPool.prestartCoreWorkers();
+	}
+
+	@Override
+	public void useIndentation(boolean useIndentation) {
+		writer.setIndent(useIndentation ? " " : "");
 	}
 
 	@Override
