@@ -1,6 +1,18 @@
 Change Log
 ==========
 
+### 4.1 - 2019-01-08
+
+##### Changes
+* renamed the parameter `<useCityDBADE>` to `<exportCityDBMetadata>` in the `config.xml` file. This parameter controls whether metadata such as the `LINEAGE` attribute of the `CITYOBJECT` table should be written to the response document. If set to `true`, the 3DCityDB ADE will be used for storing the information with the city objects. 
+
+##### Fixes
+* This release is based on the Importer/Exporter version 4.1.0, and thus incorporates all bug fixes and updates introduced in that version ([more information](https://github.com/3dcitydb/importer-exporter/releases/tag/v4.1.0)). 
+
+##### Miscellaneous 
+* Upgrade to latest PostgreSQL driver v42.2.5 and PostGIS driver v2.3.0.
+* Upgrade to latest Oracle driver 18.3.
+
 ### 4.0 - 2018-09-18
 
 ##### Additions
