@@ -1,7 +1,7 @@
 Change Log
 ==========
 
-### 4.1 - 2019-01-08
+### 4.1 - 2019-01-09
 
 ##### Changes
 * renamed the parameter `<useCityDBADE>` to `<exportCityDBMetadata>` in the `config.xml` file. This parameter controls whether metadata such as the `LINEAGE` attribute of the `CITYOBJECT` table should be written to the response document. If set to `true`, the 3DCityDB ADE will be used for storing the information with the city objects. 
