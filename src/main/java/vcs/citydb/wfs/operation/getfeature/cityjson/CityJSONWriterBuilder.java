@@ -7,12 +7,12 @@ import org.citydb.config.Config;
 import org.citydb.config.project.database.DatabaseSrs;
 import org.citydb.log.Logger;
 import org.citygml4j.CityGMLContext;
-import org.citygml4j.binding.cityjson.feature.CRSType;
-import org.citygml4j.binding.cityjson.feature.MetadataType;
+import org.citygml4j.binding.cityjson.metadata.MetadataType;
 import org.citygml4j.builder.cityjson.CityJSONBuilder;
 import org.citygml4j.builder.cityjson.CityJSONBuilderException;
 import org.citygml4j.builder.cityjson.json.io.writer.CityJSONChunkWriter;
 import org.citygml4j.builder.cityjson.json.io.writer.CityJSONOutputFactory;
+import org.citygml4j.builder.cityjson.json.io.writer.CityJSONWriteException;
 import org.citygml4j.builder.cityjson.marshal.util.DefaultTextureVerticesBuilder;
 import org.citygml4j.builder.cityjson.marshal.util.DefaultVerticesBuilder;
 import org.citygml4j.builder.cityjson.marshal.util.DefaultVerticesTransformer;
@@ -105,21 +105,23 @@ public class CityJSONWriterBuilder implements GetFeatureResponseBuilder {
 			else if (targetSRS.getSrid() != queryExpression.getTargetSrs().getSrid())
 				throw new FeatureWriteException("Multiple target coordinate reference systems are not supported by CityJSON.");
 		}
-		
-		CRSType crs = new CRSType();
-		crs.setEpsg(targetSRS.getSrid());		
-		metadata.setCRS(crs);		
+
+		metadata.setReferenceSystem(targetSRS.getSrid());
 	}
 
 	@Override
 	public FeatureWriter buildFeatureWriter(OutputStream stream, String encoding) throws FeatureWriteException {
-		CityJSONChunkWriter writer = factory.createCityJSONChunkWriter(stream);
-		writer.setMetadata(metadata);
+		try {
+			CityJSONChunkWriter writer = factory.createCityJSONChunkWriter(stream, encoding);
+			writer.setMetadata(metadata);
 
-		if ("true".equals(formatOptions.get(PRETTY_PRINT)))
-			writer.setIndent(" ");
+			if ("true".equals(formatOptions.get(PRETTY_PRINT)))
+				writer.setIndent(" ");
 
-		return new CityJSONWriter(writer, geometryStripper, uidCacheManager, eventChannel, config);
+			return new CityJSONWriter(writer, geometryStripper, uidCacheManager, eventChannel, config);
+		} catch (CityJSONWriteException e) {
+			throw new FeatureWriteException("Failed to create CityJSON response writer.", e);
+		}
 	}
 
 }

@@ -9,6 +9,7 @@ import org.citydb.concurrent.SingleWorkerPool;
 import org.citydb.config.Config;
 import org.citydb.registry.ObjectRegistry;
 import org.citydb.writer.CityJSONWriterWorkerFactory;
+import org.citygml4j.binding.cityjson.CityJSON;
 import org.citygml4j.binding.cityjson.feature.AbstractCityObjectType;
 import org.citygml4j.builder.cityjson.json.io.writer.CityJSONChunkWriter;
 import org.citygml4j.builder.cityjson.json.io.writer.CityJSONWriteException;
@@ -17,8 +18,6 @@ import org.citygml4j.model.citygml.core.AbstractCityObject;
 import org.citygml4j.model.gml.feature.AbstractFeature;
 import vcs.citydb.wfs.operation.getfeature.FeatureWriter;
 import vcs.citydb.wfs.util.GeometryStripper;
-
-import java.util.List;
 
 public class CityJSONWriter implements FeatureWriter {
 	private final CityJSONChunkWriter writer;
@@ -91,9 +90,16 @@ public class CityJSONWriter implements FeatureWriter {
 			if (geometryStripper != null)
 				feature.accept(geometryStripper);
 
-			List<AbstractCityObjectType> cityObjects = marshaller.marshal((AbstractCityObject)feature);
-			for (AbstractCityObjectType cityObject : cityObjects)
-				writerPool.addWork(cityObject);
+			CityJSON cityJSON = new CityJSON();
+			AbstractCityObjectType dest = marshaller.marshal((AbstractCityObject) feature, cityJSON);
+
+			for (AbstractCityObjectType child : cityJSON.getCityObjects())
+				writerPool.addWork(child);
+
+			if (cityJSON.isSetExtensionProperties())
+				cityJSON.getExtensionProperties().forEach(writer::addRootExtensionProperty);
+
+			writerPool.addWork(dest);
 		}
 	}
 
