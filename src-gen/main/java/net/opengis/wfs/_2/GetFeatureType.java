@@ -1,8 +1,8 @@
 //
-// Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.3.1 generiert 
+// Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.3.2 generiert 
 // Siehe <a href="https://javaee.github.io/jaxb-v2/">https://javaee.github.io/jaxb-v2/</a> 
 // Änderungen an dieser Datei gehen bei einer Neukompilierung des Quellschemas verloren. 
-// Generiert: 2019.01.07 um 11:42:07 AM CET 
+// Generiert: 2019.02.13 um 03:40:03 PM CET 
 //
 
 
@@ -35,8 +35,8 @@ import net.opengis.fes._2.AbstractQueryExpressionType;
  *       &lt;sequence&gt;
  *         &lt;element ref="{http://www.opengis.net/fes/2.0}AbstractQueryExpression" maxOccurs="unbounded"/&gt;
  *       &lt;/sequence&gt;
- *       &lt;attGroup ref="{http://www.opengis.net/wfs/2.0}StandardResolveParameters"/&gt;
  *       &lt;attGroup ref="{http://www.opengis.net/wfs/2.0}StandardPresentationParameters"/&gt;
+ *       &lt;attGroup ref="{http://www.opengis.net/wfs/2.0}StandardResolveParameters"/&gt;
  *     &lt;/extension&gt;
  *   &lt;/complexContent&gt;
  * &lt;/complexType&gt;
@@ -57,13 +57,6 @@ public class GetFeatureType
 
     @XmlElementRef(name = "AbstractQueryExpression", namespace = "http://www.opengis.net/fes/2.0", type = JAXBElement.class)
     protected List<JAXBElement<? extends AbstractQueryExpressionType>> abstractQueryExpression;
-    @XmlAttribute(name = "resolve")
-    protected ResolveValueType resolve;
-    @XmlAttribute(name = "resolveDepth")
-    protected String resolveDepth;
-    @XmlAttribute(name = "resolveTimeout")
-    @XmlSchemaType(name = "positiveInteger")
-    protected BigInteger resolveTimeout;
     @XmlAttribute(name = "startIndex")
     @XmlSchemaType(name = "nonNegativeInteger")
     protected BigInteger startIndex;
@@ -74,6 +67,13 @@ public class GetFeatureType
     protected ResultTypeType resultType;
     @XmlAttribute(name = "outputFormat")
     protected String outputFormat;
+    @XmlAttribute(name = "resolve")
+    protected ResolveValueType resolve;
+    @XmlAttribute(name = "resolveDepth")
+    protected String resolveDepth;
+    @XmlAttribute(name = "resolveTimeout")
+    @XmlSchemaType(name = "positiveInteger")
+    protected BigInteger resolveTimeout;
 
     /**
      * Gets the value of the abstractQueryExpression property.
@@ -113,102 +113,6 @@ public class GetFeatureType
 
     public void unsetAbstractQueryExpression() {
         this.abstractQueryExpression = null;
-    }
-
-    /**
-     * Ruft den Wert der resolve-Eigenschaft ab.
-     * 
-     * @return
-     *     possible object is
-     *     {@link ResolveValueType }
-     *     
-     */
-    public ResolveValueType getResolve() {
-        if (resolve == null) {
-            return ResolveValueType.NONE;
-        } else {
-            return resolve;
-        }
-    }
-
-    /**
-     * Legt den Wert der resolve-Eigenschaft fest.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link ResolveValueType }
-     *     
-     */
-    public void setResolve(ResolveValueType value) {
-        this.resolve = value;
-    }
-
-    public boolean isSetResolve() {
-        return (this.resolve!= null);
-    }
-
-    /**
-     * Ruft den Wert der resolveDepth-Eigenschaft ab.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getResolveDepth() {
-        if (resolveDepth == null) {
-            return "*";
-        } else {
-            return resolveDepth;
-        }
-    }
-
-    /**
-     * Legt den Wert der resolveDepth-Eigenschaft fest.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setResolveDepth(String value) {
-        this.resolveDepth = value;
-    }
-
-    public boolean isSetResolveDepth() {
-        return (this.resolveDepth!= null);
-    }
-
-    /**
-     * Ruft den Wert der resolveTimeout-Eigenschaft ab.
-     * 
-     * @return
-     *     possible object is
-     *     {@link BigInteger }
-     *     
-     */
-    public BigInteger getResolveTimeout() {
-        if (resolveTimeout == null) {
-            return new BigInteger("300");
-        } else {
-            return resolveTimeout;
-        }
-    }
-
-    /**
-     * Legt den Wert der resolveTimeout-Eigenschaft fest.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link BigInteger }
-     *     
-     */
-    public void setResolveTimeout(BigInteger value) {
-        this.resolveTimeout = value;
-    }
-
-    public boolean isSetResolveTimeout() {
-        return (this.resolveTimeout!= null);
     }
 
     /**
@@ -333,6 +237,102 @@ public class GetFeatureType
 
     public boolean isSetOutputFormat() {
         return (this.outputFormat!= null);
+    }
+
+    /**
+     * Ruft den Wert der resolve-Eigenschaft ab.
+     * 
+     * @return
+     *     possible object is
+     *     {@link ResolveValueType }
+     *     
+     */
+    public ResolveValueType getResolve() {
+        if (resolve == null) {
+            return ResolveValueType.NONE;
+        } else {
+            return resolve;
+        }
+    }
+
+    /**
+     * Legt den Wert der resolve-Eigenschaft fest.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link ResolveValueType }
+     *     
+     */
+    public void setResolve(ResolveValueType value) {
+        this.resolve = value;
+    }
+
+    public boolean isSetResolve() {
+        return (this.resolve!= null);
+    }
+
+    /**
+     * Ruft den Wert der resolveDepth-Eigenschaft ab.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getResolveDepth() {
+        if (resolveDepth == null) {
+            return "*";
+        } else {
+            return resolveDepth;
+        }
+    }
+
+    /**
+     * Legt den Wert der resolveDepth-Eigenschaft fest.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setResolveDepth(String value) {
+        this.resolveDepth = value;
+    }
+
+    public boolean isSetResolveDepth() {
+        return (this.resolveDepth!= null);
+    }
+
+    /**
+     * Ruft den Wert der resolveTimeout-Eigenschaft ab.
+     * 
+     * @return
+     *     possible object is
+     *     {@link BigInteger }
+     *     
+     */
+    public BigInteger getResolveTimeout() {
+        if (resolveTimeout == null) {
+            return new BigInteger("300");
+        } else {
+            return resolveTimeout;
+        }
+    }
+
+    /**
+     * Legt den Wert der resolveTimeout-Eigenschaft fest.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link BigInteger }
+     *     
+     */
+    public void setResolveTimeout(BigInteger value) {
+        this.resolveTimeout = value;
+    }
+
+    public boolean isSetResolveTimeout() {
+        return (this.resolveTimeout!= null);
     }
 
     public void setAbstractQueryExpression(List<JAXBElement<? extends AbstractQueryExpressionType>> value) {
