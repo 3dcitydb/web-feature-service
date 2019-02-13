@@ -1,6 +1,19 @@
 Change Log
 ==========
 
+### 4.2 - 2019-02-13
+
+##### Changes
+* CityJSON output now uses the latest CityJSON version 0.9.
+
+##### Fixes
+* Encoding of CityJSON output is UTF-8 per default.
+* This release is based on the Importer/Exporter version 4.2.0, and thus incorporates all bug fixes and updates introduced 
+in that version ([more information](https://github.com/3dcitydb/importer-exporter/releases/tag/v4.2.0)). 
+
+##### Miscellaneous 
+* Updated citygml4j to 2.9.1.
+
 ### 4.1 - 2019-01-09
 
 ##### Changes
