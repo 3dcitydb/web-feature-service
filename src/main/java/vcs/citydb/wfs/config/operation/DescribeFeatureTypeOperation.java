@@ -1,16 +1,15 @@
 package vcs.citydb.wfs.config.operation;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Set;
+import vcs.citydb.wfs.config.operation.OutputFormat.OutputFormatList;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
-import vcs.citydb.wfs.config.operation.OutputFormat.OutputFormatList;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Set;
 
 @XmlType(name="DescribeFeatureTypeOperationType", propOrder={
 		"outputFormats"

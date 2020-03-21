@@ -1,9 +1,9 @@
 package vcs.citydb.wfs.kvp.parser;
 
+import vcs.citydb.wfs.exception.KVPParseException;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import vcs.citydb.wfs.exception.KVPParseException;
 
 public class FlatValueListParser<T> extends ValueParser<List<T>> {
 private final ValueParser<T> valueParser;

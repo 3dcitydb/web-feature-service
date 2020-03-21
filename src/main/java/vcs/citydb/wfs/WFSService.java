@@ -275,7 +275,7 @@ public class WFSService extends HttpServlet {
 		// create copy of the 3DCityDB configuration
 		Project project = config.getProject();
 		Config config = new Config(
-				new Project(project.getDatabase(), project.getImporter(), project.getExporter(), null, project.getGlobal()),
+				new Project(project.getDatabase(), project.getImporter(), project.getExporter(), null, null, project.getGlobal()),
 				null, new Internal());
 
 		try {

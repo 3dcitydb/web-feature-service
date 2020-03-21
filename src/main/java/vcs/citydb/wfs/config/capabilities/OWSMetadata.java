@@ -1,12 +1,12 @@
 package vcs.citydb.wfs.config.capabilities;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
-
-import vcs.citydb.wfs.config.Constants;
 import net.opengis.ows._1.LanguageStringType;
 import net.opengis.ows._1.ServiceIdentification;
 import net.opengis.ows._1.ServiceProvider;
+import vcs.citydb.wfs.config.Constants;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlType;
 
 @XmlType(name="OWSMetadataType", propOrder={
 		"serviceIdentification",

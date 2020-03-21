@@ -1,10 +1,10 @@
 package vcs.citydb.wfs.config.feature;
 
+import org.citygml4j.model.citygml.CityGMLClass;
+
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlType;
-
-import org.citygml4j.model.citygml.CityGMLClass;
 
 @XmlType(name="FeatureTypeNameType")
 @XmlEnum

@@ -1,10 +1,10 @@
 package vcs.citydb.wfs.kvp;
 
-import java.util.Map;
-
 import net.opengis.wfs._2.ListStoredQueriesType;
 import vcs.citydb.wfs.config.WFSConfig;
 import vcs.citydb.wfs.exception.WFSException;
+
+import java.util.Map;
 
 public class ListStoredQueriesReader extends KVPRequestReader {
 	private final BaseRequestReader baseRequestReader;

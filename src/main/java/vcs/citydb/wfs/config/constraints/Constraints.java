@@ -1,9 +1,9 @@
 package vcs.citydb.wfs.config.constraints;
 
+import org.citydb.config.project.query.filter.lod.LodFilter;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
-
-import org.citydb.config.project.query.filter.lod.LodFilter;
 
 @XmlType(name="ConstraintsType", propOrder={
 		"countDefault",

@@ -1,22 +1,9 @@
 package vcs.citydb.wfs.operation.describefeaturetype;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
-import java.util.Set;
-
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import net.opengis.wfs._2.DescribeFeatureTypeType;
 import org.citydb.database.schema.mapping.FeatureType;
 import org.citydb.log.Logger;
 import org.citygml4j.model.module.citygml.CityGMLVersion;
-
-import net.opengis.wfs._2.DescribeFeatureTypeType;
 import vcs.citydb.wfs.config.WFSConfig;
 import vcs.citydb.wfs.config.operation.DescribeFeatureTypeOutputFormat;
 import vcs.citydb.wfs.config.operation.OutputFormat;
@@ -29,6 +16,17 @@ import vcs.citydb.wfs.operation.describefeaturetype.citygml.CityGMLSchemaReader;
 import vcs.citydb.wfs.operation.describefeaturetype.cityjson.CityJSONSchemaReader;
 import vcs.citydb.wfs.operation.filter.FeatureTypeHandler;
 import vcs.citydb.wfs.util.LoggerUtil;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+import java.util.Set;
 
 public class DescribeFeatureTypeHandler {
 	private final Logger log = Logger.getInstance();

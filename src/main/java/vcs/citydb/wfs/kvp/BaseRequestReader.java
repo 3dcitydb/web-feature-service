@@ -1,12 +1,12 @@
 package vcs.citydb.wfs.kvp;
 
-import java.util.Map;
-
 import net.opengis.wfs._2.BaseRequestType;
 import vcs.citydb.wfs.exception.KVPParseException;
 import vcs.citydb.wfs.exception.WFSException;
 import vcs.citydb.wfs.exception.WFSExceptionCode;
 import vcs.citydb.wfs.kvp.parser.StringParser;
+
+import java.util.Map;
 
 public class BaseRequestReader {
 

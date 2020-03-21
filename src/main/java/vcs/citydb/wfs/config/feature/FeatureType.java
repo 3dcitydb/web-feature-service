@@ -1,12 +1,5 @@
 package vcs.citydb.wfs.config.feature;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.namespace.QName;
-
 import net.opengis.ows._1.KeywordsType;
 import net.opengis.ows._1.WGS84BoundingBoxType;
 import net.opengis.wfs._2.Abstract;
@@ -14,6 +7,12 @@ import net.opengis.wfs._2.ExtendedDescriptionType;
 import net.opengis.wfs._2.MetadataURLType;
 import net.opengis.wfs._2.Title;
 import vcs.citydb.wfs.config.Constants;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.namespace.QName;
+import java.util.ArrayList;
+import java.util.List;
 
 @XmlTransient
 public class FeatureType {

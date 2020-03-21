@@ -1,20 +1,18 @@
 package vcs.citydb.wfs.kvp.parser;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.xml.XMLConstants;
-
 import org.citygml4j.model.module.Module;
 import org.citygml4j.model.module.Modules;
 import org.citygml4j.model.module.citygml.CityGMLModule;
 import org.citygml4j.model.module.citygml.CityGMLVersion;
 import org.xml.sax.SAXException;
-
 import vcs.citydb.wfs.config.Constants;
 import vcs.citydb.wfs.config.WFSConfig;
 import vcs.citydb.wfs.exception.KVPParseException;
 import vcs.citydb.wfs.xml.NamespaceFilter;
+
+import javax.xml.XMLConstants;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class NamespacesParser extends ValueParser<NamespaceFilter> {
 	private final WFSConfig wfsConfig;

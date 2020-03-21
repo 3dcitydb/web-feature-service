@@ -1,9 +1,9 @@
 package vcs.citydb.wfs.kvp.parser;
 
-import java.util.List;
-
 import net.opengis.ows._1.AcceptVersionsType;
 import vcs.citydb.wfs.exception.KVPParseException;
+
+import java.util.List;
 
 public class AcceptVersionsParser extends ValueParser<AcceptVersionsType> {
 

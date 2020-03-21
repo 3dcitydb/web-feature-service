@@ -1,10 +1,10 @@
 package vcs.citydb.wfs.kvp.parser;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import vcs.citydb.wfs.exception.KVPParseException;
 import vcs.citydb.wfs.kvp.KVPConstants;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ValueListParser<T> extends ValueParser<List<List<T>>> {
 	private final ValueParser<T> valueParser;

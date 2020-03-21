@@ -1,6 +1,6 @@
 package vcs.citydb.wfs.filter;
 
-import java.io.IOException;
+import vcs.citydb.wfs.config.Constants;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -11,8 +11,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import vcs.citydb.wfs.config.Constants;
+import java.io.IOException;
 
 @WebFilter(Constants.WFS_SERVICE_PATH)
 public class GZIPFilter implements Filter {

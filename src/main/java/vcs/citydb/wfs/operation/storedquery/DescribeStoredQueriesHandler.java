@@ -1,11 +1,17 @@
 package vcs.citydb.wfs.operation.storedquery;
 
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import net.opengis.wfs._2.DescribeStoredQueriesType;
+import org.citydb.log.Logger;
+import org.citydb.registry.ObjectRegistry;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import vcs.citydb.wfs.config.Constants;
+import vcs.citydb.wfs.config.WFSConfig;
+import vcs.citydb.wfs.exception.WFSException;
+import vcs.citydb.wfs.exception.WFSExceptionCode;
+import vcs.citydb.wfs.operation.BaseRequestHandler;
+import vcs.citydb.wfs.util.LoggerUtil;
+import vcs.citydb.wfs.xml.IndentingXMLStreamWriter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -18,21 +24,12 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stax.StAXResult;
-
-import net.opengis.wfs._2.DescribeStoredQueriesType;
-
-import org.citydb.log.Logger;
-import org.citydb.registry.ObjectRegistry;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-
-import vcs.citydb.wfs.config.Constants;
-import vcs.citydb.wfs.config.WFSConfig;
-import vcs.citydb.wfs.exception.WFSException;
-import vcs.citydb.wfs.exception.WFSExceptionCode;
-import vcs.citydb.wfs.operation.BaseRequestHandler;
-import vcs.citydb.wfs.util.LoggerUtil;
-import vcs.citydb.wfs.xml.IndentingXMLStreamWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 
 public class DescribeStoredQueriesHandler {
 	private final Logger log = Logger.getInstance();

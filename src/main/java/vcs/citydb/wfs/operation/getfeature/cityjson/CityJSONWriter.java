@@ -9,11 +9,11 @@ import org.citydb.concurrent.SingleWorkerPool;
 import org.citydb.config.Config;
 import org.citydb.registry.ObjectRegistry;
 import org.citydb.writer.CityJSONWriterWorkerFactory;
-import org.citygml4j.binding.cityjson.CityJSON;
-import org.citygml4j.binding.cityjson.feature.AbstractCityObjectType;
 import org.citygml4j.builder.cityjson.json.io.writer.CityJSONChunkWriter;
 import org.citygml4j.builder.cityjson.json.io.writer.CityJSONWriteException;
 import org.citygml4j.builder.cityjson.marshal.CityJSONMarshaller;
+import org.citygml4j.cityjson.CityJSON;
+import org.citygml4j.cityjson.feature.AbstractCityObjectType;
 import org.citygml4j.model.citygml.core.AbstractCityObject;
 import org.citygml4j.model.gml.feature.AbstractFeature;
 import vcs.citydb.wfs.operation.getfeature.FeatureWriter;
@@ -81,7 +81,7 @@ public class CityJSONWriter implements FeatureWriter {
 	}
 
 	@Override
-	public void write(AbstractFeature feature) throws FeatureWriteException {	
+	public void write(AbstractFeature feature, long sequenceId) throws FeatureWriteException {
 		if (feature instanceof AbstractCityObject) {
 			if (checkForDuplicates && isFeatureAlreadyExported(feature))
 				return;
@@ -114,6 +114,11 @@ public class CityJSONWriter implements FeatureWriter {
 	}
 
 	@Override
+	public void updateSequenceId(long sequenceId) throws FeatureWriteException {
+		// nothing to do
+	}
+
+	@Override
 	public void close() throws FeatureWriteException {
 		try {
 			writerPool.shutdownAndWait();
@@ -134,5 +139,4 @@ public class CityJSONWriter implements FeatureWriter {
 		UIDCache server = uidCacheManager.getCache(UIDCacheType.OBJECT);
 		return server.get(feature.getId()) != null;
 	}
-
 }

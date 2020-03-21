@@ -1,22 +1,20 @@
 package vcs.citydb.wfs.exception;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import net.opengis.ows._1.ExceptionReport;
+import net.opengis.ows._1.ExceptionType;
+import net.opengis.ows._1.ObjectFactory;
+import org.citydb.log.Logger;
+import org.citygml4j.builder.jaxb.CityGMLBuilder;
+import org.citygml4j.util.xml.SAXWriter;
+import org.xml.sax.SAXException;
+import vcs.citydb.wfs.config.Constants;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-
-import org.citydb.log.Logger;
-import org.citygml4j.builder.jaxb.CityGMLBuilder;
-import org.citygml4j.util.xml.SAXWriter;
-import org.xml.sax.SAXException;
-
-import net.opengis.ows._1.ExceptionReport;
-import net.opengis.ows._1.ExceptionType;
-import net.opengis.ows._1.ObjectFactory;
-import vcs.citydb.wfs.config.Constants;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 public class WFSExceptionReportHandler {
 	private final Logger log = Logger.getInstance();

@@ -1,13 +1,13 @@
 package vcs.citydb.wfs.kvp;
 
-import java.util.Map;
-
 import vcs.citydb.wfs.config.WFSConfig;
 import vcs.citydb.wfs.exception.KVPParseException;
 import vcs.citydb.wfs.exception.WFSException;
 import vcs.citydb.wfs.exception.WFSExceptionCode;
 import vcs.citydb.wfs.kvp.parser.NamespacesParser;
 import vcs.citydb.wfs.xml.NamespaceFilter;
+
+import java.util.Map;
 
 public abstract class KVPRequestReader {
 	protected final Map<String, String> parameters;

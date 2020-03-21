@@ -46,7 +46,7 @@ public class QueryBuilder {
 			}
 
 			// add ordering
-			if (!queryExpression.isSetOrderBy()) {
+			if (!queryExpression.isSetSorting()) {
 				ProjectionToken token = tmp.getProjection().get(0);
 				if (token instanceof Column && ((Column)token).getName().equals(MappingConstants.ID))
 					tmp.addOrderBy(new OrderByToken((Column)token));

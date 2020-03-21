@@ -1,9 +1,8 @@
 package vcs.citydb.wfs.operation.getfeature;
 
+import net.opengis.wfs._2.TruncatedResponse;
 import org.citydb.citygml.exporter.util.Metadata;
 import org.citydb.citygml.exporter.writer.FeatureWriteException;
-
-import net.opengis.wfs._2.TruncatedResponse;
 
 public interface FeatureWriter extends org.citydb.citygml.exporter.writer.FeatureWriter {
 	void startFeatureCollection(long matchNo, long returnNo) throws FeatureWriteException;

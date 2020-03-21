@@ -1,10 +1,10 @@
 package vcs.citydb.wfs.exception;
 
+import vcs.citydb.wfs.config.Constants;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import vcs.citydb.wfs.config.Constants;
 
 public class WFSException extends Exception {
 	private static final long serialVersionUID = -1620130047924173953L;

@@ -1,12 +1,11 @@
 package vcs.citydb.wfs.config;
 
-import java.io.File;
-import java.io.IOException;
-
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.SchemaOutputResolver;
 import javax.xml.transform.Result;
 import javax.xml.transform.stream.StreamResult;
+import java.io.File;
+import java.io.IOException;
 
 public class WFSConfigSchemaWriter {
 

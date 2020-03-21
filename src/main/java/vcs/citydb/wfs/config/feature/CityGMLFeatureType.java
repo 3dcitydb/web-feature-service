@@ -1,13 +1,12 @@
 package vcs.citydb.wfs.config.feature;
 
-import java.util.Objects;
+import org.citygml4j.model.module.citygml.CityGMLModuleType;
+import org.citygml4j.model.module.citygml.CityGMLVersion;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.namespace.QName;
-
-import org.citygml4j.model.module.citygml.CityGMLModuleType;
-import org.citygml4j.model.module.citygml.CityGMLVersion;
+import java.util.Objects;
 
 @XmlType(name="FeatureTypeType", propOrder={
 		"name",

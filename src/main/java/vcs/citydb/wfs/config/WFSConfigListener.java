@@ -1,13 +1,12 @@
 package vcs.citydb.wfs.config;
 
+import net.opengis.ows._1.CodeType;
+import vcs.citydb.wfs.config.capabilities.OWSMetadata;
+
+import javax.xml.bind.Unmarshaller.Listener;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-
-import javax.xml.bind.Unmarshaller.Listener;
-
-import net.opengis.ows._1.CodeType;
-import vcs.citydb.wfs.config.capabilities.OWSMetadata;
 
 public class WFSConfigListener extends Listener {
 

@@ -1,10 +1,9 @@
 package vcs.citydb.wfs.filter;
 
-import java.io.IOException;
-import java.util.zip.GZIPOutputStream;
-
 import javax.servlet.ServletOutputStream;
 import javax.servlet.WriteListener;
+import java.io.IOException;
+import java.util.zip.GZIPOutputStream;
 
 public class GZIPServletOutputStream extends ServletOutputStream {
 	private final ServletOutputStream servletOutputStream;

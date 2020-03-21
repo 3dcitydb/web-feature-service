@@ -139,7 +139,7 @@ public class CityGMLWriter implements FeatureWriter {
 	}
 
 	@Override
-	public void write(AbstractFeature feature) throws FeatureWriteException {
+	public void write(AbstractFeature feature, long sequenceId) throws FeatureWriteException {
 		// security feature: strip geometry from features
 		if (geometryStripper != null)
 			feature.accept(geometryStripper);
@@ -231,6 +231,11 @@ public class CityGMLWriter implements FeatureWriter {
 	}
 
 	@Override
+	public void updateSequenceId(long sequenceId) throws FeatureWriteException {
+		// nothing to do
+	}
+
+	@Override
 	public void close() throws FeatureWriteException {
 		try {
 			writerPool.shutdownAndWait();
@@ -293,5 +298,4 @@ public class CityGMLWriter implements FeatureWriter {
 				DatatypeConstants.FIELD_UNDEFINED,
 				DatatypeConstants.FIELD_UNDEFINED);
 	}
-
 }

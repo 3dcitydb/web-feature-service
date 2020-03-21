@@ -1,10 +1,9 @@
 package vcs.citydb.wfs.config.feature;
 
-import java.util.Objects;
-
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.namespace.QName;
+import java.util.Objects;
 
 @XmlType(name="ADEFeatureTypeType", propOrder={
 		"name",

@@ -1,21 +1,19 @@
 package vcs.citydb.wfs.xml;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-
-import javax.xml.XMLConstants;
-import javax.xml.namespace.NamespaceContext;
-
 import org.citygml4j.model.module.gml.GMLCoreModule;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLFilterImpl;
-
 import vcs.citydb.wfs.config.Constants;
+
+import javax.xml.XMLConstants;
+import javax.xml.namespace.NamespaceContext;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 public class NamespaceFilter extends XMLFilterImpl implements NamespaceContext {
 	private HashMap<String, String> prefixToUri;

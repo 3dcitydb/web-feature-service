@@ -142,6 +142,7 @@ public class ExportController {
 					config.getProject().getExporter().getResources().getThreadPool().getDefaultPool().getMaxThreads(),
 					PoolSizeAdaptationStrategy.AGGRESSIVE,
 					new DBExportWorkerFactory(
+							null,
 							schemaMapping,
 							cityGMLBuilder,
 							writer,

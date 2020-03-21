@@ -1,13 +1,12 @@
 package vcs.citydb.wfs.config.database;
 
-import java.util.List;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
-
 import org.citydb.config.project.database.DBConnection;
 import org.citydb.config.project.database.DatabaseSrs;
 import org.citydb.config.project.database.DatabaseSrsList;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlType;
+import java.util.List;
 
 @XmlType(name="WFSDatabaseType", propOrder={
 		"referenceSystems",

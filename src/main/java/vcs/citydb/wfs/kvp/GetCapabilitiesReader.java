@@ -1,7 +1,5 @@
 package vcs.citydb.wfs.kvp;
 
-import java.util.Map;
-
 import net.opengis.wfs._2.GetCapabilitiesType;
 import vcs.citydb.wfs.config.WFSConfig;
 import vcs.citydb.wfs.exception.KVPParseException;
@@ -9,6 +7,8 @@ import vcs.citydb.wfs.exception.WFSException;
 import vcs.citydb.wfs.exception.WFSExceptionCode;
 import vcs.citydb.wfs.kvp.parser.AcceptVersionsParser;
 import vcs.citydb.wfs.kvp.parser.StringParser;
+
+import java.util.Map;
 
 public class GetCapabilitiesReader extends KVPRequestReader {
 

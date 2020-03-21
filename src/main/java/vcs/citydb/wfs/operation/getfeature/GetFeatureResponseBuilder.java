@@ -1,16 +1,15 @@
 package vcs.citydb.wfs.operation.getfeature;
 
-import java.io.OutputStream;
-import java.util.List;
-import java.util.Map;
-
+import net.opengis.wfs._2.GetFeatureType;
 import org.citydb.citygml.common.database.uid.UIDCacheManager;
 import org.citydb.citygml.exporter.writer.FeatureWriteException;
 import org.citydb.config.Config;
-
-import net.opengis.wfs._2.GetFeatureType;
 import vcs.citydb.wfs.config.WFSConfig;
 import vcs.citydb.wfs.util.GeometryStripper;
+
+import java.io.OutputStream;
+import java.util.List;
+import java.util.Map;
 
 public interface GetFeatureResponseBuilder {
 	public String getMimeType();

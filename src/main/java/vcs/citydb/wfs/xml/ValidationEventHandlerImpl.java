@@ -1,10 +1,10 @@
 package vcs.citydb.wfs.xml;
 
-import javax.xml.bind.ValidationEvent;
-import javax.xml.bind.ValidationEventHandler;
-
 import org.citydb.config.project.global.LogLevel;
 import org.citydb.log.Logger;
+
+import javax.xml.bind.ValidationEvent;
+import javax.xml.bind.ValidationEventHandler;
 
 public class ValidationEventHandlerImpl implements ValidationEventHandler {
 	private final Logger log = Logger.getInstance();

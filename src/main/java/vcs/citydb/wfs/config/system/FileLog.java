@@ -1,9 +1,9 @@
 package vcs.citydb.wfs.config.system;
 
+import org.citydb.config.project.global.LogLevel;
+
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
-
-import org.citydb.config.project.global.LogLevel;
 
 @XmlType(name="FileLogType", propOrder={
 		"logLevel",

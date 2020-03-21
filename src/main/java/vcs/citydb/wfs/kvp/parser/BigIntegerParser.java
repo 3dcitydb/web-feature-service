@@ -1,8 +1,8 @@
 package vcs.citydb.wfs.kvp.parser;
 
-import java.math.BigInteger;
-
 import vcs.citydb.wfs.exception.KVPParseException;
+
+import java.math.BigInteger;
 
 public class BigIntegerParser extends ValueParser<BigInteger> {
 

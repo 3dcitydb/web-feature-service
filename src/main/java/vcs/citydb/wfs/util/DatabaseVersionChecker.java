@@ -1,9 +1,5 @@
 package vcs.citydb.wfs.util;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.citydb.config.project.database.Database;
 import org.citydb.database.adapter.AbstractDatabaseAdapter;
 import org.citydb.database.connection.DatabaseConnectionWarning;
@@ -11,6 +7,10 @@ import org.citydb.database.connection.DatabaseConnectionWarning.ConnectionWarnin
 import org.citydb.database.version.DatabaseVersion;
 import org.citydb.database.version.DatabaseVersionException;
 import org.citydb.database.version.DatabaseVersionSupport;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class DatabaseVersionChecker implements org.citydb.database.version.DatabaseVersionChecker {
 	private final DatabaseVersionSupport[] supportedVersions = new DatabaseVersionSupport[]{

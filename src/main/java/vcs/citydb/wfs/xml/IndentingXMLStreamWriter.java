@@ -1,10 +1,9 @@
 package vcs.citydb.wfs.xml;
 
-import java.util.Stack;
-
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
+import java.util.Stack;
 
 public class IndentingXMLStreamWriter implements XMLStreamWriter {
 	private final static Object SEEN_NOTHING = new Object();

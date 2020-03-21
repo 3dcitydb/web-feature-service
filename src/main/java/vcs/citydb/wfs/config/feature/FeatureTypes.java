@@ -1,5 +1,21 @@
 package vcs.citydb.wfs.config.feature;
 
+import org.citydb.ade.ADEExtension;
+import org.citydb.ade.ADEExtensionManager;
+import org.citydb.database.schema.mapping.SchemaMapping;
+import org.citydb.log.Logger;
+import org.citydb.registry.ObjectRegistry;
+import org.citygml4j.model.citygml.ade.ADEException;
+import org.citygml4j.model.citygml.ade.binding.ADEContext;
+import org.citygml4j.model.module.Module;
+import org.citygml4j.model.module.Modules;
+import org.citygml4j.model.module.ade.ADEModule;
+import org.citygml4j.model.module.citygml.CityGMLVersion;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlType;
+import javax.xml.namespace.QName;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -12,23 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.namespace.QName;
-
-import org.citydb.ade.ADEExtension;
-import org.citydb.ade.ADEExtensionManager;
-import org.citydb.database.schema.mapping.SchemaMapping;
-import org.citydb.log.Logger;
-import org.citydb.registry.ObjectRegistry;
-import org.citygml4j.model.citygml.ade.ADEException;
-import org.citygml4j.model.citygml.ade.binding.ADEContext;
-import org.citygml4j.model.module.Module;
-import org.citygml4j.model.module.Modules;
-import org.citygml4j.model.module.ade.ADEModule;
-import org.citygml4j.model.module.citygml.CityGMLVersion;
 
 @XmlType(name="FeatureTypesType", propOrder={
 		"cityGMLFeatureTypes",

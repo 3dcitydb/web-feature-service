@@ -263,7 +263,7 @@ public class WebServiceInitializer implements ServletContextListener {
 		exporter.getAppearances().setExportAppearances(false);
 		exporter.getAppearances().setExportTextureFiles(false);
 
-		return new Config(new Project(database, null, exporter, null, global), null, null);
+		return new Config(new Project(database, null, exporter, null, null, global), null, null);
 	}
 
 	private void initLogging(WFSConfig wfsConfig, ServletContext context) throws ServletException {
