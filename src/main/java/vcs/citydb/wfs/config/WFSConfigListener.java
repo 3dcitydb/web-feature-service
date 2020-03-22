@@ -5,7 +5,6 @@ import vcs.citydb.wfs.config.capabilities.OWSMetadata;
 
 import javax.xml.bind.Unmarshaller.Listener;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 public class WFSConfigListener extends Listener {
@@ -26,18 +25,13 @@ public class WFSConfigListener extends Listener {
 			
 			else {
 				List<String> versions = owsMetadata.getServiceIdentification().getServiceTypeVersion();
-				
-				Iterator<String> iter = versions.iterator();
-				while (iter.hasNext()) {
-					if (!Constants.SUPPORTED_WFS_VERSIONS.contains(iter.next()))
-						iter.remove();
-				}
-				
+				versions.removeIf(version -> !Constants.SUPPORTED_WFS_VERSIONS.contains(version));
+
 				if (!versions.isEmpty())
-					Collections.sort(versions, Collections.reverseOrder());
+					versions.sort(Collections.reverseOrder());
 				else
 					versions = Constants.SUPPORTED_WFS_VERSIONS;
-				
+
 				Constants.DEFAULT_WFS_VERSION = versions.get(0);
 			}
 		}

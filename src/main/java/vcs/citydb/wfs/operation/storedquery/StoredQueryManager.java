@@ -178,7 +178,8 @@ public class StoredQueryManager {
 		// GetFeatureById query according to the WFS 2.0 spec
 		StoredQueryDescriptionType description = new StoredQueryDescriptionType();
 
-		description.setId(GET_FEATURE_BY_ID_NAME);
+		description.setId(!Constants.DEFAULT_WFS_VERSION.equals("2.0.0") ?
+				GET_FEATURE_BY_ID_NAME : DEPRECATED_GET_FEATURE_BY_ID_NAME);
 
 		Title queryTitle = new Title();
 		queryTitle.setLang("en");

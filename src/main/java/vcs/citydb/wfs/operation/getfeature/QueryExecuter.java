@@ -201,7 +201,7 @@ public class QueryExecuter implements EventHandler {
 			} else {
 				// no results returned
 				if (!isWriteSingleFeature) {
-					if (isMultipleQueryRequest) {
+					if (isMultipleQueryRequest && resultType == ResultTypeType.RESULTS) {
 						writer.startFeatureCollection(0, 0);
 						for (int i = 0; i < queryExpressions.size(); i++) {
 							writer.startFeatureCollection(0, 0);

@@ -32,6 +32,7 @@ public class CityJSONWriterBuilder implements GetFeatureResponseBuilder {
 	private final String SIGNIFICANT_DIGITS = "significantDigits";
 	private final String SIGNIFICANT_TEXTURE_DIGITS = "significantTextureDigits";
 	private final String TRANSFORM_VERTICES = "transformVertices";
+	private final String GENERATE_CITYGML_METADATA = "generateCityGMLMetadata";
 	
 	private CityJSONOutputFactory factory;
 	private Map<String, String> formatOptions;
@@ -82,7 +83,7 @@ public class CityJSONWriterBuilder implements GetFeatureResponseBuilder {
 			
 			if (formatOptions.containsKey(SIGNIFICANT_TEXTURE_DIGITS)) {
 				try {
-					Integer significantDigits = Integer.parseInt(formatOptions.get(SIGNIFICANT_TEXTURE_DIGITS));
+					int significantDigits = Integer.parseInt(formatOptions.get(SIGNIFICANT_TEXTURE_DIGITS));
 					factory.setTextureVerticesBuilder(new DefaultTextureVerticesBuilder().withSignificantDigits(significantDigits));
 				} catch (NumberFormatException e) {
 					log.warn("The '" + SIGNIFICANT_TEXTURE_DIGITS + "' format options requires an integer value.");
@@ -91,6 +92,11 @@ public class CityJSONWriterBuilder implements GetFeatureResponseBuilder {
 			
 			if ("true".equals(formatOptions.get(TRANSFORM_VERTICES)))
 				factory.setVerticesTransformer(new DefaultVerticesTransformer());
+
+			if ("false".equals(formatOptions.get(GENERATE_CITYGML_METADATA)))
+				factory.setGenerateCityGMLMetadata(false);
+			else
+				factory.setGenerateCityGMLMetadata(true);
 				
 		} catch (CityJSONBuilderException e) {
 			throw new FeatureWriteException("Failed to initialize CityJSON response builder.", e);
