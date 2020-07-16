@@ -28,7 +28,7 @@ configurations {
 
 repositories {
     maven {
-        url 'http://download.osgeo.org/webdav/geotools'
+        url 'https://repo.osgeo.org/repository/release'
     }
     maven {
         url 'https://dl.bintray.com/3dcitydb/maven'
@@ -37,16 +37,16 @@ repositories {
 }
 
 dependencies {
-    compile('org.citydb:impexp-core:4.2.0') {
-        jdbc 'org.postgresql:postgresql:+'
-        jdbc 'net.postgis:postgis-jdbc:+'
-
+    compile('org.citydb:impexp-core:4.2.3') {
         exclude group: 'org.postgresql', module: 'postgresql'
         exclude group: 'net.postgis', module: 'postgis-jdbc'
     }
     compile files('lib/sdoapi-18.3.0.0.jar')
     providedCompile files('lib/ojdbc8-18.3.0.0.jar')
     providedCompile 'javax.servlet:javax.servlet-api:3.1.0'
+
+    jdbc 'org.postgresql:postgresql:42.2.10'
+    jdbc 'net.postgis:postgis-jdbc:2.3.0'
 
     jaxb 'org.glassfish.jaxb:jaxb-xjc:2.3.2'
     jaxb 'org.jvnet.jaxb2_commons:jaxb2-basics:0.12.0'
