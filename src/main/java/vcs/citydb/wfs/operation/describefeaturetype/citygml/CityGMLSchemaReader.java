@@ -61,7 +61,7 @@ public class CityGMLSchemaReader implements SchemaReader {
 			Module module = modules.iterator().next();
 			if (module instanceof CityGMLModule) {
 				String fileName = module.getSchemaLocation();
-				fileName = fileName.substring(fileName.lastIndexOf("/"), fileName.length());				
+				fileName = fileName.substring(fileName.lastIndexOf("/"));
 				return servletContext.getResourceAsStream(localSchemaPath + fileName);
 			} else if (module instanceof ADEModule)
 				return ((ADEModule)module).getSchemaResource().openStream();

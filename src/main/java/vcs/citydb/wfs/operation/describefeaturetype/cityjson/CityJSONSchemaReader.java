@@ -19,12 +19,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class CityJSONSchemaReader implements SchemaReader {
 	private Set<FeatureType> featureTypes;
@@ -59,49 +60,42 @@ public class CityJSONSchemaReader implements SchemaReader {
 				hierarchies.put("Bridge", Arrays.asList("BridgePart", "BridgeInstallation", "BridgeConstructionElement"));
 				hierarchies.put("Tunnel", Arrays.asList("TunnelPart", "TunnelInstallation"));
 
-				Gson gson = new GsonBuilder().setPrettyPrinting().create();
-				JsonReader reader = new JsonReader(new InputStreamReader(servletContext.getResourceAsStream(Constants.CITYJSON_SCHEMA_PATH + "/cityjson-v06.schema.json")));
+				Gson gson = new GsonBuilder().create();
+				JsonReader reader = new JsonReader(new InputStreamReader(servletContext.getResourceAsStream(Constants.CITYJSON_SCHEMA_PATH + "/cityjson-v1.0.1.min.schema.json")));
 				JsonObject schema = gson.fromJson(reader, JsonObject.class);
 
-				JsonObject definitions = schema.get("definitions").getAsJsonObject();
-				JsonArray references = schema.get("properties").getAsJsonObject()
+				Map<String, JsonElement> cityObjects = new LinkedHashMap<>();
+				JsonArray definitions = schema.get("properties").getAsJsonObject()
 						.get("CityObjects").getAsJsonObject()
 						.get("additionalProperties").getAsJsonObject()
-						.get("oneOf").getAsJsonArray();			
+						.get("oneOf").getAsJsonArray();
 
-				Map<String, JsonElement> cityObjects = new HashMap<>();
-				for (JsonElement reference1 : references) {
-					JsonObject reference = reference1.getAsJsonObject();
-					String value = reference.get("$ref").getAsString();
-					String typeName = value.substring(value.lastIndexOf("/") + 1, value.length());
-					cityObjects.put(typeName, reference);
-				}
-				
-				for (Entry<String, JsonElement> entry : cityObjects.entrySet()) {
-					String typeName = entry.getKey();
-					if (mappings.containsKey(typeName))
-						typeName = mappings.get(typeName);
-					
-					boolean found = false;
-					for (FeatureType featureType : featureTypes) {
-						if (featureType.getPath().equals(typeName)) {
-							found = true;
-							break;
-						}
+				for (Iterator<JsonElement> iter = definitions.iterator(); iter.hasNext(); ) {
+					JsonElement cityObject = iter.next();
+					if (cityObject.isJsonObject() && cityObject.getAsJsonObject().has("allOf")) {
+						String typeName = cityObject.getAsJsonObject()
+								.get("allOf").getAsJsonArray().get(1).getAsJsonObject()
+								.get("properties").getAsJsonObject()
+								.get("type").getAsJsonObject()
+								.get("enum").getAsJsonArray().get(0).getAsString();
+
+						cityObjects.put(mappings.getOrDefault(typeName, typeName), cityObject);
+						iter.remove();
 					}
-					
-					if (!found) {
-						if (hierarchies.values().stream().flatMap(List::stream).collect(Collectors.toList()).contains(typeName))
-							continue;
-						
-						definitions.remove(entry.getKey());
-						references.remove(entry.getValue());
-						
-						if (hierarchies.containsKey(entry.getKey())) {
-							for (String nested : hierarchies.get(entry.getKey())) {
-								definitions.remove(nested);
-								references.remove(cityObjects.get(nested));
-							}
+				}
+
+				for (FeatureType featureType : featureTypes) {
+					String typeName = featureType.getPath();
+					JsonElement cityObject = cityObjects.get(typeName);
+
+					if (cityObject != null) {
+						definitions.add(cityObject);
+
+						// add children
+						for (String childName : hierarchies.getOrDefault(typeName, Collections.emptyList())) {
+							JsonElement child = cityObjects.get(childName);
+							if (child != null)
+								definitions.add(child);
 						}
 					}
 				}
@@ -112,9 +106,6 @@ public class CityJSONSchemaReader implements SchemaReader {
 			}
 		}
 
-		return servletContext.getResourceAsStream(Constants.CITYJSON_SCHEMA_PATH + "/cityjson-v06.schema.json");
+		return servletContext.getResourceAsStream(Constants.CITYJSON_SCHEMA_PATH + "/cityjson-v1.0.1.min.schema.json");
 	}
-
-
-
 }

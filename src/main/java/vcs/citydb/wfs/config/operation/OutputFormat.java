@@ -16,10 +16,9 @@ import java.util.Map.Entry;
 		"options"
 })
 public class OutputFormat {
-	@XmlAttribute(required=true)
+	@XmlAttribute(required = true)
 	private String name;
 	@XmlJavaTypeAdapter(MapAdapter.class)
-	@XmlElement(nillable=false)
 	LinkedHashMap<String, String> options;
 
 	public OutputFormat() {

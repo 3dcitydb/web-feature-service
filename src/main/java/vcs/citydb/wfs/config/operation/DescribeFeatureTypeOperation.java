@@ -2,7 +2,6 @@ package vcs.citydb.wfs.config.operation;
 
 import vcs.citydb.wfs.config.operation.OutputFormat.OutputFormatList;
 
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -16,7 +15,6 @@ import java.util.Set;
 })
 public class DescribeFeatureTypeOperation {
 	@XmlJavaTypeAdapter(OutputFormatAdapter.class)
-	@XmlElement(nillable=false)
 	private LinkedHashMap<String, OutputFormat> outputFormats;
 	
 	public DescribeFeatureTypeOperation() {
@@ -38,7 +36,7 @@ public class DescribeFeatureTypeOperation {
 	
 	public boolean supportsOutputFormat(String outputFormat) {
 		DescribeFeatureTypeOutputFormat candidate = DescribeFeatureTypeOutputFormat.fromValue(outputFormat);
-		return candidate != null ? supportsOutputFormat(candidate) : false;
+		return candidate != null && supportsOutputFormat(candidate);
 	}
 	
 	public OutputFormat getOutputFormat(String outputFormat) {
@@ -68,7 +66,5 @@ public class DescribeFeatureTypeOperation {
 			list.outputFormats = new ArrayList<>(v.values());
 			return list;
 		}
-
 	}
-	
 }
