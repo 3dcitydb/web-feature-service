@@ -1,6 +1,6 @@
 package vcs.citydb.wfs.util;
 
-import org.citydb.config.project.database.Database;
+import org.citydb.config.project.database.DatabaseConfig;
 import org.citydb.database.adapter.AbstractDatabaseAdapter;
 import org.citydb.database.connection.DatabaseConnectionWarning;
 import org.citydb.database.connection.DatabaseConnectionWarning.ConnectionWarningType;
@@ -26,12 +26,13 @@ public class DatabaseVersionChecker implements org.citydb.database.version.Datab
 
 		// check for unsupported version
 		if (!version.isSupportedBy(supportedVersions))
-			throw new DatabaseVersionException("The version " + version + " of the " + Database.CITYDB_PRODUCT_NAME + " is not supported.", null, Database.CITYDB_PRODUCT_NAME, Arrays.asList(supportedVersions));
+			throw new DatabaseVersionException("The version " + version + " of the " + DatabaseConfig.CITYDB_PRODUCT_NAME + " is not supported.", null, DatabaseConfig.CITYDB_PRODUCT_NAME,
+					Arrays.asList(supportedVersions));
 
 		// check for outdated version
 		for (DatabaseVersionSupport supportedVersion : supportedVersions) {
 			if (supportedVersion.getTargetVersion().compareTo(version) > 0) {
-				warnings.add(new DatabaseConnectionWarning("The version " + version + " of the " + Database.CITYDB_PRODUCT_NAME + " is out of date. Consider upgrading.", null, Database.CITYDB_PRODUCT_NAME, ConnectionWarningType.OUTDATED_DATABASE_VERSION));				
+				warnings.add(new DatabaseConnectionWarning("The version " + version + " of the " + DatabaseConfig.CITYDB_PRODUCT_NAME + " is out of date. Consider upgrading.", null, DatabaseConfig.CITYDB_PRODUCT_NAME, ConnectionWarningType.OUTDATED_DATABASE_VERSION));
 				break;
 			}
 		}

@@ -5,6 +5,7 @@ import net.opengis.wfs._2.GetFeatureType;
 import net.opengis.wfs._2.ResultTypeType;
 import net.opengis.wfs._2.TruncatedResponse;
 import org.citydb.citygml.exporter.database.content.DBSplittingResult;
+import org.citydb.citygml.exporter.util.InternalConfig;
 import org.citydb.citygml.exporter.writer.FeatureWriteException;
 import org.citydb.concurrent.WorkerPool;
 import org.citydb.config.Config;
@@ -44,6 +45,7 @@ public class QueryExecuter implements EventHandler {
 	private final DatabaseConnectionPool connectionPool;
 	private final CityGMLBuilder cityGMLBuilder;
 	private final Config config;
+	private final InternalConfig internalConfig;
 
 	private final SchemaMapping schemaMapping;
 	private final QueryBuilder queryBuilder;
@@ -59,13 +61,14 @@ public class QueryExecuter implements EventHandler {
 			DatabaseConnectionPool connectionPool,
 			CityGMLBuilder cityGMLBuilder,
 			WFSConfig wfsConfig,
-			Config config) {
+			Config config, InternalConfig internalConfig) {
 		this.writer = writer;
 		this.databaseWorkerPool = databaseWorkerPool;
 		this.eventChannel = eventChannel;
 		this.connectionPool = connectionPool;
 		this.cityGMLBuilder = cityGMLBuilder;
 		this.config = config;
+		this.internalConfig = internalConfig;
 
 		// get standard request parameters
 		long maxFeatureCount = wfsConfig.getConstraints().getCountDefault();
@@ -244,10 +247,10 @@ public class QueryExecuter implements EventHandler {
 
 	private void setExporterContext(QueryExpression queryExpression, Query dummy, boolean isMultipleQueryRequest) {
 		// enable xlink references in multiple query responses
-		config.getInternal().setRegisterGmlIdInCache(isMultipleQueryRequest);
+		internalConfig.setRegisterGmlIdInCache(isMultipleQueryRequest);
 
 		// set flag for coordinate transformation
-		config.getInternal().setTransformCoordinates(queryExpression.getTargetSrs().getSrid() != connectionPool.getActiveDatabaseAdapter().getConnectionMetaData().getReferenceSystem().getSrid());
+		internalConfig.setTransformCoordinates(queryExpression.getTargetSrs().getSrid() != connectionPool.getActiveDatabaseAdapter().getConnectionMetaData().getReferenceSystem().getSrid());
 
 		// update filter configuration
 		dummy.copyFrom(queryExpression);

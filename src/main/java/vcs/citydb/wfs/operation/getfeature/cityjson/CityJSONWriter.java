@@ -4,6 +4,7 @@ import net.opengis.wfs._2.TruncatedResponse;
 import org.citydb.citygml.common.database.uid.UIDCache;
 import org.citydb.citygml.common.database.uid.UIDCacheManager;
 import org.citydb.citygml.common.database.uid.UIDCacheType;
+import org.citydb.citygml.exporter.util.InternalConfig;
 import org.citydb.citygml.exporter.writer.FeatureWriteException;
 import org.citydb.concurrent.SingleWorkerPool;
 import org.citydb.config.Config;
@@ -24,25 +25,27 @@ public class CityJSONWriter implements FeatureWriter {
 	private final GeometryStripper geometryStripper;
 	private final UIDCacheManager uidCacheManager;
 	private final Config config;
+	private final InternalConfig internalConfig;
 
 	private final SingleWorkerPool<AbstractCityObjectType> writerPool;
 	private final CityJSONMarshaller marshaller;
 
 	private boolean checkForDuplicates;
 
-	public CityJSONWriter(CityJSONChunkWriter writer, GeometryStripper geometryStripper, UIDCacheManager uidCacheManager, Object eventChannel, Config config) {
+	public CityJSONWriter(CityJSONChunkWriter writer, GeometryStripper geometryStripper, UIDCacheManager uidCacheManager, Object eventChannel, Config config, InternalConfig internalConfig) {
 		this.writer = writer;
 		this.geometryStripper = geometryStripper;
 		this.uidCacheManager = uidCacheManager;
 		this.config = config;
+		this.internalConfig = internalConfig;
 
 		marshaller = writer.getCityJSONMarshaller();
-		int queueSize = config.getProject().getExporter().getResources().getThreadPool().getDefaultPool().getMaxThreads() * 2;
+		int queueSize = config.getExportConfig().getResources().getThreadPool().getMaxThreads() * 2;
 
-		writerPool = new SingleWorkerPool<AbstractCityObjectType>(
-				"cityjson_writer_pool", 
-				new CityJSONWriterWorkerFactory(writer, ObjectRegistry.getInstance().getEventDispatcher()), 
-				queueSize, 
+		writerPool = new SingleWorkerPool<>(
+				"cityjson_writer_pool",
+				new CityJSONWriterWorkerFactory(writer, ObjectRegistry.getInstance().getEventDispatcher()),
+				queueSize,
 				false);
 
 		writerPool.setEventSource(eventChannel);
@@ -77,7 +80,7 @@ public class CityJSONWriter implements FeatureWriter {
 	@Override
 	public void endFeatureCollection() throws FeatureWriteException {
 		// we only have to check for duplicates after the first set of features
-		checkForDuplicates = config.getInternal().isRegisterGmlIdInCache();
+		checkForDuplicates = internalConfig.isRegisterGmlIdInCache();
 	}
 
 	@Override

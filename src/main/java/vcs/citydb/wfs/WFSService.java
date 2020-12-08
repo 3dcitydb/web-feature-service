@@ -1,14 +1,9 @@
 package vcs.citydb.wfs;
 
-import net.opengis.wfs._2.DescribeFeatureTypeType;
-import net.opengis.wfs._2.DescribeStoredQueriesType;
-import net.opengis.wfs._2.GetCapabilitiesType;
-import net.opengis.wfs._2.GetFeatureType;
-import net.opengis.wfs._2.ListStoredQueriesType;
+import net.opengis.wfs._2.*;
 import org.citydb.concurrent.SingleWorkerPool;
 import org.citydb.config.Config;
-import org.citydb.config.internal.Internal;
-import org.citydb.config.project.Project;
+import org.citydb.config.ProjectConfig;
 import org.citydb.database.connection.DatabaseConnectionPool;
 import org.citydb.log.Logger;
 import org.citydb.registry.ObjectRegistry;
@@ -24,13 +19,7 @@ import vcs.citydb.wfs.config.operation.EncodingMethod;
 import vcs.citydb.wfs.exception.WFSException;
 import vcs.citydb.wfs.exception.WFSExceptionCode;
 import vcs.citydb.wfs.exception.WFSExceptionReportHandler;
-import vcs.citydb.wfs.kvp.DescribeFeatureTypeReader;
-import vcs.citydb.wfs.kvp.DescribeStoredQueriesReader;
-import vcs.citydb.wfs.kvp.GetCapabilitiesReader;
-import vcs.citydb.wfs.kvp.GetFeatureReader;
-import vcs.citydb.wfs.kvp.KVPConstants;
-import vcs.citydb.wfs.kvp.KVPRequestReader;
-import vcs.citydb.wfs.kvp.ListStoredQueriesReader;
+import vcs.citydb.wfs.kvp.*;
 import vcs.citydb.wfs.operation.describefeaturetype.DescribeFeatureTypeHandler;
 import vcs.citydb.wfs.operation.getcapabilities.GetCapabilitiesHandler;
 import vcs.citydb.wfs.operation.getfeature.GetFeatureHandler;
@@ -273,10 +262,9 @@ public class WFSService extends HttpServlet {
 			DatabaseConnector.connect(config);
 
 		// create copy of the 3DCityDB configuration
-		Project project = config.getProject();
 		Config config = new Config(
-				new Project(project.getDatabase(), project.getImporter(), project.getExporter(), null, null, project.getGlobal()),
-				null, new Internal());
+				new ProjectConfig(this.config.getDatabaseConfig(), this.config.getImportConfig(), this.config.getExportConfig(), null, null, this.config.getGlobalConfig()),
+				null);
 
 		try {
 			if (wfsRequest instanceof GetFeatureType) {

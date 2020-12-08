@@ -7,6 +7,7 @@ import net.opengis.wfs._2.TruncatedResponse;
 import org.citydb.citygml.common.database.uid.UIDCache;
 import org.citydb.citygml.common.database.uid.UIDCacheManager;
 import org.citydb.citygml.common.database.uid.UIDCacheType;
+import org.citydb.citygml.exporter.util.InternalConfig;
 import org.citydb.citygml.exporter.writer.FeatureWriteException;
 import org.citydb.concurrent.SingleWorkerPool;
 import org.citydb.config.Config;
@@ -51,6 +52,7 @@ public class CityGMLWriter implements FeatureWriter {
 	private final GeometryStripper geometryStripper;
 	private final UIDCacheManager uidCacheManager;
 	private final Config config;
+	private final InternalConfig internalConfig;
 	
 	private final SingleWorkerPool<SAXEventBuffer> writerPool;
 	private final CityGMLBuilder cityGMLBuilder;
@@ -63,13 +65,15 @@ public class CityGMLWriter implements FeatureWriter {
 	private boolean isWriteSingleFeature;
 	private boolean checkForDuplicates;
 	
-	public CityGMLWriter(SAXWriter saxWriter, CityGMLVersion version, TransformerChainFactory transformerChainFactory, GeometryStripper geometryStripper, UIDCacheManager uidCacheManager, Object eventChannel, Config config) throws DatatypeConfigurationException {
+	public CityGMLWriter(SAXWriter saxWriter, CityGMLVersion version, TransformerChainFactory transformerChainFactory, GeometryStripper geometryStripper, UIDCacheManager uidCacheManager,
+	                     Object eventChannel, Config config, InternalConfig internalConfig) throws DatatypeConfigurationException {
 		this.saxWriter = saxWriter;
 		this.version = version;
 		this.transformerChainFactory = transformerChainFactory;
 		this.geometryStripper = geometryStripper;
 		this.uidCacheManager = uidCacheManager;
 		this.config = config;
+		this.internalConfig = internalConfig;
 		
 		cityGMLBuilder = ObjectRegistry.getInstance().getCityGMLBuilder();
 		jaxbMarshaller = cityGMLBuilder.createJAXBMarshaller(version);
@@ -77,7 +81,7 @@ public class CityGMLWriter implements FeatureWriter {
 		datatypeFactory = DatatypeFactory.newInstance();
 		additionalObjectsHandler = new AdditionalObjectsHandler(saxWriter, version, cityGMLBuilder, transformerChainFactory, eventChannel);
 		
-		int queueSize = config.getProject().getExporter().getResources().getThreadPool().getDefaultPool().getMaxThreads() * 2;
+		int queueSize = config.getExportConfig().getResources().getThreadPool().getMaxThreads() * 2;
 		
 		writerPool = new SingleWorkerPool<>(
 				"citygml_writer_pool",
@@ -116,7 +120,7 @@ public class CityGMLWriter implements FeatureWriter {
 		level--;
 		
 		// we only have to check for duplicates after the first set of features
-		checkForDuplicates = config.getInternal().isRegisterGmlIdInCache();
+		checkForDuplicates = internalConfig.isRegisterGmlIdInCache();
 	}
 
 	@Override

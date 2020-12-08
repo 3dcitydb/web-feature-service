@@ -2,17 +2,17 @@ package vcs.citydb.wfs.listener;
 
 import org.citydb.ade.ADEExtensionManager;
 import org.citydb.config.Config;
-import org.citydb.config.project.Project;
-import org.citydb.config.project.database.Database;
-import org.citydb.config.project.exporter.Exporter;
-import org.citydb.config.project.general.XSLTransformation;
-import org.citydb.config.project.global.Global;
+import org.citydb.config.ProjectConfig;
+import org.citydb.config.project.common.XSLTransformation;
+import org.citydb.config.project.database.DatabaseConfig;
+import org.citydb.config.project.exporter.ExportConfig;
+import org.citydb.config.project.global.GlobalConfig;
+import org.citydb.config.project.global.LogFileMode;
 import org.citydb.database.connection.DatabaseConnectionPool;
 import org.citydb.database.schema.mapping.SchemaMapping;
 import org.citydb.database.schema.mapping.SchemaMappingException;
 import org.citydb.database.schema.mapping.SchemaMappingValidationException;
 import org.citydb.database.schema.util.SchemaMappingUtil;
-import org.citydb.event.EventDispatcher;
 import org.citydb.log.Logger;
 import org.citydb.registry.ObjectRegistry;
 import org.citydb.util.CoreConstants;
@@ -150,16 +150,12 @@ public class WebServiceInitializer implements ServletContextListener {
         config = initConfig(wfsConfig);
 		registry.register(Config.class.getName(), config);
 
-		// start new event dispatcher thread
-		registry.setEventDispatcher(new EventDispatcher());
-
 		// initialize logging
 		try {			
 			initLogging(wfsConfig, context);
 		} catch (ServletException e) {
 			context.setAttribute(Constants.INIT_ERROR_ATTRNAME, e);
 			registry.getEventDispatcher().shutdownNow();
-			registry.cleanup();
 			return;
 		}
 
@@ -204,8 +200,6 @@ public class WebServiceInitializer implements ServletContextListener {
 			} catch (InterruptedException e) {
 				registry.getEventDispatcher().shutdownNow();
 			}
-
-			registry.cleanup();
 		}
 
 		// deregister JDBC drivers that were not loaded through the connection pool		
@@ -248,22 +242,22 @@ public class WebServiceInitializer implements ServletContextListener {
 
 	private Config initConfig(WFSConfig wfsConfig) {
 		// database settings
-		Database database = new Database();
+		DatabaseConfig database = new DatabaseConfig();
 		database.setActiveConnection(wfsConfig.getDatabase().getConnection());
 		database.setReferenceSystems(wfsConfig.getDatabase().getReferenceSystems());
 
 		// global settings
-		Global global = new Global();
+		GlobalConfig global = new GlobalConfig();
 		global.setCache(wfsConfig.getUIDCache());
 
 		// export settings
-		Exporter exporter = new Exporter();
+		ExportConfig exporter = new ExportConfig();
 		exporter.getContinuation().setExportCityDBMetadata(wfsConfig.getOperations().isExportCityDBMetadata());
 		exporter.getCityObjectGroup().setExportMemberAsXLinks(true);
 		exporter.getAppearances().setExportAppearances(false);
 		exporter.getAppearances().setExportTextureFiles(false);
 
-		return new Config(new Project(database, null, exporter, null, null, global), null, null);
+		return new Config(new ProjectConfig(database, null, exporter, null, null, global), null);
 	}
 
 	private void initLogging(WFSConfig wfsConfig, ServletContext context) throws ServletException {
@@ -291,13 +285,12 @@ public class WebServiceInitializer implements ServletContextListener {
 		}
 
 		// log to console
-		log.logToConsole(consoleLog != null);
 		if (consoleLog != null)
-			log.setDefaultConsoleLogLevel(consoleLog.getLogLevel());
+			log.setConsoleLogLevel(consoleLog.getLogLevel());
 
 		// log to file
-		log.setDefaultFileLogLevel(fileLog.getLogLevel());
-		log.appendLogFile(logFileName, false);
+		log.setFileLogLevel(fileLog.getLogLevel());
+		log.appendLogFile(Paths.get(logFileName), LogFileMode.APPEND);
 
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		log.info("*** Starting new log file session on " + dateFormat.format(new Date()) + " ***");		

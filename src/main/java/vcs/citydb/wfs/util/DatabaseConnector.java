@@ -1,9 +1,9 @@
 package vcs.citydb.wfs.util;
 
 import org.citydb.config.Config;
-import org.citydb.config.project.database.DBConnection;
-import org.citydb.config.project.database.Database;
+import org.citydb.config.project.database.DatabaseConfig;
 import org.citydb.config.project.database.DatabaseConfigurationException;
+import org.citydb.config.project.database.DatabaseConnection;
 import org.citydb.config.project.database.DatabaseSrs;
 import org.citydb.database.adapter.AbstractDatabaseAdapter;
 import org.citydb.database.connection.DatabaseConnectionPool;
@@ -35,7 +35,7 @@ public class DatabaseConnector {
                     return;
 
                 Logger log = Logger.getInstance();
-                Database databaseConfig = config.getProject().getDatabase();
+                DatabaseConfig databaseConfig = config.getDatabaseConfig();
                 if (databaseConfig.getActiveConnection() == null) {
                     WFSExceptionMessage message = new WFSExceptionMessage(WFSExceptionCode.INTERNAL_SERVER_ERROR);
                     message.addExceptionText("Failed to connect to the database.");
@@ -43,12 +43,12 @@ public class DatabaseConnector {
                     throw new WFSException(message);
                 }
 
-                DBConnection connection = databaseConfig.getActiveConnection();
-                connection.setInternalPassword(connection.getPassword());
+                DatabaseConnection connection = databaseConfig.getActiveConnection();
+                connection.setPassword(connection.getPassword());
 
                 try {
                     connectionPool.setDatabaseVersionChecker(new DatabaseVersionChecker());
-                    connectionPool.connect(config);
+                    connectionPool.connect(connection);
                 } catch (DatabaseConfigurationException | SQLException e) {
                     throw new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "Failed to connect to the database.", e);
                 } catch (DatabaseVersionException e) {
@@ -74,7 +74,7 @@ public class DatabaseConnector {
                 }
 
                 // log whether user-defined SRSs are supported
-                for (DatabaseSrs refSys : config.getProject().getDatabase().getReferenceSystems()) {
+                for (DatabaseSrs refSys : config.getDatabaseConfig().getReferenceSystems()) {
                     try {
                         adapter.getUtil().decodeDatabaseSrs(refSys);
                     } catch (FactoryException e) {

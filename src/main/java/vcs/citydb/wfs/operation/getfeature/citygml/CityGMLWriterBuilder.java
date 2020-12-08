@@ -5,6 +5,7 @@ import net.opengis.wfs._2.ResultTypeType;
 import org.citydb.ade.model.module.CityDBADE100Module;
 import org.citydb.ade.model.module.CityDBADE200Module;
 import org.citydb.citygml.common.database.uid.UIDCacheManager;
+import org.citydb.citygml.exporter.util.InternalConfig;
 import org.citydb.citygml.exporter.writer.FeatureWriteException;
 import org.citydb.config.Config;
 import org.citydb.database.schema.mapping.FeatureType;
@@ -45,6 +46,7 @@ public class CityGMLWriterBuilder implements GetFeatureResponseBuilder {
 	private GeometryStripper geometryStripper;
 	private UIDCacheManager uidCacheManager;
 	private Config config;
+	private InternalConfig internalConfig;
 	private Object eventChannel;
 
 	private SAXWriter saxWriter;
@@ -68,11 +70,14 @@ public class CityGMLWriterBuilder implements GetFeatureResponseBuilder {
 			UIDCacheManager uidCacheManager,
 			Object eventChannel,
 			WFSConfig wfsConfig,
-			Config config) throws FeatureWriteException {
+			Config config,
+			InternalConfig internalConfig) throws FeatureWriteException {
 		this.geometryStripper = geometryStripper;
 		this.uidCacheManager = uidCacheManager;
 		this.eventChannel = eventChannel;
 		this.config = config;
+		this.internalConfig = internalConfig;
+
 		version = queryExpressions.get(0).getTargetVersion();
 
 		saxWriter = new SAXWriter();
@@ -152,7 +157,7 @@ public class CityGMLWriterBuilder implements GetFeatureResponseBuilder {
 	public FeatureWriter buildFeatureWriter(OutputStream stream, String encoding) throws FeatureWriteException {
 		try {
 			saxWriter.setOutput(stream, encoding);
-			return new CityGMLWriter(saxWriter, version, transformerChainFactory, geometryStripper, uidCacheManager, eventChannel, config);
+			return new CityGMLWriter(saxWriter, version, transformerChainFactory, geometryStripper, uidCacheManager, eventChannel, config, internalConfig);
 		} catch (IOException | DatatypeConfigurationException e) {
 			throw new FeatureWriteException("Failed to create CityGML response writer.", e);
 		}
