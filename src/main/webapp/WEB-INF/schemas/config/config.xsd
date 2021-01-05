@@ -141,7 +141,6 @@
 
   <xs:complexType name="ConstraintsType">
     <xs:all>
-      <xs:element name="countDefault" type="xs:long" minOccurs="0"/>
       <xs:element name="exportCityDBMetadata" type="xs:boolean" minOccurs="0"/>
       <xs:element name="stripGeometry" type="xs:boolean" minOccurs="0"/>
       <xs:element name="lodFilter" type="WFSLodFilterType" minOccurs="0"/>

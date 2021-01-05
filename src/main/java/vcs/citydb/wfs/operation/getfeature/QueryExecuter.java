@@ -23,6 +23,7 @@ import org.citydb.query.filter.selection.operator.id.ResourceIdOperator;
 import org.citydb.registry.ObjectRegistry;
 import org.citydb.sqlbuilder.select.Select;
 import org.citygml4j.builder.jaxb.CityGMLBuilder;
+import vcs.citydb.wfs.config.Constants;
 import vcs.citydb.wfs.config.WFSConfig;
 import vcs.citydb.wfs.exception.WFSException;
 import vcs.citydb.wfs.exception.WFSExceptionCode;
@@ -70,7 +71,7 @@ public class QueryExecuter implements EventHandler {
 		this.internalConfig = internalConfig;
 
 		// get standard request parameters
-		long maxFeatureCount = wfsConfig.getConstraints().getCountDefault();
+		long maxFeatureCount = Constants.COUNT_DEFAULT;
 		count = wfsRequest.isSetCount() && wfsRequest.getCount().longValue() < maxFeatureCount ? wfsRequest.getCount().longValue() : maxFeatureCount;		
 		resultType = wfsRequest.getResultType();
 

@@ -30,6 +30,12 @@
       <method>KVP+XML</method>
       <useXMLValidation>true</useXMLValidation>
     </requestEncoding>
+    <DescribeFeatureType>
+      <outputFormats>
+        <outputFormat name="application/gml+xml; version=3.1"/>
+        <outputFormat name="application/json"/>
+      </outputFormats>
+    </DescribeFeatureType>
     <GetFeature>
       <outputFormats>
         <outputFormat name="application/gml+xml; version=3.1"/>
