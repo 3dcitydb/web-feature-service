@@ -12,7 +12,6 @@ import org.citygml4j.builder.cityjson.CityJSONBuilder;
 import org.citygml4j.builder.cityjson.CityJSONBuilderException;
 import org.citygml4j.builder.cityjson.json.io.writer.CityJSONChunkWriter;
 import org.citygml4j.builder.cityjson.json.io.writer.CityJSONOutputFactory;
-import org.citygml4j.builder.cityjson.json.io.writer.CityJSONWriteException;
 import org.citygml4j.builder.cityjson.marshal.util.DefaultTextureVerticesBuilder;
 import org.citygml4j.builder.cityjson.marshal.util.DefaultVerticesBuilder;
 import org.citygml4j.builder.cityjson.marshal.util.DefaultVerticesTransformer;
@@ -23,7 +22,7 @@ import vcs.citydb.wfs.operation.getfeature.GetFeatureResponseBuilder;
 import vcs.citydb.wfs.operation.getfeature.QueryExpression;
 import vcs.citydb.wfs.util.GeometryStripper;
 
-import java.io.OutputStream;
+import java.io.Writer;
 import java.util.List;
 import java.util.Map;
 
@@ -34,14 +33,15 @@ public class CityJSONWriterBuilder implements GetFeatureResponseBuilder {
 	private final String SIGNIFICANT_TEXTURE_DIGITS = "significantTextureDigits";
 	private final String TRANSFORM_VERTICES = "transformVertices";
 	private final String GENERATE_CITYGML_METADATA = "generateCityGMLMetadata";
-	
+
 	private CityJSONOutputFactory factory;
 	private Map<String, String> formatOptions;
 	private GeometryStripper geometryStripper;
 	private UIDCacheManager uidCacheManager;
 	private Object eventChannel;
-	private Config config;
+	private WFSConfig wfsConfig;
 	private InternalConfig internalConfig;
+	private Config config;
 
 	private MetadataType metadata;
 
@@ -56,30 +56,31 @@ public class CityJSONWriterBuilder implements GetFeatureResponseBuilder {
 	}
 
 	@Override
-	public void initializeContext(GetFeatureType wfsRequest,
-	                              List<QueryExpression> queryExpressions,
-	                              Map<String, String> formatOptions,
-	                              GeometryStripper geometryStripper,
-	                              UIDCacheManager uidCacheManager,
-	                              Object eventChannel,
-	                              WFSConfig wfsConfig,
-	                              Config config,
-	                              InternalConfig internalConfig) throws FeatureWriteException {
+	public void initializeContext(
+			GetFeatureType wfsRequest,
+			List<QueryExpression> queryExpressions,
+			Map<String, String> formatOptions,
+			GeometryStripper geometryStripper,
+			UIDCacheManager uidCacheManager,
+			Object eventChannel,
+			InternalConfig internalConfig,
+			WFSConfig wfsConfig,
+			Config config) throws FeatureWriteException {
 		this.formatOptions = formatOptions;
 		this.geometryStripper = geometryStripper;
 		this.uidCacheManager = uidCacheManager;
 		this.eventChannel = eventChannel;
-		this.config = config;
 		this.internalConfig = internalConfig;
+		this.wfsConfig = wfsConfig;
+		this.config = config;
 
 		try {
 			CityJSONBuilder builder = CityGMLContext.getInstance().createCityJSONBuilder();
 			factory = builder.createCityJSONOutputFactory();
-		}
-		catch (CityJSONBuilderException e) {
+		} catch (CityJSONBuilderException e) {
 			throw new FeatureWriteException("Failed to initialize CityJSON response builder.", e);
 		}
-
+		
 		metadata = new MetadataType();
 		DatabaseSrs targetSRS = null;
 		
@@ -89,50 +90,48 @@ public class CityJSONWriterBuilder implements GetFeatureResponseBuilder {
 			else if (targetSRS.getSrid() != queryExpression.getTargetSrs().getSrid())
 				throw new FeatureWriteException("Multiple target coordinate reference systems are not supported by CityJSON.");
 		}
-
+		
 		metadata.setReferenceSystem(targetSRS.getSrid());
 	}
 
 	@Override
-	public FeatureWriter buildFeatureWriter(OutputStream stream, String encoding) throws FeatureWriteException {
-		try {
-			CityJSONChunkWriter writer = factory.createCityJSONChunkWriter(stream, encoding);
+	public FeatureWriter buildFeatureWriter(Writer writer) throws FeatureWriteException {
+		CityJSONChunkWriter chunkWriter = factory.createCityJSONChunkWriter(writer);
 
-			if (formatOptions.containsKey(SIGNIFICANT_DIGITS)) {
-				try {
-					int significantDigits = Integer.parseInt(formatOptions.get(SIGNIFICANT_DIGITS));
-					writer.setVerticesBuilder(new DefaultVerticesBuilder().withSignificantDigits(significantDigits));
-				} catch (NumberFormatException e) {
-					log.warn("The '" + SIGNIFICANT_DIGITS + "' format options requires an integer value.");
-				}
+		if (formatOptions.containsKey(SIGNIFICANT_DIGITS)) {
+			try {
+				int significantDigits = Integer.parseInt(formatOptions.get(SIGNIFICANT_DIGITS));
+				chunkWriter.setVerticesBuilder(new DefaultVerticesBuilder().withSignificantDigits(significantDigits));
+			} catch (NumberFormatException e) {
+				log.warn("The '" + SIGNIFICANT_DIGITS + "' format options requires an integer value.");
 			}
-
-			if (formatOptions.containsKey(SIGNIFICANT_TEXTURE_DIGITS)) {
-				try {
-					int significantDigits = Integer.parseInt(formatOptions.get(SIGNIFICANT_TEXTURE_DIGITS));
-					writer.setTextureVerticesBuilder(new DefaultTextureVerticesBuilder().withSignificantDigits(significantDigits));
-				} catch (NumberFormatException e) {
-					log.warn("The '" + SIGNIFICANT_TEXTURE_DIGITS + "' format options requires an integer value.");
-				}
-			}
-
-			if ("true".equals(formatOptions.get(TRANSFORM_VERTICES)))
-				writer.setVerticesTransformer(new DefaultVerticesTransformer());
-
-			if ("false".equals(formatOptions.get(GENERATE_CITYGML_METADATA)))
-				factory.setGenerateCityGMLMetadata(false);
-			else
-				factory.setGenerateCityGMLMetadata(true);
-
-			if ("true".equals(formatOptions.get(PRETTY_PRINT)))
-				writer.setIndent(" ");
-
-			writer.setMetadata(metadata);
-
-			return new CityJSONWriter(writer, geometryStripper, uidCacheManager, eventChannel, config, internalConfig);
-		} catch (CityJSONWriteException e) {
-			throw new FeatureWriteException("Failed to create CityJSON response writer.", e);
 		}
+
+		if (formatOptions.containsKey(SIGNIFICANT_TEXTURE_DIGITS)) {
+			try {
+				int significantDigits = Integer.parseInt(formatOptions.get(SIGNIFICANT_TEXTURE_DIGITS));
+				chunkWriter.setTextureVerticesBuilder(new DefaultTextureVerticesBuilder().withSignificantDigits(significantDigits));
+			} catch (NumberFormatException e) {
+				log.warn("The '" + SIGNIFICANT_TEXTURE_DIGITS + "' format options requires an integer value.");
+			}
+		}
+
+		if ("true".equals(formatOptions.get(TRANSFORM_VERTICES)))
+			chunkWriter.setVerticesTransformer(new DefaultVerticesTransformer());
+
+		if ("false".equals(formatOptions.get(GENERATE_CITYGML_METADATA)))
+			factory.setGenerateCityGMLMetadata(false);
+		else
+			factory.setGenerateCityGMLMetadata(true);
+
+		chunkWriter.setMetadata(metadata);
+
+		CityJSONWriter cityJSONWriter = new CityJSONWriter(chunkWriter, geometryStripper, uidCacheManager, eventChannel, internalConfig, config);
+
+		if ("true".equals(formatOptions.get(PRETTY_PRINT)))
+			cityJSONWriter.useIndentation(true);
+		
+		return cityJSONWriter;
 	}
 
 }

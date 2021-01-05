@@ -27,7 +27,6 @@ import vcs.citydb.wfs.exception.WFSExceptionCode;
 import vcs.citydb.wfs.xml.NamespaceFilter;
 
 import javax.xml.XMLConstants;
-import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLOutputFactory;
@@ -42,7 +41,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class StoredQueryManager {
-	public static final String GET_FEATURE_BY_ID_NAME = "http://www.opengis.net/def/query/OGC-WFS/0/GetFeatureById";
+	private final String GET_FEATURE_BY_ID_NAME = "http://www.opengis.net/def/query/OGC-WFS/0/GetFeatureById";
 	private final String DEPRECATED_GET_FEATURE_BY_ID_NAME = "urn:ogc:def:query:OGC-WFS::GetFeatureById";
 
 	private final StoredQuery DEFAULT_QUERY;
@@ -67,7 +66,7 @@ public class StoredQueryManager {
 	}
 
 	public List<StoredQueryAdapter> listStoredQueries(String handle) throws WFSException {
-		List<StoredQueryAdapter> storedQueries = new ArrayList<StoredQueryAdapter>();
+		List<StoredQueryAdapter> storedQueries = new ArrayList<>();
 		storedQueries.add(new StoredQueryAdapter(DEFAULT_QUERY.getId()));
 
 		return storedQueries;
@@ -75,7 +74,7 @@ public class StoredQueryManager {
 
 	public StoredQuery getStoredQuery(StoredQueryAdapter adapter, String handle) throws WFSException {
 		// urn:ogc:def:query:OGC-WFS::GetFeatureById is deprecated since 2.0.2 but still supported
-		if (DEFAULT_QUERY.getId().equals(adapter.getId()) || DEPRECATED_GET_FEATURE_BY_ID_NAME.equals(adapter.getId()))
+		if (GET_FEATURE_BY_ID_NAME.equals(adapter.getId()) || DEPRECATED_GET_FEATURE_BY_ID_NAME.equals(adapter.getId()))
 			return DEFAULT_QUERY;
 
 		throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, "A stored query with identifier '" + adapter.getId() + "' is not offered by this server.", handle);
@@ -83,7 +82,7 @@ public class StoredQueryManager {
 
 	public Element parseStoredQuery(StoredQueryAdapter adapter, String handle) throws WFSException {
 		// urn:ogc:def:query:OGC-WFS::GetFeatureById is deprecated since 2.0.2 but still supported
-		if (DEFAULT_QUERY.getId().equals(adapter.getId()) || DEPRECATED_GET_FEATURE_BY_ID_NAME.equals(adapter.getId()))
+		if (GET_FEATURE_BY_ID_NAME.equals(adapter.getId()) || DEPRECATED_GET_FEATURE_BY_ID_NAME.equals(adapter.getId()))
 			return DEFAULT_QUERY.toDOMElement(handle);
 
 		throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, "A stored query with identifier '" + adapter.getId() + "' is not offered by this server.", handle);
@@ -98,7 +97,7 @@ public class StoredQueryManager {
 
 			StoredQuery storedQuery = getStoredQuery(new StoredQueryAdapter(query.getId()), handle);
 			if (storedQuery != null) {
-				if (storedQuery.getId().equals(StoredQueryManager.GET_FEATURE_BY_ID_NAME)) {
+				if (storedQuery.getId().equals(DEFAULT_QUERY.getId())) {
 					QueryType queryType = (QueryType)storedQuery.compile(query, namespaceFilter).iterator().next();
 					queryType.setIsGetFeatureById(true);
 					queries.add(queryType);
@@ -107,7 +106,7 @@ public class StoredQueryManager {
 						compileQuery(compiled, queries, namespaceFilter, handle);
 				}
 			} else
-				throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, "No stored query with identifier '" + query.getId() + "' is offered by this server.", handle);
+				throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "No stored query with identifier '" + query.getId() + "' is offered by this server.", handle);
 		} 
 
 		else
@@ -231,7 +230,7 @@ public class StoredQueryManager {
 		queryExpression.getContent().add(query);		
 		queryExpression.setIsPrivate(false);
 		queryExpression.setLanguage("en");
-		queryExpression.setReturnFeatureTypes(new ArrayList<QName>());
+		queryExpression.setReturnFeatureTypes(new ArrayList<>());
 		queryExpression.setLanguage(StoredQuery.DEFAULT_LANGUAGE);
 		description.getQueryExpressionText().add(queryExpression);
 

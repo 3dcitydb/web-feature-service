@@ -10,7 +10,7 @@ public class ResultTypeParser extends ValueParser<ResultTypeType> {
 		try {
 			return ResultTypeType.fromValue(value.trim());
 		} catch (IllegalArgumentException e) {
-			throw new KVPParseException("The value '" + value + "' is not allowed for the parameter " + key + ".");
+			throw new KVPParseException("The value '" + value + "' is not allowed for the parameter " + key + ".", key);
 		}
 	}
 

@@ -21,21 +21,20 @@ package vcs.citydb.wfs.exception;
 
 public class KVPParseException extends Exception {
 	private static final long serialVersionUID = -2099896956174757521L;
+	private final String parameter;
 
-	public KVPParseException() {
-		super();
-	}
-	
-	public KVPParseException(String message) {
+	public KVPParseException(String message, String parameter) {
 		super(message);
+		this.parameter = parameter;
 	}
 	
-	public KVPParseException(Throwable cause) {
-		super(cause);
-	}
-	
-	public KVPParseException(String message, Throwable cause) {
+	public KVPParseException(String message, String parameter, Throwable cause) {
 		super(message, cause);
+		this.parameter = parameter;
 	}
-	
+
+	public String getParameter() {
+		return parameter;
+	}
+
 }

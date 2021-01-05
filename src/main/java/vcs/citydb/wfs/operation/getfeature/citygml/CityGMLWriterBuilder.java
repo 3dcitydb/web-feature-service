@@ -33,8 +33,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.sax.SAXTransformerFactory;
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.Writer;
 import java.util.List;
 import java.util.Map;
 
@@ -45,8 +44,8 @@ public class CityGMLWriterBuilder implements GetFeatureResponseBuilder {
 	private CityGMLVersion version;
 	private GeometryStripper geometryStripper;
 	private UIDCacheManager uidCacheManager;
-	private Config config;
 	private InternalConfig internalConfig;
+	private Config config;
 	private Object eventChannel;
 
 	private SAXWriter saxWriter;
@@ -63,20 +62,21 @@ public class CityGMLWriterBuilder implements GetFeatureResponseBuilder {
 	}
 
 	@Override
-	public void initializeContext(GetFeatureType wfsRequest, 
+	public void initializeContext(
+			GetFeatureType wfsRequest,
 			List<QueryExpression> queryExpressions,
 			Map<String, String> formatOptions,
 			GeometryStripper geometryStripper,
 			UIDCacheManager uidCacheManager,
 			Object eventChannel,
+			InternalConfig internalConfig,
 			WFSConfig wfsConfig,
-			Config config,
-			InternalConfig internalConfig) throws FeatureWriteException {
+			Config config) throws FeatureWriteException {
 		this.geometryStripper = geometryStripper;
 		this.uidCacheManager = uidCacheManager;
 		this.eventChannel = eventChannel;
-		this.config = config;
 		this.internalConfig = internalConfig;
+		this.config = config;
 
 		version = queryExpressions.get(0).getTargetVersion();
 
@@ -108,7 +108,7 @@ public class CityGMLWriterBuilder implements GetFeatureResponseBuilder {
 				if (!(module instanceof CityGMLModule)) {
 					// skip 3DCityDB ADE prefix and namespace if metadata shall not be exported
 					if ((module == CityDBADE200Module.v3_0 || module == CityDBADE100Module.v3_0)
-							&& !wfsConfig.getOperations().isExportCityDBMetadata())
+							&& !wfsConfig.getConstraints().isExportCityDBMetadata())
 						continue;
 
 					saxWriter.setPrefix(module.getNamespacePrefix(), module.getNamespaceURI());
@@ -154,11 +154,11 @@ public class CityGMLWriterBuilder implements GetFeatureResponseBuilder {
 	}
 
 	@Override
-	public FeatureWriter buildFeatureWriter(OutputStream stream, String encoding) throws FeatureWriteException {
+	public FeatureWriter buildFeatureWriter(Writer writer) throws FeatureWriteException {
 		try {
-			saxWriter.setOutput(stream, encoding);
-			return new CityGMLWriter(saxWriter, version, transformerChainFactory, geometryStripper, uidCacheManager, eventChannel, config, internalConfig);
-		} catch (IOException | DatatypeConfigurationException e) {
+			saxWriter.setOutput(writer);
+			return new CityGMLWriter(saxWriter, version, transformerChainFactory, geometryStripper, uidCacheManager, eventChannel, internalConfig, config);
+		} catch (DatatypeConfigurationException e) {
 			throw new FeatureWriteException("Failed to create CityGML response writer.", e);
 		}
 	}

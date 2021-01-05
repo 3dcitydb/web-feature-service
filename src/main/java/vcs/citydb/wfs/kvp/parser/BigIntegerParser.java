@@ -11,7 +11,7 @@ public class BigIntegerParser extends ValueParser<BigInteger> {
 		try {
 			return new BigInteger(value.trim());
 		} catch (NumberFormatException e) {
-			throw new KVPParseException("The value '" + value + "' is not allowed for the parameter " + key + ".");
+			throw new KVPParseException("The value '" + value + "' is not allowed for the parameter " + key + ".", key);
 		}
 	}
 

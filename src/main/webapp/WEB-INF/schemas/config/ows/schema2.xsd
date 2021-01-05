@@ -31,7 +31,7 @@
     </xs:restriction>
   </xs:simpleType>
 
-  <xs:attribute name="actuate" type="xs:string"/>
+  <xs:attribute name="actuate" type="tns:actuateType"/>
 
   <xs:attribute name="arcrole" type="xs:string"/>
 
@@ -39,10 +39,10 @@
 
   <xs:attribute name="role" type="xs:string"/>
 
-  <xs:attribute name="show" type="xs:string"/>
+  <xs:attribute name="show" type="tns:showType"/>
 
   <xs:attribute name="title" type="xs:string"/>
 
-  <xs:attribute name="type" type="xs:string"/>
+  <xs:attribute name="type" type="tns:typeType"/>
 </xs:schema>
 

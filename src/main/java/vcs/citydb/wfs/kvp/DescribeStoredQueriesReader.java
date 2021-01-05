@@ -15,7 +15,6 @@ public class DescribeStoredQueriesReader extends KVPRequestReader {
 
 	public DescribeStoredQueriesReader(Map<String, String> parameters, WFSConfig wfsConfig) {
 		super(parameters, wfsConfig);
-
 		baseRequestReader = new BaseRequestReader();
 	}
 
@@ -26,13 +25,17 @@ public class DescribeStoredQueriesReader extends KVPRequestReader {
 
 		try {
 			if (parameters.containsKey(KVPConstants.STOREDQUERY_ID))
-				wfsRequest.setStoredQueryId(new FlatValueListParser<String>(new StringParser()).parse(KVPConstants.STOREDQUERY_ID, parameters.get(KVPConstants.STOREDQUERY_ID)));
+				wfsRequest.setStoredQueryId(new FlatValueListParser<>(new StringParser()).parse(KVPConstants.STOREDQUERY_ID, parameters.get(KVPConstants.STOREDQUERY_ID)));
 
 		} catch (KVPParseException e) {
-			throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, e.getMessage(), e.getCause());
+			throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, e.getMessage(), e.getParameter(), e.getCause());
 		}
 
 		return wfsRequest;
 	}
 
+	@Override
+	public String getOperationName() {
+		return KVPConstants.DESCRIBE_STORED_QUERIES;
+	}
 }

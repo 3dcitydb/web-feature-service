@@ -28,6 +28,7 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
 import vcs.citydb.wfs.config.Constants;
+import vcs.citydb.wfs.config.WFSConfig;
 import vcs.citydb.wfs.util.CacheCleanerWork;
 import vcs.citydb.wfs.util.CacheCleanerWorker;
 
@@ -36,9 +37,8 @@ import javax.xml.transform.sax.SAXResult;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.security.SecureRandom;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class AdditionalObjectsHandler {
@@ -52,6 +52,7 @@ public class AdditionalObjectsHandler {
 
     private final Map<String, Path> tempFiles = new ConcurrentHashMap<>();
     private final Map<String, CityModelWriter> tempWriters = new ConcurrentHashMap<>();
+    private final Path tempDir;
 
     private volatile boolean shouldRun = true;
     private boolean isInitialized;
@@ -64,6 +65,7 @@ public class AdditionalObjectsHandler {
         this.transformerChainFactory = transformerChainFactory;
         this.eventChannel = eventChannel;
 
+        tempDir = (ObjectRegistry.getInstance().lookup(WFSConfig.class)).getServer().getTempDir();
         cacheCleanerPool = (WorkerPool<CacheCleanerWork>) ObjectRegistry.getInstance().lookup(CacheCleanerWorker.class.getName());
         eventDispatcher = ObjectRegistry.getInstance().getEventDispatcher();
     }
@@ -161,7 +163,7 @@ public class AdditionalObjectsHandler {
                 }
             }
 
-            cacheCleanerPool.addWork(new CacheCleanerWork(entry.getValue()));
+            cacheCleanerPool.addWork(() -> Files.delete(entry.getValue()));
         }
     }
 
@@ -170,10 +172,7 @@ public class AdditionalObjectsHandler {
         CityModelWriter tempWriter = tempWriters.get(key);
         if (tempWriter == null) {
             // create unique temp file
-            long n = new SecureRandom().nextLong();
-            n = n == Long.MIN_VALUE ? 0 : Math.abs(n);
-            Path tempFile = Paths.get(System.getProperty("java.io.tmpdir"), "3dcitydb-wfs", Long.toString(n) + ".tmp");
-            Files.createDirectories(tempFile.getParent());
+            Path tempFile = tempDir.resolve("objects-" + UUID.randomUUID().toString() + ".tmp");
 
             // create temp writer
             CityGMLOutputFactory out = cityGMLBuilder.createCityGMLOutputFactory(version);

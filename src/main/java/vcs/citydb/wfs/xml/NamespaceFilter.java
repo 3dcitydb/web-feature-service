@@ -25,8 +25,8 @@ public class NamespaceFilter extends XMLFilterImpl implements NamespaceContext {
 	
 	public NamespaceFilter(XMLReader reader) {
 		super(reader);
-		prefixToUri = new HashMap<String, String>();
-		uriToPrefix = new HashMap<String, Set<String>>();
+		prefixToUri = new HashMap<>();
+		uriToPrefix = new HashMap<>();
 		
 		bindNamespace(XMLConstants.XML_NS_PREFIX, XMLConstants.XML_NS_URI);
 		bindNamespace(XMLConstants.XMLNS_ATTRIBUTE, XMLConstants.XMLNS_ATTRIBUTE_NS_URI);
@@ -34,7 +34,7 @@ public class NamespaceFilter extends XMLFilterImpl implements NamespaceContext {
 	
 	@Override
 	public void startPrefixMapping(String prefix, String uri) throws SAXException {
-		if (uri == Constants.GML_3_2_1_NAMESPACE_URI || uri == Constants.GML_3_3_NAMESPACE_URI)
+		if (Constants.GML_3_2_1_NAMESPACE_URI.equals(uri) || Constants.GML_3_3_NAMESPACE_URI.equals(uri))
 			uri = GMLCoreModule.v3_1_1.getNamespaceURI();
 		
 		super.startPrefixMapping(prefix, uri);
@@ -43,10 +43,7 @@ public class NamespaceFilter extends XMLFilterImpl implements NamespaceContext {
 	
 	private void bindNamespace(String prefix, String uri) {
 		prefixToUri.put(prefix, uri);
-		if (uriToPrefix.get(uri) == null)
-			uriToPrefix.put(uri, new HashSet<String>());
-		
-		uriToPrefix.get(uri).add(prefix);
+		uriToPrefix.computeIfAbsent(uri, k -> new HashSet<>()).add(prefix);
 	}
 
 	@Override
@@ -76,7 +73,7 @@ public class NamespaceFilter extends XMLFilterImpl implements NamespaceContext {
 		if (uriToPrefix.containsKey(namespaceURI))
 			return uriToPrefix.get(namespaceURI).iterator();
 		
-		return Collections.<String>emptySet().iterator();
+		return Collections.emptyIterator();
 	}
 
 	public Iterator<String> getPrefixes() {
@@ -85,7 +82,7 @@ public class NamespaceFilter extends XMLFilterImpl implements NamespaceContext {
 	
 	@Override
 	public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
-		if (uri == Constants.GML_3_2_1_NAMESPACE_URI || uri == Constants.GML_3_3_NAMESPACE_URI)
+		if (Constants.GML_3_2_1_NAMESPACE_URI.equals(uri) || Constants.GML_3_3_NAMESPACE_URI.equals(uri))
 			uri = GMLCoreModule.v3_1_1.getNamespaceURI();
 
 		super.startElement(uri, localName, qName, atts);

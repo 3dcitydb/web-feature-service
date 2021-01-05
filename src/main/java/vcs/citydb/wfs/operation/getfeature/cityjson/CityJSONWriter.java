@@ -24,19 +24,26 @@ public class CityJSONWriter implements FeatureWriter {
 	private final CityJSONChunkWriter writer;
 	private final GeometryStripper geometryStripper;
 	private final UIDCacheManager uidCacheManager;
-	private final Config config;
+	private final Object eventChannel;
 	private final InternalConfig internalConfig;
 
 	private final SingleWorkerPool<AbstractCityObjectType> writerPool;
 	private final CityJSONMarshaller marshaller;
 
+	private boolean hasContent;
 	private boolean checkForDuplicates;
 
-	public CityJSONWriter(CityJSONChunkWriter writer, GeometryStripper geometryStripper, UIDCacheManager uidCacheManager, Object eventChannel, Config config, InternalConfig internalConfig) {
+	public CityJSONWriter(
+			CityJSONChunkWriter writer,
+			GeometryStripper geometryStripper,
+			UIDCacheManager uidCacheManager,
+			Object eventChannel,
+			InternalConfig internalConfig,
+			Config config) {
 		this.writer = writer;
 		this.geometryStripper = geometryStripper;
 		this.uidCacheManager = uidCacheManager;
-		this.config = config;
+		this.eventChannel = eventChannel;
 		this.internalConfig = internalConfig;
 
 		marshaller = writer.getCityJSONMarshaller();
@@ -68,6 +75,12 @@ public class CityJSONWriter implements FeatureWriter {
 	}
 
 	@Override
+	public void endFeatureCollection() throws FeatureWriteException {
+		// we only have to check for duplicates after the first set of features
+		checkForDuplicates = internalConfig.isRegisterGmlIdInCache();
+	}
+
+	@Override
 	public void startAdditionalObjects() throws FeatureWriteException {
 		// nothing to do here...
 	}
@@ -75,12 +88,6 @@ public class CityJSONWriter implements FeatureWriter {
 	@Override
 	public void endAdditionalObjects() throws FeatureWriteException {
 		// nothing to do here...
-	}
-
-	@Override
-	public void endFeatureCollection() throws FeatureWriteException {
-		// we only have to check for duplicates after the first set of features
-		checkForDuplicates = internalConfig.isRegisterGmlIdInCache();
 	}
 
 	@Override
@@ -102,6 +109,7 @@ public class CityJSONWriter implements FeatureWriter {
 			if (cityJSON.isSetExtensionProperties())
 				cityJSON.getExtensionProperties().forEach(writer::addRootExtensionProperty);
 
+			hasContent = true;
 			writerPool.addWork(dest);
 		}
 	}
@@ -125,8 +133,8 @@ public class CityJSONWriter implements FeatureWriter {
 	public void close() throws FeatureWriteException {
 		try {
 			writerPool.shutdownAndWait();
-			writer.writeEndDocument();
-			writer.flush();
+			if (hasContent)
+				writer.writeEndDocument();
 		} catch (InterruptedException | CityJSONWriteException e) {
 			throw new FeatureWriteException("Failed to close CityJSON response writer.", e);
 		} finally {

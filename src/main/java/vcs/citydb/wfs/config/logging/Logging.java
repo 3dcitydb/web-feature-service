@@ -1,4 +1,4 @@
-package vcs.citydb.wfs.config.system;
+package vcs.citydb.wfs.config.logging;
 
 import javax.xml.bind.annotation.XmlType;
 

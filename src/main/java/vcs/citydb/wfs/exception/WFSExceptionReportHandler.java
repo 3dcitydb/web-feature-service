@@ -6,7 +6,6 @@ import net.opengis.ows._1.ObjectFactory;
 import org.citydb.log.Logger;
 import org.citygml4j.builder.jaxb.CityGMLBuilder;
 import org.citygml4j.util.xml.SAXWriter;
-import org.xml.sax.SAXException;
 import vcs.citydb.wfs.config.Constants;
 
 import javax.servlet.http.HttpServletRequest;
@@ -26,9 +25,10 @@ public class WFSExceptionReportHandler {
 		owsFactory = new ObjectFactory();		
 	}
 
-	public ExceptionReport getExceptionReport(WFSException wfsException, HttpServletRequest request, boolean writeToLog) {
-		ExceptionReport exceptionReport = owsFactory.createExceptionReport();
+	public ExceptionReport getExceptionReport(WFSException wfsException, String operationName, HttpServletRequest request, boolean writeToLog) {
+		preprocessWFSException(wfsException, operationName);
 
+		ExceptionReport exceptionReport = owsFactory.createExceptionReport();
 		exceptionReport.setLang(wfsException.getLanguage());
 		exceptionReport.setVersion(wfsException.getVersion());
 
@@ -42,13 +42,13 @@ public class WFSExceptionReportHandler {
 				exceptionType.getExceptionText().add(text);
 
 				if (writeToLog) {
-					StringBuilder logMessage = new StringBuilder();
-					logMessage.append('[').append(message.getExceptionCode().getValue())
-					.append(", ").append(request.getRemoteAddr());
+					StringBuilder logMessage = new StringBuilder()
+							.append('[').append(message.getExceptionCode().getValue())
+							.append(", ").append(request.getRemoteAddr());
 					if (message.getLocator() != null)
 						logMessage.append(", ").append(message.getLocator());
 
-					logMessage.append("]: ").append(text);				
+					logMessage.append("] ").append(text);
 					log.error(logMessage.toString());
 				}
 			}
@@ -59,12 +59,12 @@ public class WFSExceptionReportHandler {
 		return exceptionReport;
 	}
 
-	public synchronized void sendErrorResponse(WFSException wfsException, HttpServletRequest request, HttpServletResponse response) throws IOException {
-		ExceptionReport exceptionReport = getExceptionReport(wfsException, request, true);
+	public synchronized void sendErrorResponse(WFSException wfsException, String operationName, HttpServletRequest request, HttpServletResponse response) throws IOException {
+		ExceptionReport exceptionReport = getExceptionReport(wfsException, operationName, request, true);
 
 		response.setContentType("text/xml");
 		response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-		response.setStatus(wfsException.getExceptionMessages().get(0).getExceptionCode().getHttpStatusCode());	
+		response.setStatus(wfsException.getFirstExceptionMessage().getExceptionCode().getHttpStatusCode());
 
 		// prepare SAXWriter
 		SAXWriter saxWriter = new SAXWriter();
@@ -76,18 +76,25 @@ public class WFSExceptionReportHandler {
 
 		// marshall JAXB object
 		try {
-			saxWriter.setOutput(response.getOutputStream(), StandardCharsets.UTF_8.name());
+			saxWriter.setOutput(response.getWriter());
 			Marshaller marshaller = cityGMLBuilder.getJAXBContext().createMarshaller();
 			marshaller.marshal(exceptionReport, saxWriter);
 		} catch (JAXBException | IOException e) {
 			if (!response.isCommitted())
 				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-		} finally {
-			// flush SAX writer
-			try {
-				saxWriter.flush();
-			} catch (SAXException e) {
-				//
+		}
+	}
+
+	private void preprocessWFSException(WFSException wfsException, String operationName) {
+		if (operationName != null) {
+			WFSExceptionMessage message = wfsException.getFirstExceptionMessage();
+			WFSExceptionCode code = message.getExceptionCode();
+
+			if (message.getLocator() == null
+					&& (code == WFSExceptionCode.OPERATION_PROCESSING_FAILED
+					|| code == WFSExceptionCode.OPERATION_PARSING_FAILED
+					|| code == WFSExceptionCode.OPERATION_NOT_SUPPORTED)) {
+				message.setLocator(operationName);
 			}
 		}
 	}

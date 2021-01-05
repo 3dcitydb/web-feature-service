@@ -53,15 +53,20 @@ public class GetFeatureReader extends KVPRequestReader {
 
 			if (parameters.containsKey(KVPConstants.RESOLVE_TIMEOUT))
 				wfsRequest.setResolveTimeout(new BigIntegerParser().parse(KVPConstants.RESOLVE_TIMEOUT, parameters.get(KVPConstants.RESOLVE_TIMEOUT)));
+
 		} catch (KVPParseException e) {
-			throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, e.getMessage(), e.getCause());
+			throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, e.getMessage(), e.getParameter(), e.getCause());
 		}
 		
 		// queries
-		List<JAXBElement<? extends AbstractQueryExpressionType>> queries = queryExpressionReader.read(parameters, getNamespaces(), true);
+		List<JAXBElement<? extends AbstractQueryExpressionType>> queries = queryExpressionReader.read(parameters, KVPConstants.GET_FEATURE, getNamespaces(), true);
 		wfsRequest.getAbstractQueryExpression().addAll(queries);
 		
 		return wfsRequest;
 	}
 
+	@Override
+	public String getOperationName() {
+		return KVPConstants.GET_FEATURE;
+	}
 }

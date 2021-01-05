@@ -16,11 +16,10 @@
       <xs:element name="capabilities" type="CapabilitiesType"/>
       <xs:element name="featureTypes" type="FeatureTypesType"/>
       <xs:element name="operations" type="OperationsType" minOccurs="0"/>
+      <xs:element name="constraints" type="ConstraintsType" minOccurs="0"/>
       <xs:element name="postProcessing" type="PostProcessingType" minOccurs="0"/>
       <xs:element name="database" type="WFSDatabaseType"/>
-      <xs:element name="server" type="ServiceType"/>
-      <xs:element name="uidCache" type="CacheType" minOccurs="0"/>
-      <xs:element name="constraints" type="ConstraintsType" minOccurs="0"/>
+      <xs:element name="server" type="ServerType"/>
       <xs:element name="logging" type="LoggingType" minOccurs="0"/>
     </xs:sequence>
   </xs:complexType>
@@ -87,12 +86,11 @@
   </xs:complexType>
 
   <xs:complexType name="OperationsType">
-    <xs:sequence>
+    <xs:all>
       <xs:element name="requestEncoding" type="RequestEncodingType" minOccurs="0"/>
-      <xs:element name="exportCityDBMetadata" type="xs:boolean" minOccurs="0"/>
       <xs:element name="DescribeFeatureType" type="DescribeFeatureTypeOperationType" minOccurs="0"/>
       <xs:element name="GetFeature" type="GetFeatureOperationType" minOccurs="0"/>
-    </xs:sequence>
+    </xs:all>
   </xs:complexType>
 
   <xs:complexType name="RequestEncodingType">
@@ -141,6 +139,33 @@
     </xs:sequence>
   </xs:complexType>
 
+  <xs:complexType name="ConstraintsType">
+    <xs:all>
+      <xs:element name="countDefault" type="xs:long" minOccurs="0"/>
+      <xs:element name="exportCityDBMetadata" type="xs:boolean" minOccurs="0"/>
+      <xs:element name="stripGeometry" type="xs:boolean" minOccurs="0"/>
+      <xs:element name="lodFilter" type="WFSLodFilterType" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="WFSLodFilterType">
+    <xs:complexContent>
+      <xs:extension base="LodFilterType">
+        <xs:sequence/>
+        <xs:attribute name="isEnabled" type="xs:boolean" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="LodFilterType">
+    <xs:sequence>
+      <xs:element name="lod" type="xs:int" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="mode" type="LodFilterModeType"/>
+    <xs:attribute name="searchMode" type="LodSearchDepthModeType"/>
+    <xs:attribute name="searchDepth" type="xs:int"/>
+  </xs:complexType>
+
   <xs:complexType name="PostProcessingType">
     <xs:sequence>
       <xs:element name="xslTransformation" type="XSLTransformationType" minOccurs="0"/>
@@ -185,7 +210,7 @@
       <xs:element name="sid" type="xs:string"/>
       <xs:element name="schema" type="xs:string" minOccurs="0"/>
       <xs:element name="user" type="xs:string"/>
-      <xs:element name="password" type="xs:string"/>
+      <xs:element name="password" type="xs:string" minOccurs="0"/>
       <xs:element name="savePassword" type="xs:boolean" minOccurs="0"/>
     </xs:sequence>
     <xs:attribute name="id" type="xs:ID"/>
@@ -217,13 +242,14 @@
     <xs:attribute name="suspectTimeout" type="xs:int"/>
   </xs:complexType>
 
-  <xs:complexType name="ServiceType">
-    <xs:sequence>
-      <xs:element name="externalServiceURL" type="xs:string"/>
-      <xs:element name="maxParallelRequests" type="xs:int" minOccurs="0"/>
-      <xs:element name="waitTimeout" type="xs:int" minOccurs="0"/>
+  <xs:complexType name="ServerType">
+    <xs:all>
+      <xs:element name="externalServiceURL" type="xs:string" minOccurs="0"/>
+      <xs:element name="maxParallelRequests" type="xs:nonNegativeInteger" minOccurs="0"/>
+      <xs:element name="waitTimeout" type="xs:positiveInteger" minOccurs="0"/>
       <xs:element name="enableCORS" type="xs:boolean" minOccurs="0"/>
-    </xs:sequence>
+      <xs:element name="tempCache" type="CacheType" minOccurs="0"/>
+    </xs:all>
   </xs:complexType>
 
   <xs:complexType name="CacheType">
@@ -231,23 +257,6 @@
       <xs:element name="mode" type="CacheModeType"/>
       <xs:element name="localPath" type="xs:string" minOccurs="0"/>
     </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="ConstraintsType">
-    <xs:sequence>
-      <xs:element name="countDefault" type="xs:long" minOccurs="0"/>
-      <xs:element name="stripGeometry" type="xs:boolean" default="false" minOccurs="0"/>
-      <xs:element name="lodFilter" type="LodFilterType" minOccurs="0"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="LodFilterType">
-    <xs:sequence>
-      <xs:element name="lod" type="xs:int" maxOccurs="unbounded"/>
-    </xs:sequence>
-    <xs:attribute name="mode" type="LodFilterModeType"/>
-    <xs:attribute name="searchMode" type="LodSearchDepthModeType"/>
-    <xs:attribute name="searchDepth" type="xs:int"/>
   </xs:complexType>
 
   <xs:complexType name="LoggingType">
@@ -305,6 +314,22 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <xs:simpleType name="LodFilterModeType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="or"/>
+      <xs:enumeration value="and"/>
+      <xs:enumeration value="minimum"/>
+      <xs:enumeration value="maximum"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="LodSearchDepthModeType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="all"/>
+      <xs:enumeration value="depth"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:simpleType name="DatabaseTypeType">
     <xs:restriction base="xs:string">
       <xs:enumeration value="Oracle"/>
@@ -316,20 +341,6 @@
     <xs:restriction base="xs:string">
       <xs:enumeration value="database"/>
       <xs:enumeration value="local"/>
-    </xs:restriction>
-  </xs:simpleType>
-
-  <xs:simpleType name="LodFilterModeType">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="or"/>
-      <xs:enumeration value="and"/>
-    </xs:restriction>
-  </xs:simpleType>
-
-  <xs:simpleType name="LodSearchDepthModeType">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="all"/>
-      <xs:enumeration value="depth"/>
     </xs:restriction>
   </xs:simpleType>
 

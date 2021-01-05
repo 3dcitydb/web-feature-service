@@ -13,9 +13,9 @@ import org.citygml4j.model.module.Modules;
 import org.citygml4j.model.module.citygml.CityGMLModule;
 import org.citygml4j.model.module.citygml.CityGMLModuleVersion;
 import org.citygml4j.util.xml.SAXWriter;
-import org.xml.sax.SAXException;
 import vcs.citydb.wfs.config.Constants;
 import vcs.citydb.wfs.config.WFSConfig;
+import vcs.citydb.wfs.config.feature.FeatureType;
 import vcs.citydb.wfs.exception.WFSException;
 import vcs.citydb.wfs.exception.WFSExceptionCode;
 import vcs.citydb.wfs.operation.BaseRequestHandler;
@@ -33,6 +33,7 @@ import java.util.List;
 
 public class ListStoredQueriesHandler {
 	private final Logger log = Logger.getInstance();
+	private final WFSConfig wfsConfig;
 
 	private final BaseRequestHandler baseRequestHandler;
 	private final StoredQueryManager storedQueryManager;
@@ -40,9 +41,10 @@ public class ListStoredQueriesHandler {
 	private final ObjectFactory wfsFactory;
 
 	public ListStoredQueriesHandler(CityGMLBuilder cityGMLBuilder, WFSConfig wfsConfig) throws JAXBException {
+		this.wfsConfig = wfsConfig;
+
 		baseRequestHandler = new BaseRequestHandler(wfsConfig);
-		storedQueryManager = (StoredQueryManager)ObjectRegistry.getInstance().lookup(StoredQueryManager.class.getName());
-		
+		storedQueryManager = ObjectRegistry.getInstance().lookup(StoredQueryManager.class);
 		wfsFactory = storedQueryManager.getObjectFactory();
 		marshaller = cityGMLBuilder.getJAXBContext().createMarshaller();
 	}
@@ -61,7 +63,7 @@ public class ListStoredQueriesHandler {
 		List<StoredQueryAdapter> adapters = storedQueryManager.listStoredQueries(operationHandle);
 
 		final SAXWriter saxWriter = new SAXWriter();
-		
+
 		try {
 			// generate stored queries list
 			ListStoredQueriesResponseType listStoredQueriesResponse = new ListStoredQueriesResponseType();
@@ -70,12 +72,19 @@ public class ListStoredQueriesHandler {
 				StoredQueryListItemType listItem = new StoredQueryListItemType();
 				listItem.setId(storedQuery.getId());
 				listItem.setTitle(storedQuery.getTitle());
-				listItem.setReturnFeatureType(storedQuery.getReturnFeatureTypeNames());
+
+				List<QName> returnTypeNames = storedQuery.getReturnFeatureTypeNames();
+				if (returnTypeNames.isEmpty() && wfsRequest.getVersion().equals("2.0.0")) {
+					for (FeatureType featureType : wfsConfig.getFeatureTypes().getAdvertisedFeatureTypes())
+						returnTypeNames.add(featureType.getName());
+				}
+
+				listItem.setReturnFeatureType(returnTypeNames);
 				
 				// add namespace declarations
 				int i = 1;
-				for (QName featureType : storedQuery.getReturnFeatureTypeNames()) {
-					String prefix = null;
+				for (QName featureType : returnTypeNames) {
+					String prefix;
 
 					Module module = Modules.getModule(featureType.getNamespaceURI());
 					if (module != null) {
@@ -110,7 +119,7 @@ public class ListStoredQueriesHandler {
 			saxWriter.setIndentString("  ");
 			saxWriter.setPrefix(Constants.WFS_NAMESPACE_PREFIX, Constants.WFS_NAMESPACE_URI);
 			saxWriter.setSchemaLocation(Constants.WFS_NAMESPACE_URI, Constants.WFS_SCHEMA_LOCATION);
-			saxWriter.setOutput(response.getOutputStream(), StandardCharsets.UTF_8.name());
+			saxWriter.setOutput(response.getWriter());
 
 			marshaller.setProperty("com.sun.xml.bind.namespacePrefixMapper", new NamespacePrefixMapper() {
 				public String getPreferredPrefix(String namespaceUri, String suggestion, boolean requirePrefix) {
@@ -120,14 +129,9 @@ public class ListStoredQueriesHandler {
 
 			marshaller.marshal(responseElement, saxWriter);
 
-			// flush SAX writer
-			saxWriter.flush();
-
 			log.info(LoggerUtil.getLogMessage(request, "ListStoredQueriesHandler operation successfully finished."));
 		} catch (JAXBException | IOException e) {
-			throw new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "A fatal error occurred whilst marshalling the response document.", e);
-		} catch (SAXException e) {
-			throw new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "Failed to close the SAX writer.", e);			
+			throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "A fatal error occurred whilst marshalling the response document.", e);
 		}
 	}
 

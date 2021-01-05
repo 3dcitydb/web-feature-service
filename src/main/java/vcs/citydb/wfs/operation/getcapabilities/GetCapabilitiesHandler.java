@@ -30,7 +30,6 @@ import org.citygml4j.model.module.citygml.CityGMLVersion;
 import org.citygml4j.model.module.gml.GMLCoreModule;
 import org.citygml4j.model.module.gml.XLinkModule;
 import org.citygml4j.util.xml.SAXWriter;
-import org.xml.sax.SAXException;
 import vcs.citydb.wfs.config.Constants;
 import vcs.citydb.wfs.config.WFSConfig;
 import vcs.citydb.wfs.config.capabilities.OWSMetadata;
@@ -42,6 +41,7 @@ import vcs.citydb.wfs.exception.WFSExceptionCode;
 import vcs.citydb.wfs.exception.WFSExceptionMessage;
 import vcs.citydb.wfs.kvp.KVPConstants;
 import vcs.citydb.wfs.util.LoggerUtil;
+import vcs.citydb.wfs.util.ServerUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -66,6 +66,9 @@ public class GetCapabilitiesHandler {
 	private final net.opengis.ows._1.ObjectFactory owsFactory;
 	private final AbstractDatabaseAdapter databaseAdapter;
 
+	private final ValueType TRUE;
+	private final ValueType FALSE;
+
 	public GetCapabilitiesHandler(CityGMLBuilder cityGMLBuilder, WFSConfig wfsConfig) throws JAXBException {
 		this.wfsConfig = wfsConfig;
 
@@ -74,6 +77,11 @@ public class GetCapabilitiesHandler {
 		owsFactory = new net.opengis.ows._1.ObjectFactory();
 		marshaller = cityGMLBuilder.getJAXBContext().createMarshaller();
 		databaseAdapter = DatabaseConnectionPool.getInstance().getActiveDatabaseAdapter();
+
+		TRUE = new ValueType();
+		TRUE.setValue("TRUE");
+		FALSE = new ValueType();
+		FALSE.setValue("FALSE");
 	}
 
 	public void doOperation(GetCapabilitiesType wfsRequest,
@@ -82,8 +90,10 @@ public class GetCapabilitiesHandler {
 		log.info(LoggerUtil.getLogMessage(request, "Accepting GetCapabilities request."));
 
 		// check service attribute
-		if (!wfsRequest.isSetService() || !Constants.WFS_SERVICE_STRING.equals(wfsRequest.getService()))
-			throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, "The attribute 'service' must match the fixed value '" + Constants.WFS_SERVICE_STRING + "'.");		
+		if (!wfsRequest.isSetService())
+			throw new WFSException(WFSExceptionCode.MISSING_PARAMETER_VALUE, "The request lacks the mandatory " + KVPConstants.SERVICE + " parameter.", KVPConstants.SERVICE);
+		else if(!Constants.WFS_SERVICE_STRING.equals(wfsRequest.getService()))
+			throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, "The attribute 'service' must match the fixed value '" + Constants.WFS_SERVICE_STRING + "'.", KVPConstants.SERVICE);
 
 		// negotiate version
 		String version = wfsConfig.getCapabilities().getSupportedWFSVersions().get(0);
@@ -122,10 +132,10 @@ public class GetCapabilitiesHandler {
 		capabilities.setFilter_Capabilities(filterCapabilities);
 
 		// add operations
-		addOperations(operations);
+		addOperations(operations, request);
 
-		// add service and operation constraints
-		addServiceAndOperationConstraints(operations);
+		// add global parameter domains and constraints
+		addParameterDomainsAndConstraints(operations);
 
 		// add feature types
 		addFeatureTypes(featureTypeList);
@@ -139,38 +149,24 @@ public class GetCapabilitiesHandler {
 		log.info(LoggerUtil.getLogMessage(request, "GetCapabilities operation successfully finished."));
 	}
 
-	private void addOperations(OperationsMetadata operationsMetadata) {
-		// add operations to satisfy WFS Simple conformance class
-		// create external service URL
-		String externalServiceURL = wfsConfig.getServer().getExternalServiceURL();
-		if (externalServiceURL.endsWith("/"))
-			externalServiceURL = externalServiceURL.substring(0, externalServiceURL.length() - 1);
+	private void addOperations(OperationsMetadata operationsMetadata, HttpServletRequest request) throws WFSException {
+		String serviceURL = wfsConfig.getServer().isSetExternalServiceURL() ?
+				wfsConfig.getServer().getExternalServiceURL() :
+				ServerUtil.getServiceURL(request);
 
-		externalServiceURL += Constants.WFS_SERVICE_PATH;
-		RequestMethodType request = new RequestMethodType();
-		request.setHref(externalServiceURL);
+		RequestMethodType requestMethod = new RequestMethodType();
+		requestMethod.setHref(serviceURL + Constants.WFS_SERVICE_PATH);
 
 		DCP getAndPost = new DCP();
 		getAndPost.setHTTP(new HTTP());
 		if (conformance.implementsKVPEncoding())
-			getAndPost.getHTTP().getGetOrPost().add(owsFactory.createHTTPGet(request));
+			getAndPost.getHTTP().getGetOrPost().add(owsFactory.createHTTPGet(requestMethod));
 		if (conformance.implementsXMLEncoding())
-			getAndPost.getHTTP().getGetOrPost().add(owsFactory.createHTTPPost(request));
+			getAndPost.getHTTP().getGetOrPost().add(owsFactory.createHTTPPost(requestMethod));
 
 		DCP post = new DCP();
 		post.setHTTP(new HTTP());
-		post.getHTTP().getGetOrPost().add(owsFactory.createHTTPPost(request));
-
-		// operations version
-		DomainType operationVersion = new DomainType();
-		operationVersion.setName(KVPConstants.VERSION);
-		operationVersion.setAllowedValues(new AllowedValues());
-
-		for (String version : wfsConfig.getCapabilities().getSupportedWFSVersions()) {
-			ValueType value = new ValueType();
-			value.setValue(version);
-			operationVersion.getAllowedValues().getValueOrRange().add(value);
-		}
+		post.getHTTP().getGetOrPost().add(owsFactory.createHTTPPost(requestMethod));
 
 		// GetCapabilities operation
 		{
@@ -181,7 +177,7 @@ public class GetCapabilitiesHandler {
 
 			DomainType acceptVersions = new DomainType();
 			getCapabilities.getParameter().add(acceptVersions);
-			acceptVersions.setName(KVPConstants.ACCEPT_VERSIONS);
+			acceptVersions.setName("AcceptVersions");
 			acceptVersions.setAllowedValues(new AllowedValues());
 
 			for (String version : wfsConfig.getCapabilities().getSupportedWFSVersions()) {
@@ -250,33 +246,39 @@ public class GetCapabilitiesHandler {
 			describeStoredQueries.getDCP().add(getAndPost);
 			operationsMetadata.getOperation().add(describeStoredQueries);
 		}
-
-		operationsMetadata.getParameter().add(operationVersion);
 	}
 
-	private void addServiceAndOperationConstraints(OperationsMetadata operationsMetadata) {
-		ValueType trueValue = new ValueType();
-		trueValue.setValue("TRUE");
+	private void addParameterDomainsAndConstraints(OperationsMetadata operationsMetadata) {
+		// parameter domains
+		// version parameter
+		DomainType operationVersion = new DomainType();
+		operationVersion.setName("version");
+		operationVersion.setAllowedValues(new AllowedValues());
 
-		ValueType falseValue = new ValueType();
-		falseValue.setValue("FALSE");
+		for (String version : wfsConfig.getCapabilities().getSupportedWFSVersions()) {
+			ValueType value = new ValueType();
+			value.setValue(version);
+			operationVersion.getAllowedValues().getValueOrRange().add(value);
+		}
+
+		operationsMetadata.getParameter().add(operationVersion);
 
 		// mandatory constraints
 		LinkedHashMap<String, ValueType> constraints = new LinkedHashMap<>();
-		constraints.put("ImplementsBasicWFS", conformance.implementsBasicWFS() ? trueValue : falseValue);
-		constraints.put("ImplementsTransactionalWFS", conformance.implementsTransactionalWFS() ? trueValue : falseValue);
-		constraints.put("ImplementsLockingWFS", conformance.implementsLockingWFS() ? trueValue : falseValue);
-		constraints.put("KVPEncoding", conformance.implementsKVPEncoding() ? trueValue : falseValue);
-		constraints.put("XMLEncoding", conformance.implementsXMLEncoding() ? trueValue : falseValue);
-		constraints.put("SOAPEncoding", conformance.implementsSOAPEncoding() ? trueValue : falseValue);
-		constraints.put("ImplementsInheritance", conformance.implementsInheritance() ? trueValue : falseValue);
-		constraints.put("ImplementsRemoteResolve", conformance.implementsRemoteResolve() ? trueValue : falseValue);
-		constraints.put("ImplementsResultPaging", conformance.implementsResultPaging() ? trueValue : falseValue);
-		constraints.put("ImplementsStandardJoins", conformance.implementsStandardJoins() ? trueValue : falseValue);
-		constraints.put("ImplementsSpatialJoins", conformance.implementsSpatialJoins() ? trueValue : falseValue);
-		constraints.put("ImplementsTemporalJoins", conformance.implementsTemporalJoins() ? trueValue : falseValue);
-		constraints.put("ImplementsFeatureVersioning", conformance.implementsFeatureVersioning() ? trueValue : falseValue);
-		constraints.put("ManageStoredQueries", conformance.implementsManageStoredQueries() ? trueValue : falseValue);			
+		constraints.put("ImplementsBasicWFS", conformance.implementsBasicWFS() ? TRUE : FALSE);
+		constraints.put("ImplementsTransactionalWFS", conformance.implementsTransactionalWFS() ? TRUE : FALSE);
+		constraints.put("ImplementsLockingWFS", conformance.implementsLockingWFS() ? TRUE : FALSE);
+		constraints.put("KVPEncoding", conformance.implementsKVPEncoding() ? TRUE : FALSE);
+		constraints.put("XMLEncoding", conformance.implementsXMLEncoding() ? TRUE : FALSE);
+		constraints.put("SOAPEncoding", conformance.implementsSOAPEncoding() ? TRUE : FALSE);
+		constraints.put("ImplementsInheritance", conformance.implementsInheritance() ? TRUE : FALSE);
+		constraints.put("ImplementsRemoteResolve", conformance.implementsRemoteResolve() ? TRUE : FALSE);
+		constraints.put("ImplementsResultPaging", conformance.implementsResultPaging() ? TRUE : FALSE);
+		constraints.put("ImplementsStandardJoins", conformance.implementsStandardJoins() ? TRUE : FALSE);
+		constraints.put("ImplementsSpatialJoins", conformance.implementsSpatialJoins() ? TRUE : FALSE);
+		constraints.put("ImplementsTemporalJoins", conformance.implementsTemporalJoins() ? TRUE : FALSE);
+		constraints.put("ImplementsFeatureVersioning", conformance.implementsFeatureVersioning() ? TRUE : FALSE);
+		constraints.put("ManageStoredQueries", conformance.implementsManageStoredQueries() ? TRUE : FALSE);
 
 		for (Entry<String, ValueType> entry : constraints.entrySet()) {
 			DomainType constraint = new DomainType();
@@ -304,7 +306,7 @@ public class GetCapabilitiesHandler {
 		queryExpressions.setAllowedValues(new AllowedValues());
 
 		ValueType storedQueryValue = new ValueType();
-		storedQueryValue.setValue(new StringBuilder(Constants.WFS_NAMESPACE_PREFIX).append(":").append("StoredQuery").toString());
+		storedQueryValue.setValue(Constants.WFS_NAMESPACE_PREFIX + ":" + "StoredQuery");
 		queryExpressions.getAllowedValues().getValueOrRange().add(storedQueryValue);
 		operationsMetadata.getConstraint().add(queryExpressions);
 	}
@@ -361,28 +363,22 @@ public class GetCapabilitiesHandler {
 		ConformanceType conformanceType = new ConformanceType();
 		filterCapabilities.setConformance(conformanceType);
 
-		ValueType trueValue = new ValueType();
-		trueValue.setValue("TRUE");
-
-		ValueType falseValue = new ValueType();
-		falseValue.setValue("FALSE");
-
 		LinkedHashMap<String, ValueType> constraints = new LinkedHashMap<>();
-		constraints.put("ImplementsQuery", conformance.implementsQuery() ? trueValue : falseValue);
-		constraints.put("ImplementsAdHocQuery", conformance.implementsAdHocQuery() ? trueValue : falseValue);
-		constraints.put("ImplementsFunctions", conformance.implementsFunctions() ? trueValue : falseValue);
-		constraints.put("ImplementsResourceld", conformance.implementsResourceld() ? trueValue : falseValue);
-		constraints.put("ImplementsMinStandardFilter", conformance.implementsMinStandardFilter() ? trueValue : falseValue);		
-		constraints.put("ImplementsStandardFilter", conformance.implementsStandardFilter() ? trueValue : falseValue);
-		constraints.put("ImplementsMinSpatialFilter", conformance.implementsMinSpatialFilter() ? trueValue : falseValue);
-		constraints.put("ImplementsSpatialFilter", conformance.implementsSpatialFilter() ? trueValue : falseValue);
-		constraints.put("ImplementsMinTemporalFilter", conformance.implementsMinTemporalFilter() ? trueValue : falseValue);
-		constraints.put("ImplementsTemporalFilter", conformance.implementsTemporalFilter() ? trueValue : falseValue);
-		constraints.put("ImplementsVersionNav", conformance.implementsVersionNav() ? trueValue : falseValue);
-		constraints.put("ImplementsSorting", conformance.implementsSorting() ? trueValue : falseValue);
-		constraints.put("ImplementsExtendedOperators", conformance.implementsExtendedOperators() ? trueValue : falseValue);
-		constraints.put("ImplementsMinimumXPath", conformance.implementsMinimumXPath() ? trueValue : falseValue);
-		constraints.put("ImplementsSchemaElementFunc", conformance.implementsSchemaElementFunc() ? trueValue : falseValue);
+		constraints.put("ImplementsQuery", conformance.implementsQuery() ? TRUE : FALSE);
+		constraints.put("ImplementsAdHocQuery", conformance.implementsAdHocQuery() ? TRUE : FALSE);
+		constraints.put("ImplementsFunctions", conformance.implementsFunctions() ? TRUE : FALSE);
+		constraints.put("ImplementsResourceld", conformance.implementsResourceld() ? TRUE : FALSE);
+		constraints.put("ImplementsMinStandardFilter", conformance.implementsMinStandardFilter() ? TRUE : FALSE);
+		constraints.put("ImplementsStandardFilter", conformance.implementsStandardFilter() ? TRUE : FALSE);
+		constraints.put("ImplementsMinSpatialFilter", conformance.implementsMinSpatialFilter() ? TRUE : FALSE);
+		constraints.put("ImplementsSpatialFilter", conformance.implementsSpatialFilter() ? TRUE : FALSE);
+		constraints.put("ImplementsMinTemporalFilter", conformance.implementsMinTemporalFilter() ? TRUE : FALSE);
+		constraints.put("ImplementsTemporalFilter", conformance.implementsTemporalFilter() ? TRUE : FALSE);
+		constraints.put("ImplementsVersionNav", conformance.implementsVersionNav() ? TRUE : FALSE);
+		constraints.put("ImplementsSorting", conformance.implementsSorting() ? TRUE : FALSE);
+		constraints.put("ImplementsExtendedOperators", conformance.implementsExtendedOperators() ? TRUE : FALSE);
+		constraints.put("ImplementsMinimumXPath", conformance.implementsMinimumXPath() ? TRUE : FALSE);
+		constraints.put("ImplementsSchemaElementFunc", conformance.implementsSchemaElementFunc() ? TRUE : FALSE);
 
 		for (Entry<String, ValueType> entry : constraints.entrySet()) {
 			DomainType constraint = new DomainType();
@@ -432,7 +428,7 @@ public class GetCapabilitiesHandler {
 			}
 
 			saxWriter.setSchemaLocation(Constants.WFS_NAMESPACE_URI, Constants.WFS_SCHEMA_LOCATION);
-			saxWriter.setOutput(response.getOutputStream(), StandardCharsets.UTF_8.name());
+			saxWriter.setOutput(response.getWriter());
 
 			marshaller.setProperty("com.sun.xml.bind.namespacePrefixMapper", new NamespacePrefixMapper() {
 				public String getPreferredPrefix(String namespaceUri, String suggestion, boolean requirePrefix) {
@@ -441,13 +437,8 @@ public class GetCapabilitiesHandler {
 			});
 
 			marshaller.marshal(responseElement, saxWriter);
-
-			// flush SAX writer
-			saxWriter.flush();
 		} catch (JAXBException | IOException e) {
-			throw new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "A fatal error occurred whilst marshalling the response document.", e);
-		} catch (SAXException e) {
-			throw new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "Failed to close the SAX writer.", e);			
+			throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "A fatal error occurred whilst marshalling the response document.", e);
 		}
 	}
 

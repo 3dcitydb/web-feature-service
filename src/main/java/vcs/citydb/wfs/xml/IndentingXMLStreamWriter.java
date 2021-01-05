@@ -11,7 +11,7 @@ public class IndentingXMLStreamWriter implements XMLStreamWriter {
 	private final static Object SEEN_DATA = new Object();
 
 	private Object state = SEEN_NOTHING;
-	private Stack<Object> stateStack = new Stack<Object>();
+	private Stack<Object> stateStack = new Stack<>();
 
 	private XMLStreamWriter writer;
 	private String indentStep = "  ";

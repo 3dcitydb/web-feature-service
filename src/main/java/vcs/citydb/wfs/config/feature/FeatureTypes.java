@@ -35,11 +35,11 @@ import java.util.stream.Collectors;
 		"versions"
 })
 public class FeatureTypes {
-	@XmlElement(name="featureType", nillable=false, required=true)
+	@XmlElement(name="featureType", required=true)
 	private LinkedHashSet<CityGMLFeatureType> cityGMLFeatureTypes;
-	@XmlElement(name="adeFeatureType", nillable=false)
+	@XmlElement(name="adeFeatureType")
 	private LinkedHashSet<ADEFeatureType> adeFeatureTypes;
-	@XmlElement(name="version", nillable=false, required=true)
+	@XmlElement(name="version", required=true)
 	private LinkedHashSet<CityGMLVersionType> versions;
 
 	@XmlTransient
@@ -56,7 +56,7 @@ public class FeatureTypes {
 	}
 
 	public boolean contains(QName featureName) {
-		return getFeatureTypes().keySet().contains(featureName);
+		return getFeatureTypes().containsKey(featureName);
 	}
 
 	public Set<Module> getModules() {
@@ -165,12 +165,12 @@ public class FeatureTypes {
 
 				if (!isAvailable)
 					throw new ADEException("The feature type is not available for the CityGML version(s): " 
-							+ getVersions().stream().map(v -> v.toString()).collect(Collectors.joining(",")));
+							+ getVersions().stream().map(CityGMLVersion::toString).collect(Collectors.joining(",")));
 
 				featureTypes.put(name, new FeatureType(name, type));
 			} catch (ADEException e) {
-				log.error(new StringBuilder("The ADE feature type '").append(name).append("' will not be advertised.").toString());
-				log.error(new StringBuilder("Cause: ").append(e.getMessage()).toString());
+				log.error("The ADE feature type '" + name + "' will not be advertised.");
+				log.error("Cause: " + e.getMessage());
 			}
 		}
 

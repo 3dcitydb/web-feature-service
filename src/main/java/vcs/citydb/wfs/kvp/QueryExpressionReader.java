@@ -22,7 +22,7 @@ public class QueryExpressionReader {
 		this.wfsFactory = wfsFactory;
 	}
 
-	public List<JAXBElement<? extends AbstractQueryExpressionType>> read(Map<String, String> parameters, NamespaceFilter namespaceFilter, boolean allowMultipleQueries) throws WFSException {
+	public List<JAXBElement<? extends AbstractQueryExpressionType>> read(Map<String, String> parameters, String operationName, NamespaceFilter namespaceFilter, boolean allowMultipleQueries) throws WFSException {
 		List<JAXBElement<? extends AbstractQueryExpressionType>> queries = new ArrayList<>();
 		
 		try {
@@ -32,7 +32,7 @@ public class QueryExpressionReader {
 				storedQueryId = new StringParser().parse(KVPConstants.STOREDQUERY_ID, parameters.get(KVPConstants.STOREDQUERY_ID));
 
 			if (storedQueryId == null)
-				throw new WFSException(WFSExceptionCode.OPTION_NOT_SUPPORTED, "Only stored query expressions are supported in a GetFeature request.");
+				throw new WFSException(WFSExceptionCode.MISSING_PARAMETER_VALUE, "The query request lacks the mandatory parameter " + KVPConstants.TYPE_NAMES + ".");
 
 			StoredQueryType storedQuery = new StoredQueryType();
 
@@ -50,7 +50,7 @@ public class QueryExpressionReader {
 
 			queries.add(wfsFactory.createStoredQuery(storedQuery));
 		} catch (KVPParseException e) {
-			throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, e.getMessage(), e.getCause());
+			throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, e.getMessage(), e.getParameter(), e.getCause());
 		}
 		
 		return queries;

@@ -13,33 +13,28 @@ public class ValueListParser<T> extends ValueParser<List<List<T>>> {
 		this.valueParser = valueParser;
 	}
 
-	@Override
-	public List<List<T>> parse(String key, String value) throws KVPParseException {		
+	public List<List<T>> parse(String key, String value) throws KVPParseException {
+		// remove embracing brackets
+		if (value.startsWith("(") && value.endsWith(")"))
+			value = value.substring(1, value.length() - 1);
+
 		String[] lists = value.split(KVPConstants.LIST_DELIMITER);
-		List<List<T>> result = new ArrayList<List<T>>(lists.length);
+		List<List<T>> result = new ArrayList<>(lists.length);
 
-		for (int i = 0; i < lists.length; i++) {
-			String[] items = lists[i].split(KVPConstants.ITEM_DELIMITER);
-			List<T> tmp = new ArrayList<T>(items.length);
-			for (int j = 0; j < items.length; j++) {
-				String item = items[j];
-
-				if (i == 0 && j == 0)
-					item = item.replaceFirst("^\\(", "");
-				if (i == lists.length - 1 && j == items.length - 1)
-					item = item.replaceFirst("\\)$", "");
-
+		for (String list : lists) {
+			String[] items = list.split(KVPConstants.ITEM_DELIMITER);
+			List<T> tmp = new ArrayList<>(items.length);
+			for (String item : items) {
 				if (!item.trim().isEmpty())
 					tmp.add(valueParser.parse(key, item));
 			}
-			
+
 			if (tmp.isEmpty())
-				throw new KVPParseException("The parameter " + key + " must not contain an empty parameter list.");
+				throw new KVPParseException("The parameter " + key + " must not contain an empty parameter list.", key);
 
 			result.add(tmp);
 		}
 
 		return result;
 	}
-
 }

@@ -6,7 +6,7 @@ import java.util.List;
 
 public class WFSExceptionMessage {
 	private final WFSExceptionCode exceptionCode;
-	private List<String> exceptionTexts;
+	private List<String> exceptionTexts = new ArrayList<>();
 	private String locator;
 	
 	public WFSExceptionMessage(WFSExceptionCode exceptionCode) {
@@ -20,16 +20,6 @@ public class WFSExceptionMessage {
 	
 	public WFSExceptionMessage(WFSExceptionCode exceptionCode, String exceptionText, String locator) {
 		this(exceptionCode, exceptionText);
-		this.locator = locator;
-	}
-	
-	public WFSExceptionMessage(WFSExceptionCode exceptionCode, List<String> exceptionTexts) {
-		this(exceptionCode);
-		this.exceptionTexts = exceptionTexts;
-	}
-	
-	public WFSExceptionMessage(WFSExceptionCode exceptionCode, List<String> exceptionTexts, String locator) {
-		this(exceptionCode, exceptionTexts);
 		this.locator = locator;
 	}
 
@@ -46,17 +36,13 @@ public class WFSExceptionMessage {
 	}
 	
 	public void addExceptionText(String exceptionText) {
-		if (exceptionTexts == null)
-			exceptionTexts = new ArrayList<String>();
-		
-		exceptionTexts.add(exceptionText);
+		if (exceptionText != null)
+			exceptionTexts.add(exceptionText);
 	}
 	
 	public void addExceptionTexts(Collection<String> exceptionTexts) {
-		if (this.exceptionTexts == null)
-			this.exceptionTexts = new ArrayList<String>();
-		
-		this.exceptionTexts.addAll(exceptionTexts);
+		if (exceptionTexts != null)
+			exceptionTexts.forEach(this::addExceptionText);
 	}
 	
 	public void setLocator(String locator) {

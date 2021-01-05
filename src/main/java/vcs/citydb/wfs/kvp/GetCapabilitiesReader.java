@@ -23,15 +23,21 @@ public class GetCapabilitiesReader extends KVPRequestReader {
 		try {
 			if (parameters.containsKey(KVPConstants.SERVICE))
 				wfsRequest.setService(new StringParser().parse(KVPConstants.SERVICE, parameters.get(KVPConstants.SERVICE)));
+			else
+				throw new WFSException(WFSExceptionCode.MISSING_PARAMETER_VALUE, "The request lacks the mandatory " + KVPConstants.SERVICE + " parameter.", KVPConstants.SERVICE);
 
 			if (parameters.containsKey(KVPConstants.ACCEPT_VERSIONS))
 				wfsRequest.setAcceptVersions(new AcceptVersionsParser().parse(KVPConstants.ACCEPT_VERSIONS, parameters.get(KVPConstants.ACCEPT_VERSIONS)));
 
 		} catch (KVPParseException e) {
-			throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, e.getMessage(), e.getCause());
+			throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, e.getMessage(), e.getParameter(), e.getCause());
 		}
 
 		return wfsRequest;
 	}
 
+	@Override
+	public String getOperationName() {
+		return KVPConstants.GET_CAPABILITIES;
+	}
 }

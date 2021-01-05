@@ -14,12 +14,16 @@ public class BaseRequestReader {
 		try {
 			if (parameters.containsKey(KVPConstants.SERVICE))
 				wfsRequest.setService(new StringParser().parse(KVPConstants.SERVICE, parameters.get(KVPConstants.SERVICE)));
+			else
+				throw new WFSException(WFSExceptionCode.MISSING_PARAMETER_VALUE, "The request lacks the mandatory " + KVPConstants.SERVICE + " parameter.", KVPConstants.SERVICE);
 			
 			if (parameters.containsKey(KVPConstants.VERSION))
 				wfsRequest.setVersion(new StringParser().parse(KVPConstants.VERSION, parameters.get(KVPConstants.VERSION)));
+			else
+				throw new WFSException(WFSExceptionCode.MISSING_PARAMETER_VALUE, "The request lacks the mandatory " + KVPConstants.VERSION + " parameter.", KVPConstants.VERSION);
 			
 		} catch (KVPParseException e) {
-			throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, e.getMessage(), e.getCause());
+			throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, e.getMessage(), e.getParameter(), e.getCause());
 		}
 	}
 

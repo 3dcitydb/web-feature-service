@@ -13,7 +13,7 @@ import java.util.List;
 		"connection"
 })
 public class Database {
-	private DatabaseSrsList referenceSystems;
+	private final DatabaseSrsList referenceSystems;
 	@XmlElement(required=true)
 	private DatabaseConnection connection;
 	

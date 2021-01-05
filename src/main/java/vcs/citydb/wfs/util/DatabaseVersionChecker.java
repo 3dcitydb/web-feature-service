@@ -22,17 +22,19 @@ public class DatabaseVersionChecker implements org.citydb.database.version.Datab
 	public List<DatabaseConnectionWarning> checkVersionSupport(AbstractDatabaseAdapter databaseAdapter) throws DatabaseVersionException {
 		// we only check against the 3d city database		
 		DatabaseVersion version = databaseAdapter.getConnectionMetaData().getCityDBVersion();
-		List<DatabaseConnectionWarning> warnings = new ArrayList<DatabaseConnectionWarning>();
+		List<DatabaseConnectionWarning> warnings = new ArrayList<>();
 
 		// check for unsupported version
-		if (!version.isSupportedBy(supportedVersions))
-			throw new DatabaseVersionException("The version " + version + " of the " + DatabaseConfig.CITYDB_PRODUCT_NAME + " is not supported.", null, DatabaseConfig.CITYDB_PRODUCT_NAME,
-					Arrays.asList(supportedVersions));
+		if (!version.isSupportedBy(supportedVersions)) {
+			throw new DatabaseVersionException("The version " + version + " of the " + DatabaseConfig.CITYDB_PRODUCT_NAME + " is not supported.",
+					null, DatabaseConfig.CITYDB_PRODUCT_NAME, Arrays.asList(supportedVersions));
+		}
 
 		// check for outdated version
 		for (DatabaseVersionSupport supportedVersion : supportedVersions) {
 			if (supportedVersion.getTargetVersion().compareTo(version) > 0) {
-				warnings.add(new DatabaseConnectionWarning("The version " + version + " of the " + DatabaseConfig.CITYDB_PRODUCT_NAME + " is out of date. Consider upgrading.", null, DatabaseConfig.CITYDB_PRODUCT_NAME, ConnectionWarningType.OUTDATED_DATABASE_VERSION));
+				warnings.add(new DatabaseConnectionWarning("The version " + version + " of the " + DatabaseConfig.CITYDB_PRODUCT_NAME + " is out of date. Consider upgrading.",
+						null, DatabaseConfig.CITYDB_PRODUCT_NAME, ConnectionWarningType.OUTDATED_DATABASE_VERSION));
 				break;
 			}
 		}

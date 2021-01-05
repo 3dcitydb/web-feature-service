@@ -45,16 +45,19 @@ public class ExportController {
 	private final WFSConfig wfsConfig;
 	private final Config config;
 	private final DatabaseConnectionPool connectionPool;
+	private final WorkerPool<CacheCleanerWork> cacheCleanerPool;
 	private final EventDispatcher eventDispatcher;
 
 	private final Object eventChannel = new Object();
 
+	@SuppressWarnings("unchecked")
 	public ExportController(CityGMLBuilder cityGMLBuilder, WFSConfig wfsConfig, Config config) {
 		this.cityGMLBuilder = cityGMLBuilder;
 		this.wfsConfig = wfsConfig;
 		this.config = config;
 
 		connectionPool = DatabaseConnectionPool.getInstance();
+		cacheCleanerPool = (WorkerPool<CacheCleanerWork>) ObjectRegistry.getInstance().lookup(CacheCleanerWorker.class.getName());
 		eventDispatcher = ObjectRegistry.getInstance().getEventDispatcher();
 	}
 
@@ -84,7 +87,7 @@ public class ExportController {
 						config.getExportConfig().getResources().getThreadPool().getMaxThreads(),
 						config);
 			} catch (SQLException | IOException e) {
-				throw new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "Failed to initialize internal cache manager.", e);
+				throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "Failed to initialize internal cache manager.", e);
 			}
 
 			// create instance of gml:id lookup server manager...
@@ -110,7 +113,7 @@ public class ExportController {
 						config.getExportConfig().getResources().getGmlIdCache().getFeature().getPageFactor(),
 						config.getExportConfig().getResources().getThreadPool().getMaxThreads());
 			} catch (SQLException e) {
-				throw new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "Failed to initialize internal gml:id caches.", e);
+				throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "Failed to initialize internal gml:id caches.", e);
 			}
 
 			// create worker pools
@@ -133,9 +136,9 @@ public class ExportController {
 				response.setContentType(builder.getMimeType());
 				response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
-				writer = builder.buildFeatureWriter(response.getOutputStream(), StandardCharsets.UTF_8.name());
+				writer = builder.buildFeatureWriter(response.getWriter());
 			} catch (FeatureWriteException | IOException e) {
-				throw new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "Failed to initialize the response writer.", e);
+				throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "Failed to initialize the response writer.", e);
 			}
 
 			databaseWorkerPool = new WorkerPool<>(
@@ -172,9 +175,8 @@ public class ExportController {
 					eventChannel,
 					connectionPool,
 					cityGMLBuilder,
-					wfsConfig,
-					config,
-					internalConfig);
+					internalConfig,
+					wfsConfig);
 
 			// execute database query
 			queryExecuter.executeQuery(queryExpressions, dummy, request);
@@ -184,9 +186,13 @@ public class ExportController {
 				databaseWorkerPool.shutdownAndWait();
 				xlinkPool.shutdownAndWait();
 			} catch (InterruptedException e) {
-				throw new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "Failed to shutdown worker pools.", e);
+				throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "Failed to shutdown worker pools.", e);
 			}
 
+		} catch (WFSException e){
+			throw e;
+		} catch (Throwable e) {
+			throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "An unexpected " + e.getClass().getName() + " error occurred.", e);
 		} finally {
 			// flush response writer
 			if (writer != null) {
@@ -213,7 +219,7 @@ public class ExportController {
 			}
 
 			if (cacheTableManager != null)
-				((WorkerPool<CacheCleanerWork>)ObjectRegistry.getInstance().lookup(CacheCleanerWorker.class.getName())).addWork(new CacheCleanerWork(cacheTableManager));
+				cacheCleanerPool.addWork(cacheTableManager::dropAll);
 		}
 	}
 
@@ -241,7 +247,7 @@ public class ExportController {
 			builder = new CityGMLWriterBuilder();
 		
 		// initialize builder
-		builder.initializeContext(wfsRequest, queryExpressions, outputFormat.getOptions(), geometryStripper, uidCacheManager, builder, wfsConfig, config, internalConfig);
+		builder.initializeContext(wfsRequest, queryExpressions, outputFormat.getOptions(), geometryStripper, uidCacheManager, builder, internalConfig, wfsConfig, config);
 
 		return builder;
 	}

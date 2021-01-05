@@ -68,14 +68,14 @@ public class NamespacesParser extends ValueParser<NamespaceFilter> {
 						prefix = prefix != null ? prefix.trim() : XMLConstants.DEFAULT_NS_PREFIX;
 						namespaceURI = namespaceURI != null ? namespaceURI.trim() : "";
 						if (namespaceURI.isEmpty())
-							throw new KVPParseException("The " + key + " parameter must not contain an empty namespace URI.");
+							throw new KVPParseException("The " + key + " parameter must not contain an empty namespace URI.", key);
 
 						namespaceFilter.startPrefixMapping(prefix, namespaceURI);
 					}
 				} else
-					throw new KVPParseException("The parameter " + key + " must be given as comma-separated list of one or more namespaces of the form \"xmlns(prefix,escaped_url)\".");
+					throw new KVPParseException("The parameter " + key + " must be given as comma-separated list of one or more namespaces of the form \"xmlns(prefix,escaped_url)\".", key);
 			} catch (SAXException e) {
-				throw new KVPParseException("Failed to parse the parameter " + key + ".", e);
+				throw new KVPParseException("Failed to parse the parameter " + key + ".", key, e);
 			}
 		}
 

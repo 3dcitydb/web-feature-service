@@ -3,7 +3,6 @@ package vcs.citydb.wfs.util;
 import org.citydb.config.Config;
 import org.citydb.config.project.database.DatabaseConfig;
 import org.citydb.config.project.database.DatabaseConfigurationException;
-import org.citydb.config.project.database.DatabaseConnection;
 import org.citydb.config.project.database.DatabaseSrs;
 import org.citydb.database.adapter.AbstractDatabaseAdapter;
 import org.citydb.database.connection.DatabaseConnectionPool;
@@ -43,12 +42,9 @@ public class DatabaseConnector {
                     throw new WFSException(message);
                 }
 
-                DatabaseConnection connection = databaseConfig.getActiveConnection();
-                connection.setPassword(connection.getPassword());
-
                 try {
                     connectionPool.setDatabaseVersionChecker(new DatabaseVersionChecker());
-                    connectionPool.connect(connection);
+                    connectionPool.connect(databaseConfig.getActiveConnection());
                 } catch (DatabaseConfigurationException | SQLException e) {
                     throw new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "Failed to connect to the database.", e);
                 } catch (DatabaseVersionException e) {
@@ -74,7 +70,7 @@ public class DatabaseConnector {
                 }
 
                 // log whether user-defined SRSs are supported
-                for (DatabaseSrs refSys : config.getDatabaseConfig().getReferenceSystems()) {
+                for (DatabaseSrs refSys : databaseConfig.getReferenceSystems()) {
                     try {
                         adapter.getUtil().decodeDatabaseSrs(refSys);
                     } catch (FactoryException e) {
