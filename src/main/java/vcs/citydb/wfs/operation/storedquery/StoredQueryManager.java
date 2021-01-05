@@ -113,6 +113,12 @@ public class StoredQueryManager {
 			throw new WFSException(WFSExceptionCode.OPTION_NOT_SUPPORTED, "Only ad hoc and stored query expressions are supported.", handle);
 	}
 
+	public boolean containsStoredQuery(String id, String handle) {
+		// urn:ogc:def:query:OGC-WFS::GetFeatureById is deprecated since 2.0.2 but still supported
+		return GET_FEATURE_BY_ID_NAME.equals(id)
+				|| DEPRECATED_GET_FEATURE_BY_ID_NAME.equals(id);
+	}
+
 	protected Element processStoredQueryElement(Element root, String handle) throws WFSException {
 		try {
 			NodeList nodeList = root.getElementsByTagNameNS(Constants.WFS_NAMESPACE_URI, "StoredQueryDescription");

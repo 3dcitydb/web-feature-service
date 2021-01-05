@@ -55,10 +55,16 @@ public class DescribeStoredQueriesHandler {
 		List<StoredQueryAdapter> adapters;
 		if (wfsRequest.isSetStoredQueryId()) {
 			adapters = new ArrayList<>();
-			for (String id : new HashSet<>(wfsRequest.getStoredQueryId()))
+			for (String id : new HashSet<>(wfsRequest.getStoredQueryId())) {
+				if (!storedQueryManager.containsStoredQuery(id, operationHandle)) {
+					throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "A stored query with identifier '" + id + "' is not offered by this server.", operationHandle);
+				}
+
 				adapters.add(new StoredQueryAdapter(id));
-		} else
+			}
+		} else {
 			adapters = storedQueryManager.listStoredQueries(operationHandle);
+		}
 
 		try {
 			// generate and write response

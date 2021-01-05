@@ -190,7 +190,7 @@ public class WFSService extends HttpServlet {
 						reader = new DescribeFeatureTypeReader(parameters, wfsConfig);
 						break;
 					case KVPConstants.GET_FEATURE:
-						reader = new GetFeatureReader(parameters, wfsSchema, cityGMLBuilder, wfsConfig);
+						reader = new GetFeatureReader(parameters, wfsConfig);
 						break;
 					case KVPConstants.LIST_STORED_QUERIES:
 						reader = new ListStoredQueriesReader(parameters, wfsConfig);
