@@ -3,15 +3,9 @@ package vcs.citydb.wfs.config.operation;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
-@XmlType(name="OperationsType", propOrder={
-		"requestEncoding",
-		"exportCityDBMetadata",
-		"describeFeatureType",
-		"getFeature"
-})
+@XmlType(name="OperationsType", propOrder={})
 public class Operations {
 	private RequestEncoding requestEncoding;
-	private Boolean exportCityDBMetadata = false;
 	@XmlElement(name="DescribeFeatureType")
 	private DescribeFeatureTypeOperation describeFeatureType;
 	@XmlElement(name="GetFeature")
@@ -29,14 +23,6 @@ public class Operations {
 
 	public void setRequestEncoding(RequestEncoding requestEncoding) {
 		this.requestEncoding = requestEncoding;
-	}
-
-	public boolean isExportCityDBMetadata() {
-		return exportCityDBMetadata;
-	}
-
-	public void setExportCityDBMetadata(boolean exportCityDBMetadata) {
-		this.exportCityDBMetadata = exportCityDBMetadata;
 	}
 
 	public DescribeFeatureTypeOperation getDescribeFeatureType() {

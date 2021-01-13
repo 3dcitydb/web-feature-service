@@ -34,7 +34,7 @@ public enum XSDataType {
 	
 	private final String localPart;
 	
-	private XSDataType(String localName) {
+	XSDataType(String localName) {
 		this.localPart = localName;
 	}
 	

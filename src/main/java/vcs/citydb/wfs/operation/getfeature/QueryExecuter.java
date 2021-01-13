@@ -5,9 +5,9 @@ import net.opengis.wfs._2.GetFeatureType;
 import net.opengis.wfs._2.ResultTypeType;
 import net.opengis.wfs._2.TruncatedResponse;
 import org.citydb.citygml.exporter.database.content.DBSplittingResult;
+import org.citydb.citygml.exporter.util.InternalConfig;
 import org.citydb.citygml.exporter.writer.FeatureWriteException;
 import org.citydb.concurrent.WorkerPool;
-import org.citydb.config.Config;
 import org.citydb.database.connection.DatabaseConnectionPool;
 import org.citydb.database.schema.mapping.AbstractObjectType;
 import org.citydb.database.schema.mapping.SchemaMapping;
@@ -23,10 +23,12 @@ import org.citydb.query.filter.selection.operator.id.ResourceIdOperator;
 import org.citydb.registry.ObjectRegistry;
 import org.citydb.sqlbuilder.select.Select;
 import org.citygml4j.builder.jaxb.CityGMLBuilder;
+import vcs.citydb.wfs.config.Constants;
 import vcs.citydb.wfs.config.WFSConfig;
 import vcs.citydb.wfs.exception.WFSException;
 import vcs.citydb.wfs.exception.WFSExceptionCode;
 import vcs.citydb.wfs.exception.WFSExceptionReportHandler;
+import vcs.citydb.wfs.kvp.KVPConstants;
 
 import javax.servlet.http.HttpServletRequest;
 import java.sql.Connection;
@@ -43,7 +45,7 @@ public class QueryExecuter implements EventHandler {
 	private final Object eventChannel;
 	private final DatabaseConnectionPool connectionPool;
 	private final CityGMLBuilder cityGMLBuilder;
-	private final Config config;
+	private final InternalConfig internalConfig;
 
 	private final SchemaMapping schemaMapping;
 	private final QueryBuilder queryBuilder;
@@ -52,23 +54,24 @@ public class QueryExecuter implements EventHandler {
 	private WFSException wfsException;
 	private volatile boolean shouldRun = true;
 
-	public QueryExecuter(GetFeatureType wfsRequest,
+	public QueryExecuter(
+			GetFeatureType wfsRequest,
 			FeatureWriter writer,
 			WorkerPool<DBSplittingResult> databaseWorkerPool,
 			Object eventChannel,
 			DatabaseConnectionPool connectionPool,
 			CityGMLBuilder cityGMLBuilder,
-			WFSConfig wfsConfig,
-			Config config) {
+			InternalConfig internalConfig,
+			WFSConfig wfsConfig) {
 		this.writer = writer;
 		this.databaseWorkerPool = databaseWorkerPool;
 		this.eventChannel = eventChannel;
 		this.connectionPool = connectionPool;
 		this.cityGMLBuilder = cityGMLBuilder;
-		this.config = config;
+		this.internalConfig = internalConfig;
 
 		// get standard request parameters
-		long maxFeatureCount = wfsConfig.getConstraints().getCountDefault();
+		long maxFeatureCount = Constants.COUNT_DEFAULT;
 		count = wfsRequest.isSetCount() && wfsRequest.getCount().longValue() < maxFeatureCount ? wfsRequest.getCount().longValue() : maxFeatureCount;		
 		resultType = wfsRequest.getResultType();
 
@@ -242,40 +245,39 @@ public class QueryExecuter implements EventHandler {
 		}
 	}
 
-	private void setExporterContext(QueryExpression queryExpression, Query dummy, boolean isMultipleQueryRequest) {
-		// enable xlink references in multiple query responses
-		config.getInternal().setRegisterGmlIdInCache(isMultipleQueryRequest);
+    private void setExporterContext(QueryExpression queryExpression, Query dummy, boolean isMultipleQueryRequest) {
+        // enable xlink references in multiple query responses
+        internalConfig.setRegisterGmlIdInCache(isMultipleQueryRequest);
 
-		// set flag for coordinate transformation
-		config.getInternal().setTransformCoordinates(queryExpression.getTargetSrs().getSrid() != connectionPool.getActiveDatabaseAdapter().getConnectionMetaData().getReferenceSystem().getSrid());
+        // set flag for coordinate transformation
+        internalConfig.setTransformCoordinates(queryExpression.getTargetSrs().getSrid() != connectionPool.getActiveDatabaseAdapter().getConnectionMetaData().getReferenceSystem().getSrid());
 
-		// update filter configuration
-		dummy.copyFrom(queryExpression);
-	}
-	
-	private TruncatedResponse getTruncatedResponse(WFSException wfsException, HttpServletRequest request) {
-		WFSExceptionReportHandler reportHandler = new WFSExceptionReportHandler(cityGMLBuilder);
-		ExceptionReport exceptionReport = reportHandler.getExceptionReport(wfsException, request, true);
+        // update filter configuration
+        dummy.copyFrom(queryExpression);
+    }
 
-		TruncatedResponse truncatedResponse = new TruncatedResponse();
-		truncatedResponse.setExceptionReport(exceptionReport);
-		
-		return truncatedResponse;
-	}
+    private TruncatedResponse getTruncatedResponse(WFSException wfsException, HttpServletRequest request) {
+        WFSExceptionReportHandler reportHandler = new WFSExceptionReportHandler(cityGMLBuilder);
+        ExceptionReport exceptionReport = reportHandler.getExceptionReport(wfsException, KVPConstants.GET_FEATURE, request, true);
 
-	private Connection initConnection() throws SQLException {
-		Connection connection = connectionPool.getConnection();
-		connection.setAutoCommit(false);
+        TruncatedResponse truncatedResponse = new TruncatedResponse();
+        truncatedResponse.setExceptionReport(exceptionReport);
+
+        return truncatedResponse;
+    }
+
+    private Connection initConnection() throws SQLException {
+        Connection connection = connectionPool.getConnection();
+        connection.setAutoCommit(false);
 
 		return connection;
 	}
 
-	@Override
-	public void handleEvent(Event event) throws Exception {
-		if (event.getChannel() == eventChannel) {
-			wfsException = new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, ((InterruptEvent)event).getLogMessage(), ((InterruptEvent)event).getCause());
-			shouldRun = false;
-		}
-	}
-
+    @Override
+    public void handleEvent(Event event) throws Exception {
+        if (event.getChannel() == eventChannel) {
+            wfsException = new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, ((InterruptEvent) event).getLogMessage(), ((InterruptEvent) event).getCause());
+            shouldRun = false;
+        }
+    }
 }

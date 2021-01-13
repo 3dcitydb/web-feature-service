@@ -1,6 +1,6 @@
 package vcs.citydb.wfs.config.processing;
 
-import org.citydb.config.project.general.XSLTransformation;
+import org.citydb.config.project.common.XSLTransformation;
 
 import javax.xml.bind.annotation.XmlType;
 

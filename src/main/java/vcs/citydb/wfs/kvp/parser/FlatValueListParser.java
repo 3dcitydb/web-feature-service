@@ -14,12 +14,12 @@ private final ValueParser<T> valueParser;
 	
 	@Override
 	public List<T> parse(String key, String value) throws KVPParseException {
-		List<T> result = new ArrayList<T>();
-		ValueListParser<String> listParser = new ValueListParser<String>(new StringParser());
+		List<T> result = new ArrayList<>();
+		ValueListParser<String> listParser = new ValueListParser<>(new StringParser());
 		
 		List<List<String>> lists = listParser.parse(key, value);
 		if (lists.size() > 1)
-			throw new KVPParseException("Multiple lists are not supported for the parameter " + key);
+			throw new KVPParseException("Multiple lists are not supported for the parameter " + key, key);
 		
 		for (String item : lists.get(0))
 			result.add(valueParser.parse(key, item));

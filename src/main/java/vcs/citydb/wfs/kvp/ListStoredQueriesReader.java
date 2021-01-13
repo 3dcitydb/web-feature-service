@@ -11,7 +11,6 @@ public class ListStoredQueriesReader extends KVPRequestReader {
 	
 	public ListStoredQueriesReader(Map<String, String> parameters, WFSConfig wfsConfig) {
 		super(parameters, wfsConfig);
-		
 		baseRequestReader = new BaseRequestReader();
 	}
 	
@@ -23,4 +22,8 @@ public class ListStoredQueriesReader extends KVPRequestReader {
 		return wfsRequest;
 	}
 
+	@Override
+	public String getOperationName() {
+		return KVPConstants.LIST_STORED_QUERIES;
+	}
 }

@@ -36,8 +36,8 @@ public class QueryBuilder {
 
 		for (int i = 0; i < queryExpressions.size(); ++i) {
 			QueryExpression queryExpression = queryExpressions.get(i);
-			Select tmp = null;
-			Table table = null;
+			Select tmp;
+			Table table;
 
 			try {
 				tmp = builder.buildQuery(queryExpression);
@@ -91,7 +91,7 @@ public class QueryBuilder {
 	}
 
 	public Select buildHitsQuery(QueryExpression queryExpression) throws WFSException {
-		Select select = null;
+		Select select;
 
 		try {
 			select = builder.buildQuery(queryExpression);

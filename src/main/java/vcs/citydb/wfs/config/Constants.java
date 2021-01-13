@@ -6,6 +6,8 @@ import java.util.List;
 
 public class Constants {
 	public static final String DEFAULT_OWS_TITLE = "3D City Database Web Feature Service";
+	public static final long UNKNOWN_NUMBER_MATCHED = Long.MAX_VALUE;
+	public static final long COUNT_DEFAULT = Long.MAX_VALUE;
 	
 	public static final String CONFIG_PATH = "/WEB-INF";
 	public static final String CONFIG_FILE = "config.xml";

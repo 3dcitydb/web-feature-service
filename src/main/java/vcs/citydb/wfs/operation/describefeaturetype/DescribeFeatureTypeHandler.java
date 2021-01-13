@@ -63,7 +63,7 @@ public class DescribeFeatureTypeHandler {
 			throw new WFSException(message);
 		}
 
-		Set<FeatureType> featureTypes = featureTypeHandler.getFeatureTypes(wfsRequest.getTypeName(), true, operationHandle);
+		Set<FeatureType> featureTypes = featureTypeHandler.getFeatureTypes(wfsRequest.getTypeName(), true, KVPConstants.TYPE_NAME, operationHandle);
 		CityGMLVersion version = featureTypeHandler.getCityGMLVersion();
 		if (version == null)
 			version = wfsConfig.getFeatureTypes().getDefaultVersion();

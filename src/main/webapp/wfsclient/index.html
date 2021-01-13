@@ -1,60 +1,88 @@
 <!doctype html>
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <HEAD>
-<title>WFS Client</title>
-<script type="text/javascript" src="jquery1_9_1.js"></script>
-<link type="text/css" href="css/style.css" rel="stylesheet" />
+    <title>WFS Client</title>
+    <script type="text/javascript" src="lib/jquery1_9_1.js"></script>
+    <link type="text/css" href="css/style.css" rel="stylesheet"/>
+    <link rel="icon" type="image/png" href="img/wfs_logo.png">
+    <!-- codeMirror library for highlighting XML code -->
+    <script type="text/javascript" src="lib/codeMirror/codemirror.js"></script>
+    <script type="text/javascript" src="lib/codeMirror/foldcode.js"></script>
+    <script type="text/javascript" src="lib/codeMirror/foldgutter.js"></script>
+    <script type="text/javascript" src="lib/codeMirror/xml-fold.js"></script>
+    <script type="text/javascript" src="lib/codeMirror/xml.js"></script>
+    <link type="text/css" href="lib/codeMirror/codemirror.css" rel="stylesheet"/>
+    <link type="text/css" href="lib/codeMirror/foldgutter.css" rel="stylesheet"/>
 </HEAD>
 <body>
-<div id="container" class="ui-widget">
- <div id="Header">
-    <div id="CompanyLogo"><a href="http://www.virtualcitysystems.de" target="_blank" title="virtualcitySYSTEMS GmbH"><img src="img/logo.png" alt="virtualcitySYSTEMS GmbH" width="174" height="80" border="0" /></a><h1>WFS Client</h1></div>
-  </div>
- <div id="leftcolumn">
-    <!-- Containing the map -->
-    <div id="content">
-      <!-- Toolbar -->
-       <div id="Query">
-	   <h2>WFS Request</h2><br>
-		<textarea id="wfsrequest"></textarea>
-		<br />
-		<input id="wfsbutton" type="button" value="send" /><img id="loading" src="loading.gif" />       
-      </div>
-	  
-	  <div id="Result">
-	  <h2>WFS Result</h2><br>
-		<textarea id="response"></textarea>
-	  </div>
-	  
-  </div>
-  </div>
-<div id="footer">
-  <div id="copyright"><a href="http://www.virtualcitysystems.de/" target="_blank">(C) virtualcitySYSTEMS GmbH, 2013</a></div>
-</div>
+
+<div id="container">
+    <div id="Header">
+        <div id="CompanyLogo">
+            <img src="img/wfs_logo.png" alt="virtualcitysystems GmbH" width="70" height="70" style="vertical-align:middle"/>
+            <h1>VC WFS Client</h1>
+            <a href="http://www.virtualcitysystems.de" target="_blank" title="virtualcitysystems GmbH">
+                <img src="img/vcs_logo.png" alt="virtualcitysystems GmbH" width="200" height="48" style="vertical-align:middle; padding-top:20px; position: absolute; right: 10px"/>
+            </a>
+        </div>
+    </div>
+    <div id="leftcolumn">
+        <div id="content">
+            <div id="Query">
+                <h2>Request</h2>
+                <textarea id="wfsrequest"></textarea>
+                <input id="wfsbutton" type="button" value="Submit"/>
+                <img id="loading" src="img/loading.gif" style="padding-left:5px;" alt="loading"/>
+            </div>
+            <div id="Result">
+                <h2>Response</h2>
+                <textarea id="response"></textarea>
+            </div>
+            <div id="copyright">
+                <a href="http://www.virtualcitysystems.de/" target="_blank">
+                    (C) 2015 - 2020, virtualcitysystems GmbH. All rights reserved.
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script type="text/javascript">
-	$('#loading').hide();
-	$("#wfsbutton").click(function(){
-		var data = $('#wfsrequest').val();
-		$('#loading').show();
-		$("#wfsbutton").attr('disabled', 'disabled');
-		$('#response').text('');
-		$.ajax({		
-			  url: "../wfs",
-				type:"POST", 
-				data:data,
-				dataType:"text"
-			}).done(function ( data ) {				
-				$('#response').text(data);
-				$('#loading').hide();
-				$("#wfsbutton").removeAttr('disabled');
-			}).fail(function ( jqXHR, textStatus, errorThrown ) {
-				$('#response').text(jqXHR.responseText);
-				$('#loading').hide();
-				$("#wfsbutton").removeAttr('disabled');
-			});
-	});
+    const requestEditor = CodeMirror.fromTextArea(wfsrequest, {
+        mode: "text/xml",
+        foldGutter: true,
+        gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+        lineNumbers: true
+    });
+
+    const responseEditor = CodeMirror.fromTextArea(response, {
+        mode: "text/xml",
+        foldGutter: true,
+        gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+        lineNumbers: true
+    });
+
+    $('#loading').hide();
+    $("#wfsbutton").click(function () {
+        const data = requestEditor.getValue();
+        $('#loading').show();
+        $("#wfsbutton").attr('disabled', 'disabled');
+        $('#response').text('');
+        $.ajax({
+            url: "../wfs",
+            type: "POST",
+            data: data,
+            dataType: "text"
+        }).done(function (data) {
+            responseEditor.setValue(data);
+            $('#loading').hide();
+            $("#wfsbutton").removeAttr('disabled');
+        }).fail(function (jqXHR) {
+            responseEditor.setValue(jqXHR.responseText);
+            $('#loading').hide();
+            $("#wfsbutton").removeAttr('disabled');
+        });
+    });
 </script>
 
 </body>

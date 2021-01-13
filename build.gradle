@@ -7,18 +7,19 @@ plugins {
 }
 
 group 'org.citydb.wfs'
-version '4.2.3'
+version '4.3.0'
 
 apply from: 'properties.gradle'
-
-sourceCompatibility = 1.8
 
 ext {
     genSrcDir = 'src-gen/main/java'
 }
 
-sourceSets {
-    main.java.srcDir genSrcDir
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    sourceSets {
+        main.java.srcDir genSrcDir
+    }
 }
 
 configurations {
@@ -37,16 +38,18 @@ repositories {
 }
 
 dependencies {
-    compile('org.citydb:impexp-core:4.2.3') {
+    implementation('org.citydb:impexp-core:4.2.3') {
         exclude group: 'org.postgresql', module: 'postgresql'
         exclude group: 'net.postgis', module: 'postgis-jdbc'
     }
-    compile files('lib/sdoapi-19.3.0.0.jar')
+    implementation files('lib/sdoapi-19.3.0.0.jar')
     providedCompile files('lib/ojdbc8-19.3.0.0.jar')
     providedCompile 'javax.servlet:javax.servlet-api:3.1.0'
 
-    jdbc 'org.postgresql:postgresql:42.2.10'
-    jdbc 'net.postgis:postgis-jdbc:2.3.0'
+    jdbc 'org.postgresql:postgresql:42.2.14'
+    jdbc ('net.postgis:postgis-jdbc:2.5.0') {
+        exclude group: 'org.slf4j', module: 'slf4j-api'
+    }
 
     jaxb 'org.glassfish.jaxb:jaxb-xjc:2.3.2'
     jaxb 'org.jvnet.jaxb2_commons:jaxb2-basics:0.12.0'

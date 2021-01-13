@@ -25,7 +25,6 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stax.StAXResult;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -39,7 +38,7 @@ public class DescribeStoredQueriesHandler {
 
 	public DescribeStoredQueriesHandler(WFSConfig wfsConfig) throws JAXBException {
 		baseRequestHandler = new BaseRequestHandler(wfsConfig);
-		storedQueryManager = (StoredQueryManager)ObjectRegistry.getInstance().lookup(StoredQueryManager.class.getName());
+		storedQueryManager = ObjectRegistry.getInstance().lookup(StoredQueryManager.class);
 	}
 
 	public void doOperation(DescribeStoredQueriesType wfsRequest,
@@ -53,13 +52,19 @@ public class DescribeStoredQueriesHandler {
 		baseRequestHandler.validate(wfsRequest);
 
 		// get stored queries to be described
-		List<StoredQueryAdapter> adapters = null;
+		List<StoredQueryAdapter> adapters;
 		if (wfsRequest.isSetStoredQueryId()) {
-			adapters = new ArrayList<StoredQueryAdapter>();
-			for (String id : new HashSet<String>(wfsRequest.getStoredQueryId()))
+			adapters = new ArrayList<>();
+			for (String id : new HashSet<>(wfsRequest.getStoredQueryId())) {
+				if (!storedQueryManager.containsStoredQuery(id, operationHandle)) {
+					throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "A stored query with identifier '" + id + "' is not offered by this server.", operationHandle);
+				}
+
 				adapters.add(new StoredQueryAdapter(id));
-		} else
+			}
+		} else {
 			adapters = storedQueryManager.listStoredQueries(operationHandle);
+		}
 
 		try {
 			// generate and write response
@@ -67,7 +72,7 @@ public class DescribeStoredQueriesHandler {
 			response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 			
 			XMLOutputFactory out = storedQueryManager.getXMLOutputFactory();
-			IndentingXMLStreamWriter writer = new IndentingXMLStreamWriter(out.createXMLStreamWriter(new OutputStreamWriter(response.getOutputStream(), StandardCharsets.UTF_8)));
+			IndentingXMLStreamWriter writer = new IndentingXMLStreamWriter(out.createXMLStreamWriter(response.getWriter()));
 			writer.setIndentStep("  ");
 			writer.setWriteFragment(true);
 			
@@ -104,13 +109,13 @@ public class DescribeStoredQueriesHandler {
 			
 			writer.writeEndElement();
 			writer.forceEndDocument();
-			
+
 			// flush XML writer
 			writer.flush();
 			
 			log.info(LoggerUtil.getLogMessage(request, "DescribeStoredQueries operation successfully finished."));
 		} catch (IOException | XMLStreamException | TransformerException e) {
-			throw new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "A fatal DOM error occurred whilst marshalling the response document.", e);
+			throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "A fatal DOM error occurred whilst marshalling the response document.", e);
 		}
 	}
 

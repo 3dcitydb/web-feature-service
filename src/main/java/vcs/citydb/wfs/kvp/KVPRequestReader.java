@@ -21,13 +21,14 @@ public abstract class KVPRequestReader {
 	}
 
 	public abstract Object readRequest() throws WFSException;
+	public abstract String getOperationName();
 
 	public NamespaceFilter getNamespaces() throws WFSException {
 		if (namespaceFilter == null) {
 			try {
 				namespaceFilter = new NamespacesParser(wfsConfig).parse(KVPConstants.NAMESPACES, parameters.get(KVPConstants.NAMESPACES));
 			} catch (KVPParseException e) {
-				throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, e.getMessage());
+				throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, e.getMessage(), e.getParameter(), e.getCause());
 			}
 		}
 

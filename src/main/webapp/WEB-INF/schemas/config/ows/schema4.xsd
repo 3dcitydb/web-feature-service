@@ -74,8 +74,8 @@
     <xs:complexType>
       <xs:sequence>
         <xs:choice minOccurs="0" maxOccurs="unbounded">
-          <xs:element name="Get" type="tns:RequestMethodType"/>
           <xs:element name="Post" type="tns:RequestMethodType"/>
+          <xs:element name="Get" type="tns:RequestMethodType"/>
         </xs:choice>
       </xs:sequence>
     </xs:complexType>
@@ -277,119 +277,12 @@
     <xs:attribute name="dimensions" type="xs:positiveInteger"/>
   </xs:complexType>
 
-  <xs:complexType name="ServiceReferenceType">
-    <xs:complexContent>
-      <xs:extension base="tns:ReferenceType">
-        <xs:sequence>
-          <xs:element name="RequestMessage" type="xs:anyType" minOccurs="0"/>
-          <xs:element name="RequestMessageReference" type="xs:anyURI" minOccurs="0"/>
-        </xs:sequence>
+  <xs:complexType name="DomainMetadataType">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute ref="tns:reference"/>
       </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-
-  <xs:complexType name="ReferenceType">
-    <xs:complexContent>
-      <xs:extension base="tns:AbstractReferenceBaseType">
-        <xs:sequence>
-          <xs:element name="Identifier" type="tns:CodeType" minOccurs="0"/>
-          <xs:element name="Abstract" type="tns:LanguageStringType" minOccurs="0" maxOccurs="unbounded"/>
-          <xs:element name="Format" type="xs:string" minOccurs="0"/>
-          <xs:element name="Metadata" type="tns:MetadataType" minOccurs="0" maxOccurs="unbounded"/>
-        </xs:sequence>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-
-  <xs:complexType name="AbstractReferenceBaseType">
-    <xs:sequence/>
-    <xs:attribute ref="tns:type"/>
-    <xs:attribute ref="ns1:href" use="required"/>
-    <xs:attribute ref="ns1:role"/>
-    <xs:attribute ref="ns1:arcrole"/>
-    <xs:attribute ref="ns1:title"/>
-    <xs:attribute ref="ns1:show"/>
-    <xs:attribute ref="ns1:actuate"/>
-  </xs:complexType>
-
-  <xs:complexType name="MetadataType">
-    <xs:sequence>
-      <xs:element name="AbstractMetaData" type="xs:anyType" minOccurs="0"/>
-    </xs:sequence>
-    <xs:attribute name="about" type="xs:anyURI"/>
-    <xs:attribute ref="ns1:type"/>
-    <xs:attribute ref="ns1:href"/>
-    <xs:attribute ref="ns1:role"/>
-    <xs:attribute ref="ns1:arcrole"/>
-    <xs:attribute ref="ns1:title"/>
-    <xs:attribute ref="ns1:show"/>
-    <xs:attribute ref="ns1:actuate"/>
-  </xs:complexType>
-
-  <xs:simpleType name="ValueType">
-    <xs:restriction base="xs:string"/>
-  </xs:simpleType>
-
-  <xs:complexType name="ReferenceGroupType">
-    <xs:complexContent>
-      <xs:extension base="tns:BasicIdentificationType">
-        <xs:sequence>
-          <xs:choice minOccurs="0" maxOccurs="unbounded">
-            <xs:element ref="tns:AbstractReferenceBase"/>
-            <xs:element ref="tns:Reference"/>
-            <xs:element ref="tns:ServiceReference"/>
-          </xs:choice>
-        </xs:sequence>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-
-  <xs:complexType name="BasicIdentificationType">
-    <xs:complexContent>
-      <xs:extension base="tns:DescriptionType">
-        <xs:sequence>
-          <xs:element name="Identifier" type="tns:CodeType" minOccurs="0"/>
-          <xs:element name="Metadata" type="tns:MetadataType" minOccurs="0" maxOccurs="unbounded"/>
-        </xs:sequence>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-
-  <xs:complexType name="ManifestType">
-    <xs:complexContent>
-      <xs:extension base="tns:BasicIdentificationType">
-        <xs:sequence>
-          <xs:element name="ReferenceGroup" type="tns:ReferenceGroupType" maxOccurs="unbounded"/>
-        </xs:sequence>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-
-  <xs:complexType name="IdentificationType">
-    <xs:complexContent>
-      <xs:extension base="tns:BasicIdentificationType">
-        <xs:sequence>
-          <xs:choice minOccurs="0" maxOccurs="unbounded">
-            <xs:element ref="tns:BoundingBox"/>
-            <xs:element ref="tns:WGS84BoundingBox"/>
-          </xs:choice>
-          <xs:element name="OutputFormat" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
-          <xs:choice minOccurs="0" maxOccurs="unbounded">
-            <xs:element ref="tns:AvailableCRS"/>
-            <xs:element ref="tns:SupportedCRS"/>
-          </xs:choice>
-        </xs:sequence>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-
-  <xs:complexType name="GetResourceByIdType">
-    <xs:sequence>
-      <xs:element name="ResourceID" type="xs:anyURI" minOccurs="0" maxOccurs="unbounded"/>
-      <xs:element name="OutputFormat" type="xs:string" minOccurs="0"/>
-    </xs:sequence>
-    <xs:attribute name="service" type="xs:string" use="required"/>
-    <xs:attribute name="version" type="xs:string" use="required"/>
+    </xs:simpleContent>
   </xs:complexType>
 
   <xs:complexType name="ContactType">
@@ -465,6 +358,10 @@
     </xs:sequence>
   </xs:complexType>
 
+  <xs:simpleType name="ValueType">
+    <xs:restriction base="xs:string"/>
+  </xs:simpleType>
+
   <xs:complexType name="RangeType">
     <xs:sequence>
       <xs:element name="MinimumValue" type="tns:ValueType" minOccurs="0"/>
@@ -474,12 +371,18 @@
     <xs:attribute ref="tns:rangeClosure"/>
   </xs:complexType>
 
-  <xs:complexType name="DomainMetadataType">
-    <xs:simpleContent>
-      <xs:extension base="xs:string">
-        <xs:attribute ref="tns:reference"/>
-      </xs:extension>
-    </xs:simpleContent>
+  <xs:complexType name="MetadataType">
+    <xs:sequence>
+      <xs:element name="AbstractMetaData" type="xs:anyType" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="about" type="xs:anyURI"/>
+    <xs:attribute ref="ns1:type"/>
+    <xs:attribute ref="ns1:href"/>
+    <xs:attribute ref="ns1:role"/>
+    <xs:attribute ref="ns1:arcrole"/>
+    <xs:attribute ref="ns1:title"/>
+    <xs:attribute ref="ns1:show"/>
+    <xs:attribute ref="ns1:actuate"/>
   </xs:complexType>
 
   <xs:complexType name="ExceptionType">
@@ -490,31 +393,92 @@
     <xs:attribute name="locator" type="xs:string"/>
   </xs:complexType>
 
-  <xs:complexType name="AcceptFormatsType">
-    <xs:sequence>
-      <xs:element name="OutputFormat" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
-    </xs:sequence>
+  <xs:complexType name="ManifestType">
+    <xs:complexContent>
+      <xs:extension base="tns:BasicIdentificationType">
+        <xs:sequence>
+          <xs:element name="ReferenceGroup" type="tns:ReferenceGroupType" maxOccurs="unbounded"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
 
-  <xs:complexType name="GetCapabilitiesType">
-    <xs:sequence>
-      <xs:element name="AcceptVersions" type="tns:AcceptVersionsType" minOccurs="0"/>
-      <xs:element name="Sections" type="tns:SectionsType" minOccurs="0"/>
-      <xs:element name="AcceptFormats" type="tns:AcceptFormatsType" minOccurs="0"/>
-    </xs:sequence>
-    <xs:attribute name="updateSequence" type="xs:string"/>
+  <xs:complexType name="BasicIdentificationType">
+    <xs:complexContent>
+      <xs:extension base="tns:DescriptionType">
+        <xs:sequence>
+          <xs:element name="Identifier" type="tns:CodeType" minOccurs="0"/>
+          <xs:element name="Metadata" type="tns:MetadataType" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
 
-  <xs:complexType name="AcceptVersionsType">
-    <xs:sequence>
-      <xs:element name="Version" type="xs:string" maxOccurs="unbounded"/>
-    </xs:sequence>
+  <xs:complexType name="ReferenceGroupType">
+    <xs:complexContent>
+      <xs:extension base="tns:BasicIdentificationType">
+        <xs:sequence>
+          <xs:choice minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="tns:AbstractReferenceBase"/>
+            <xs:element ref="tns:Reference"/>
+            <xs:element ref="tns:ServiceReference"/>
+          </xs:choice>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
 
-  <xs:complexType name="SectionsType">
-    <xs:sequence>
-      <xs:element name="Section" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
-    </xs:sequence>
+  <xs:complexType name="IdentificationType">
+    <xs:complexContent>
+      <xs:extension base="tns:BasicIdentificationType">
+        <xs:sequence>
+          <xs:choice minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="tns:BoundingBox"/>
+            <xs:element ref="tns:WGS84BoundingBox"/>
+          </xs:choice>
+          <xs:element name="OutputFormat" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:choice minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="tns:AvailableCRS"/>
+            <xs:element ref="tns:SupportedCRS"/>
+          </xs:choice>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="ReferenceType">
+    <xs:complexContent>
+      <xs:extension base="tns:AbstractReferenceBaseType">
+        <xs:sequence>
+          <xs:element name="Identifier" type="tns:CodeType" minOccurs="0"/>
+          <xs:element name="Abstract" type="tns:LanguageStringType" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="Format" type="xs:string" minOccurs="0"/>
+          <xs:element name="Metadata" type="tns:MetadataType" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="AbstractReferenceBaseType">
+    <xs:sequence/>
+    <xs:attribute ref="tns:type"/>
+    <xs:attribute ref="ns1:href" use="required"/>
+    <xs:attribute ref="ns1:role"/>
+    <xs:attribute ref="ns1:arcrole"/>
+    <xs:attribute ref="ns1:title"/>
+    <xs:attribute ref="ns1:show"/>
+    <xs:attribute ref="ns1:actuate"/>
+  </xs:complexType>
+
+  <xs:complexType name="ServiceReferenceType">
+    <xs:complexContent>
+      <xs:extension base="tns:ReferenceType">
+        <xs:sequence>
+          <xs:element name="RequestMessage" type="xs:anyType" minOccurs="0"/>
+          <xs:element name="RequestMessageReference" type="xs:anyURI" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
 
   <xs:complexType name="ResponsiblePartySubsetType">
@@ -533,6 +497,12 @@
     </xs:sequence>
   </xs:complexType>
 
+  <xs:complexType name="SectionsType">
+    <xs:sequence>
+      <xs:element name="Section" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
   <xs:complexType name="ResponsiblePartyType">
     <xs:sequence>
       <xs:element name="IndividualName" type="xs:string" minOccurs="0"/>
@@ -541,6 +511,36 @@
       <xs:element name="ContactInfo" type="tns:ContactType" minOccurs="0"/>
       <xs:element name="Role" type="tns:CodeType"/>
     </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="GetCapabilitiesType">
+    <xs:sequence>
+      <xs:element name="AcceptVersions" type="tns:AcceptVersionsType" minOccurs="0"/>
+      <xs:element name="Sections" type="tns:SectionsType" minOccurs="0"/>
+      <xs:element name="AcceptFormats" type="tns:AcceptFormatsType" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="updateSequence" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="AcceptVersionsType">
+    <xs:sequence>
+      <xs:element name="Version" type="xs:string" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="AcceptFormatsType">
+    <xs:sequence>
+      <xs:element name="OutputFormat" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="GetResourceByIdType">
+    <xs:sequence>
+      <xs:element name="ResourceID" type="xs:anyURI" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="OutputFormat" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="service" type="xs:string" use="required"/>
+    <xs:attribute name="version" type="xs:string" use="required"/>
   </xs:complexType>
 
   <xs:complexType name="CapabilitiesBaseType">

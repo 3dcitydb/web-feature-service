@@ -1,6 +1,6 @@
 package vcs.citydb.wfs.config.database;
 
-import org.citydb.config.project.database.DBConnection;
+import org.citydb.config.project.database.DatabaseConnection;
 import org.citydb.config.project.database.DatabaseSrs;
 import org.citydb.config.project.database.DatabaseSrsList;
 
@@ -13,9 +13,9 @@ import java.util.List;
 		"connection"
 })
 public class Database {
-	private DatabaseSrsList referenceSystems;
+	private final DatabaseSrsList referenceSystems;
 	@XmlElement(required=true)
-	private DBConnection connection;
+	private DatabaseConnection connection;
 	
 	public Database() {
 		referenceSystems = new DatabaseSrsList();
@@ -25,11 +25,11 @@ public class Database {
 		return referenceSystems.getItems();
 	}
 
-	public DBConnection getConnection() {
+	public DatabaseConnection getConnection() {
 		return connection;
 	}
 
-	public void setConnection(DBConnection connection) {
+	public void setConnection(DatabaseConnection connection) {
 		this.connection = connection;
 	}
 

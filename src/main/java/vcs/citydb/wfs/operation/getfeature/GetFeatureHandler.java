@@ -22,6 +22,7 @@ import vcs.citydb.wfs.config.WFSConfig;
 import vcs.citydb.wfs.exception.WFSException;
 import vcs.citydb.wfs.exception.WFSExceptionCode;
 import vcs.citydb.wfs.exception.WFSExceptionMessage;
+import vcs.citydb.wfs.kvp.KVPConstants;
 import vcs.citydb.wfs.operation.BaseRequestHandler;
 import vcs.citydb.wfs.operation.filter.FeatureTypeHandler;
 import vcs.citydb.wfs.operation.filter.FilterHandler;
@@ -54,7 +55,7 @@ public class GetFeatureHandler {
 		controller = new ExportController(cityGMLBuilder, wfsConfig, config);
 		baseRequestHandler = new BaseRequestHandler(wfsConfig);
 		featureTypeHandler = new FeatureTypeHandler();
-		storedQueryManager = (StoredQueryManager)ObjectRegistry.getInstance().lookup(StoredQueryManager.class.getName());
+		storedQueryManager = ObjectRegistry.getInstance().lookup(StoredQueryManager.class);
 		filterHandler = new FilterHandler();
 	}
 
@@ -74,10 +75,10 @@ public class GetFeatureHandler {
 
 		// check output format
 		if (wfsRequest.isSetOutputFormat() && !wfsConfig.getOperations().getGetFeature().supportsOutputFormat(wfsRequest.getOutputFormat())) {
-			WFSExceptionMessage message = new WFSExceptionMessage(WFSExceptionCode.OPTION_NOT_SUPPORTED);
+			WFSExceptionMessage message = new WFSExceptionMessage(WFSExceptionCode.INVALID_PARAMETER_VALUE);
 			message.addExceptionText("The output format of a GetFeature request must match one of the following formats:");
 			message.addExceptionTexts(wfsConfig.getOperations().getGetFeature().getOutputFormatsAsString());
-			message.setLocator(operationHandle);
+			message.setLocator(KVPConstants.OUTPUT_FORMAT);
 
 			throw new WFSException(message);
 		}
@@ -92,7 +93,7 @@ public class GetFeatureHandler {
 
 		// check for queries to be present
 		if (wfsRequest.getAbstractQueryExpression().isEmpty())
-			throw new WFSException(WFSExceptionCode.OPERATION_PARSING_FAILED, "No query provided.", operationHandle);
+			throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "No query provided.", operationHandle);
 
 		// compile queries to be executed from ad-hoc and stored queries
 		List<QueryType> queries = new ArrayList<>();
@@ -104,7 +105,7 @@ public class GetFeatureHandler {
 		}
 
 		// lod filter constraint
-		if (wfsConfig.getConstraints().isSetLodFilter()) {
+		if (wfsConfig.getConstraints().getLodFilter().isEnabled()) {
 			try {
 				lodFilter = new LodFilterBuilder().buildLodFilter(wfsConfig.getConstraints().getLodFilter());
 			} catch (QueryBuildException e) {
@@ -130,7 +131,7 @@ public class GetFeatureHandler {
 			
 			// join queries are not supported
 			if (query.getTypeNames().size() > 1)
-				throw new WFSException(WFSExceptionCode.OPERATION_NOT_SUPPORTED, "Join queries are not supported.", queryHandle);
+				throw new WFSException(WFSExceptionCode.OPTION_NOT_SUPPORTED, "Join queries are not supported.", queryHandle);
 
 			// create and populate query expression
 			QueryExpression queryExpression = new QueryExpression();
@@ -145,11 +146,11 @@ public class GetFeatureHandler {
 				queryExpression.setTargetSrs(databaseAdapter.getConnectionMetaData().getReferenceSystem());
 			
 			// create filter from feature type names
-			Set<FeatureType> featureTypes = featureTypeHandler.getFeatureTypes(query.getTypeNames(), namespaceFilter, false, queryHandle);
+			Set<FeatureType> featureTypes = featureTypeHandler.getFeatureTypes(query.getTypeNames(), namespaceFilter, false, KVPConstants.TYPE_NAMES, queryHandle);
 			try {
 				queryExpression.setFeatureTypeFilter(new FeatureTypeFilter(featureTypes));
 			} catch (FilterException e) {
-				throw new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "Failed to build filter expression.", queryHandle, e);
+				throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "Failed to build filter expression.", queryHandle, e);
 			}
 
 			// check for unique CityGML version over multiple queries
@@ -171,7 +172,7 @@ public class GetFeatureHandler {
 		}
 
 		if (queryExpressions.size() == 0)
-			throw new WFSException(WFSExceptionCode.OPERATION_PARSING_FAILED, "No valid query expressions provided.", operationHandle);
+			throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "No valid query expressions provided.", operationHandle);
 
 		controller.doExport(wfsRequest, queryExpressions, request, response);
 		log.info(LoggerUtil.getLogMessage(request, "GetFeature operation successfully finished."));

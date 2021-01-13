@@ -1,16 +1,14 @@
-package vcs.citydb.wfs.config.system;
+package vcs.citydb.wfs.config.logging;
 
 import org.citydb.config.project.global.LogLevel;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
-@XmlType(name="FileLogType", propOrder={
-		"logLevel",
-		"fileName"
+@XmlType(name="ConsoleLogType", propOrder={
+		"logLevel"
 })
-public class FileLog {
-	private String fileName;
+public class ConsoleLog {
 	@XmlAttribute(required=true)
 	private LogLevel logLevel = LogLevel.INFO;
 
@@ -20,14 +18,6 @@ public class FileLog {
 
 	public void setLogLevel(LogLevel logLevel) {
 		this.logLevel = logLevel;
-	}
-
-	public String getFileName() {
-		return fileName;
-	}
-
-	public void setFileName(String fileName) {
-		this.fileName = fileName;
 	}
 	
 }

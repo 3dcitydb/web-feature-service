@@ -10,7 +10,7 @@ public class ResolveValueParser extends ValueParser<ResolveValueType> {
 		try {
 			return ResolveValueType.fromValue(value.trim());
 		} catch (IllegalArgumentException e) {
-			throw new KVPParseException("The value '" + value + "' is not allowed for the parameter " + key + ".");
+			throw new KVPParseException("The value '" + value + "' is not allowed for the parameter " + key + ".", key);
 		}
 	}
 

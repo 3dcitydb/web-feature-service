@@ -2,7 +2,6 @@ package vcs.citydb.wfs.kvp;
 
 import net.opengis.fes._2.AbstractQueryExpressionType;
 import net.opengis.wfs._2.GetFeatureType;
-import org.citygml4j.builder.jaxb.CityGMLBuilder;
 import vcs.citydb.wfs.config.WFSConfig;
 import vcs.citydb.wfs.exception.KVPParseException;
 import vcs.citydb.wfs.exception.WFSException;
@@ -13,7 +12,6 @@ import vcs.citydb.wfs.kvp.parser.ResultTypeParser;
 import vcs.citydb.wfs.kvp.parser.StringParser;
 
 import javax.xml.bind.JAXBElement;
-import javax.xml.validation.Schema;
 import java.util.List;
 import java.util.Map;
 
@@ -21,7 +19,7 @@ public class GetFeatureReader extends KVPRequestReader {
 	private final BaseRequestReader baseRequestReader;
 	private final QueryExpressionReader queryExpressionReader;
 	
-	public GetFeatureReader(Map<String, String> parameters, Schema wfsSchema, CityGMLBuilder cityGMLBuilder, WFSConfig wfsConfig) {
+	public GetFeatureReader(Map<String, String> parameters, WFSConfig wfsConfig) {
 		super(parameters, wfsConfig);
 		
 		baseRequestReader = new BaseRequestReader();
@@ -53,15 +51,20 @@ public class GetFeatureReader extends KVPRequestReader {
 
 			if (parameters.containsKey(KVPConstants.RESOLVE_TIMEOUT))
 				wfsRequest.setResolveTimeout(new BigIntegerParser().parse(KVPConstants.RESOLVE_TIMEOUT, parameters.get(KVPConstants.RESOLVE_TIMEOUT)));
+
 		} catch (KVPParseException e) {
-			throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, e.getMessage(), e.getCause());
+			throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, e.getMessage(), e.getParameter(), e.getCause());
 		}
 		
 		// queries
-		List<JAXBElement<? extends AbstractQueryExpressionType>> queries = queryExpressionReader.read(parameters, getNamespaces(), true);
+		List<JAXBElement<? extends AbstractQueryExpressionType>> queries = queryExpressionReader.read(parameters);
 		wfsRequest.getAbstractQueryExpression().addAll(queries);
 		
 		return wfsRequest;
 	}
 
+	@Override
+	public String getOperationName() {
+		return KVPConstants.GET_FEATURE;
+	}
 }

@@ -69,11 +69,11 @@ public class StoredQuery {
 	}
 
 	public List<QName> getReturnFeatureTypeNames() {
-		Set<QName> featureTypeNames = new HashSet<QName>();
+		Set<QName> featureTypeNames = new HashSet<>();
 		for (QueryExpressionTextType queryExpression : description.getQueryExpressionText())
 			featureTypeNames.addAll(queryExpression.getReturnFeatureTypes());
 
-		return new ArrayList<QName>(featureTypeNames);		
+		return new ArrayList<>(featureTypeNames);
 	}
 
 	public StoredQueryDescriptionType getStoredQueryDescription() {
@@ -82,12 +82,12 @@ public class StoredQuery {
 
 	public void validate(String handle) throws WFSException {
 		if (!description.isSetId())
-			throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, "The stored query description lacks the mandatory identifier.", handle);
+			throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, "The stored query description lacks the mandatory identifier.", KVPConstants.STOREDQUERY_ID);
 
 		Matcher tokenMatcher = Pattern.compile("\\$\\{(.*?)\\}", Pattern.UNICODE_CHARACTER_CLASS).matcher("");
 
 		try {
-			Set<String> parameterNames = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
+			Set<String> parameterNames = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
 			for (ParameterExpressionType parameterExpression : description.getParameter()) {
 				// check for duplicate parameter names
 				String parameterName = parameterExpression.getName();
@@ -102,18 +102,18 @@ public class StoredQuery {
 			}
 
 			if (description.getQueryExpressionText().isEmpty())
-				throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, "The stored query description lacks a mandatory query expressions.", handle);
+				throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "The stored query description lacks a mandatory query expressions.", handle);
 			
 			for (QueryExpressionTextType expressionText : description.getQueryExpressionText()) {
 				// check whether the requested feature type is advertised
 				for (QName featureType : expressionText.getReturnFeatureTypes()) {
 					if (!manager.getWFSConfig().getFeatureTypes().contains(featureType))
-						throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, "The feature type '" + featureType.toString() + "' is not advertised.", handle);
+						throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "The feature type '" + featureType.toString() + "' is not advertised.", handle);
 				}
 
 				// check language
 				if (!DEFAULT_LANGUAGE.equals(expressionText.getLanguage()))
-					throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, "Only the language '" + DEFAULT_LANGUAGE + "' is supported for query expressions.", handle);
+					throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "Only the language '" + DEFAULT_LANGUAGE + "' is supported for query expressions.", handle);
 
 				// get string representation of query expression
 				StringBuilder value = new StringBuilder();
@@ -124,7 +124,7 @@ public class StoredQuery {
 				for (String parameterName : parameterNames) {
 					String token = "${" + parameterName + "}";
 					if (value.indexOf(token) < 0)
-						throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, "The parameter '" + parameterName + "' is never being used within the query expression.", handle);						
+						throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "The parameter '" + parameterName + "' is never being used within the query expression.", handle);
 				}
 				
 				// check whether no undeclared token is used
@@ -132,12 +132,12 @@ public class StoredQuery {
 				while (tokenMatcher.find()) {
 					String parameterName = tokenMatcher.group(1);
 					if (!parameterNames.contains(parameterName))
-						throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, "The parameter '" + parameterName + "' is being used within the query expression but is not declared.", handle);						
+						throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "The parameter '" + parameterName + "' is being used within the query expression but is not declared.", handle);
 				}
 
 			}
 		} catch (JAXBException | TransformerFactoryConfigurationError | TransformerException e) {
-			throw new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "Failed to validate the stored query '" + description.getId() + "'.", handle, e);
+			throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "Failed to validate the stored query '" + description.getId() + "'.", handle, e);
 		}
 
 	}
@@ -146,10 +146,10 @@ public class StoredQuery {
 		if (description.getQueryExpressionText().isEmpty())
 			throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "The stored query '" + getId() + "' does not specify any query expression texts.", storedQuery.getHandle());
 
-		List<AbstractQueryExpressionType> queries = new ArrayList<AbstractQueryExpressionType>();
+		List<AbstractQueryExpressionType> queries = new ArrayList<>();
 		try {
 			// build parameter map
-			HashMap<String, String> parameterMap = new HashMap<String, String>();
+			HashMap<String, String> parameterMap = new HashMap<>();
 			for (ParameterType parameter : storedQuery.getParameter()) {
 
 				// check whether parameter is declared
@@ -162,7 +162,7 @@ public class StoredQuery {
 				}
 
 				if (parameterExpression == null)
-					throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, "The paramter '" + parameter.getName() + "' is not declared for the stored query '" + storedQuery.getId() + "'.", storedQuery.getHandle());
+					throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "The parameter '" + parameter.getName() + "' is not declared for the stored query '" + storedQuery.getId() + "'.", storedQuery.getHandle());
 
 				// convert parameter value to string
 				StringBuilder value = new StringBuilder();
@@ -177,7 +177,7 @@ public class StoredQuery {
 			if (description.getParameter().size() != parameterMap.size()) {
 				for (ParameterExpressionType parameter : description.getParameter()) {
 					if (!parameterMap.containsKey(parameter.getName()))
-						throw new WFSException(WFSExceptionCode.MISSING_PARAMETER_VALUE, "The parameter '" + parameter.getName() + "' of the stored query lacks a value.", storedQuery.getHandle());
+						throw new WFSException(WFSExceptionCode.MISSING_PARAMETER_VALUE, "The parameter '" + parameter.getName() + "' of the stored query lacks a value.", parameter.getName());
 				}
 			}
 
@@ -213,11 +213,11 @@ public class StoredQuery {
 				// unmarshal to GetFeature request
 				Object result = unmarshal(template.toString());
 				if (!(result instanceof JAXBElement<?>))
-					throw new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "Failed to compile the stored query '" + storedQuery.getId() + "' after token replacement.", storedQuery.getHandle());
+					throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "Failed to compile the stored query '" + storedQuery.getId() + "' after token replacement.", storedQuery.getHandle());
 
 				JAXBElement<?> jaxbElement = (JAXBElement<?>)result;
 				if (!(jaxbElement.getValue() instanceof GetFeatureType))
-					throw new WFSException(WFSExceptionCode.OPERATION_PARSING_FAILED, "The query expression text of the stored query '" + storedQuery.getId() + "' cannot be compiled to a valid set of query elements.", storedQuery.getHandle());						
+					throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "The query expression text of the stored query '" + storedQuery.getId() + "' cannot be compiled to a valid set of query elements.", storedQuery.getHandle());
 
 				GetFeatureType getFeature = (GetFeatureType)jaxbElement.getValue();
 				for (JAXBElement<? extends AbstractQueryExpressionType> queryElement: getFeature.getAbstractQueryExpression())
@@ -232,7 +232,7 @@ public class StoredQuery {
 			}
 
 		} catch (JAXBException | TransformerFactoryConfigurationError | TransformerException | SAXException e) {
-			throw new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "Failed to compile the stored query '" + storedQuery.getId() + "'.", storedQuery.getHandle(), e);
+			throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "Failed to compile the stored query '" + storedQuery.getId() + "'.", storedQuery.getHandle(), e);
 		} 
 
 		return queries;
@@ -251,7 +251,7 @@ public class StoredQuery {
 
 			return manager.processStoredQueryElement(document.getDocumentElement(), handle);
 		} catch (ParserConfigurationException | JAXBException e) {
-			throw new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "Failed to compile the stored query '" + getId() + "'.", handle, e);
+			throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "Failed to compile the stored query '" + getId() + "'.", handle, e);
 		}
 	}
 

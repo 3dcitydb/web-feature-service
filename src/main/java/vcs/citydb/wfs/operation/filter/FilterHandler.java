@@ -17,7 +17,7 @@ public class FilterHandler {
 
 	public SelectionFilter getSelection(JAXBElement<?> selectionClauseElement, String handle) throws WFSException {
 		if (!(selectionClauseElement.getValue() instanceof FilterType))
-			throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, "The element '" + selectionClauseElement.getName() + "' is not supported as selection clause of queries.", handle); 
+			throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "The element '" + selectionClauseElement.getName() + "' is not supported as selection clause of queries.", handle);
 
 		FilterType filter = (FilterType)selectionClauseElement.getValue();		
 		Predicate predicate;

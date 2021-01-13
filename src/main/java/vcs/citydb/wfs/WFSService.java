@@ -7,8 +7,6 @@ import net.opengis.wfs._2.GetFeatureType;
 import net.opengis.wfs._2.ListStoredQueriesType;
 import org.citydb.concurrent.SingleWorkerPool;
 import org.citydb.config.Config;
-import org.citydb.config.internal.Internal;
-import org.citydb.config.project.Project;
 import org.citydb.database.connection.DatabaseConnectionPool;
 import org.citydb.log.Logger;
 import org.citydb.registry.ObjectRegistry;
@@ -60,7 +58,6 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import java.io.File;
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -69,14 +66,15 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 @WebServlet(Constants.WFS_SERVICE_PATH)
-public class WFSService extends HttpServlet { 
+public class WFSService extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private final Logger log = Logger.getInstance();
 	private final DatabaseConnectionPool connectionPool = DatabaseConnectionPool.getInstance();
 
+	private CityGMLBuilder cityGMLBuilder;
 	private WFSConfig wfsConfig;
 	private Config config;
-	private CityGMLBuilder cityGMLBuilder;
+
 	private SAXParserFactory saxParserFactory;
 	private Schema wfsSchema;
 	private ArrayBlockingQueue<String> requestQueue;
@@ -88,25 +86,25 @@ public class WFSService extends HttpServlet {
 		// check whether servlet initialization threw an error
 		Object error = getServletContext().getAttribute(Constants.INIT_ERROR_ATTRNAME);
 		if (error instanceof ServletException)
-			throw (ServletException)error;
+			throw (ServletException) error;
 
 		log.info("WFS service is loaded by the servlet container.");
 
 		// service specific initialization
 		ObjectRegistry registry = ObjectRegistry.getInstance();
+		config = registry.getConfig();
 		cityGMLBuilder = registry.getCityGMLBuilder();
-		wfsConfig = (WFSConfig)registry.lookup(WFSConfig.class.getName());
-		config = (Config)registry.lookup(Config.class.getName());
+		wfsConfig = registry.lookup(WFSConfig.class);
+
 		requestQueue = new ArrayBlockingQueue<>(wfsConfig.getServer().getMaxParallelRequests(), true);
 		exceptionReportHandler = new WFSExceptionReportHandler(cityGMLBuilder);
-
 		saxParserFactory = SAXParserFactory.newInstance();
 		saxParserFactory.setNamespaceAware(true);
 
 		try {
 			StoredQueryManager storedQueryManager = new StoredQueryManager(cityGMLBuilder, wfsConfig);
-			registry.register(StoredQueryManager.class.getName(), storedQueryManager);
-		} catch (ParserConfigurationException | SAXException | NoSuchAlgorithmException | IOException e) {
+			registry.register(storedQueryManager);
+		} catch (Throwable e) {
 			String message = "Failed to initialize stored query manager.";
 			log.error(message);
 			log.error(e.getMessage());
@@ -116,7 +114,7 @@ public class WFSService extends HttpServlet {
 		// read WFS 2.0 schema to validate requests
 		if (wfsConfig.getOperations().getRequestEncoding().isUseXMLValidation()) {
 			try {
-				SchemaHandler schemaHandler = (SchemaHandler)registry.lookup(SchemaHandler.class.getName());
+				SchemaHandler schemaHandler = registry.lookup(SchemaHandler.class);
 				schemaHandler.parseSchema(new File(getServletContext().getRealPath(Constants.SCHEMAS_PATH + "/ogc/wfs/2.0.2/wfs.xsd")));
 				SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
 				wfsSchema = schemaFactory.newSchema(schemaHandler.getSchemaSources());
@@ -128,7 +126,7 @@ public class WFSService extends HttpServlet {
 			}
 		}
 
-		// register cache table cleaner pool
+		// register cache cleaner pool
 		cacheCleanerPool = new SingleWorkerPool<>(
 				"cache_cleaner",
 				CacheCleanerWorker::new,
@@ -146,78 +144,83 @@ public class WFSService extends HttpServlet {
 		try {
 			cacheCleanerPool.shutdownAndWait();
 		} catch (InterruptedException e) {
-			String message = "Failed to clean temporay tables.";
+			String message = "Failed to shutdown cache cleaner pool.";
 			log.error(message);
 			log.error(e.getMessage());
 		}
 	}
 
 	@Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		try {
-			// set CORS http headers
-			if (wfsConfig.getServer().isEnableCORS())
-				addCORSHeaders(request, response, false);
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		// set CORS http headers
+		if (wfsConfig.getServer().isEnableCORS())
+			addCORSHeaders(request, response, false);
 
+		KVPRequestReader reader = null;
+		try {
 			if (wfsConfig.getOperations().getRequestEncoding().getMethod() == EncodingMethod.XML)
 				throw new WFSException(WFSExceptionCode.OPTION_NOT_SUPPORTED, "KVP encoding of requests is not advertised.");
 
+			// parse parameters
 			Map<String, String> parameters = new HashMap<>();
-
-			// check for invalid parameters
 			for (Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
 				String name = entry.getKey().toUpperCase();
 				String value = entry.getValue()[0];
 
 				for (int i = 1; i < entry.getValue().length; i++) {
 					if (!value.equals(entry.getValue()[i]))
-						throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, "Found inconsistent values for parameter " + name + ": " + Util.collection2string(Arrays.asList(entry.getValue()), ", "));
+						throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, "Found inconsistent values for parameter " + name + ": " + Util.collection2string(Arrays.asList(entry.getValue()), ", "), name);
 				}
 
-				if (parameters.containsKey(name)) {
-					if (!value.equals(parameters.get(name)))
-						throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, "Found inconsistent values for parameter " + name + ": " + value + ", " + parameters.get(name));
-				}
+				String previous = parameters.get(name);
+				if (previous != null && !value.equals(parameters.get(previous)))
+					throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, "Found inconsistent values for parameter " + name + ": " + value + ", " + parameters.get(name), name);
 
 				if (!value.isEmpty())
 					parameters.put(name, value);
 			}
 
 			String operationName = parameters.get(KVPConstants.REQUEST);
-			if (operationName == null)
-				throw new WFSException(WFSExceptionCode.MISSING_PARAMETER_VALUE, "The request lacks the mandatory " + KVPConstants.REQUEST + " parameter."); 
+			if (operationName != null) {
+				switch (operationName) {
+					case KVPConstants.GET_CAPABILITIES:
+						reader = new GetCapabilitiesReader(parameters, wfsConfig);
+						break;
+					case KVPConstants.DESCRIBE_FEATURE_TYPE:
+						reader = new DescribeFeatureTypeReader(parameters, wfsConfig);
+						break;
+					case KVPConstants.GET_FEATURE:
+						reader = new GetFeatureReader(parameters, wfsConfig);
+						break;
+					case KVPConstants.LIST_STORED_QUERIES:
+						reader = new ListStoredQueriesReader(parameters, wfsConfig);
+						break;
+					case KVPConstants.DESCRIBE_STORED_QUERIES:
+						reader = new DescribeStoredQueriesReader(parameters, wfsConfig);
+						break;
+					default:
+						throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, "The operation " + operationName + " is not supported by this WFS implementation.", KVPConstants.REQUEST);
+				}
+			} else
+				throw new WFSException(WFSExceptionCode.MISSING_PARAMETER_VALUE, "The request lacks the mandatory " + KVPConstants.REQUEST + " parameter.", KVPConstants.REQUEST);
 
-			KVPRequestReader reader = null;
-			if (operationName.equals(KVPConstants.GET_CAPABILITIES))
-				reader = new GetCapabilitiesReader(parameters, wfsConfig);
-			else if (operationName.equals(KVPConstants.DESCRIBE_FEATURE_TYPE))
-				reader = new DescribeFeatureTypeReader(parameters, wfsConfig);
-			else if (operationName.equals(KVPConstants.GET_FEATURE))
-				reader = new GetFeatureReader(parameters, wfsSchema, cityGMLBuilder, wfsConfig);
-			else if (operationName.equals(KVPConstants.LIST_STORED_QUERIES))
-				reader = new ListStoredQueriesReader(parameters, wfsConfig);
-			else if (operationName.equals(KVPConstants.DESCRIBE_STORED_QUERIES))
-				reader = new DescribeStoredQueriesReader(parameters, wfsConfig);
-
-			if (reader == null)
-				throw new WFSException(WFSExceptionCode.OPERATION_NOT_SUPPORTED, "The operation " + operationName + " is not supported by this WFS implementation.");
-
-			// read request
-			Object wfsRequest = reader.readRequest();	
-			handleRequest(wfsRequest, operationName, reader.getNamespaces(), request, response);
-
+			// parse and process request
+			Object wfsRequest = reader.readRequest();
+			handleRequest(wfsRequest, reader.getOperationName(), reader.getNamespaces(), request, response);
 		} catch (WFSException e) {
-			exceptionReportHandler.sendErrorResponse(e, request, response);
+			String operationName = reader != null ? reader.getOperationName() : null;
+			exceptionReportHandler.sendErrorResponse(e, operationName, request, response);
 		}
 	}
 
 	@Override
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		try {
-			// set CORS http headers
-			if (wfsConfig.getServer().isEnableCORS())
-				addCORSHeaders(request, response, false);
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		// set CORS http headers
+		if (wfsConfig.getServer().isEnableCORS())
+			addCORSHeaders(request, response, false);
 
+		String operationName = null;
+		try {
 			if (wfsConfig.getOperations().getRequestEncoding().getMethod() == EncodingMethod.KVP)
 				throw new WFSException(WFSExceptionCode.OPTION_NOT_SUPPORTED, "XML encoding of requests is not advertised.");
 
@@ -231,39 +234,36 @@ public class WFSService extends HttpServlet {
 				unmarshaller.setEventHandler(validationEventHandler);
 			}
 
-			UnmarshallerHandler unmarshallerHandler = unmarshaller.getUnmarshallerHandler();			
+			UnmarshallerHandler unmarshallerHandler = unmarshaller.getUnmarshallerHandler();
 
 			// use SAX parser to keep track of namespace declarations
-			SAXParser parser = saxParserFactory.newSAXParser();			
+			SAXParser parser = saxParserFactory.newSAXParser();
 			XMLReader reader = parser.getXMLReader();
 			NamespaceFilter namespaceFilter = new NamespaceFilter(reader);
 			namespaceFilter.setContentHandler(unmarshallerHandler);
 
 			try {
-				namespaceFilter.parse(new InputSource(request.getInputStream()));		
+				namespaceFilter.parse(new InputSource(request.getInputStream()));
 			} catch (SAXException e) {
 				if (validationEventHandler != null && !validationEventHandler.isValid())
 					throw new WFSException(WFSExceptionCode.OPERATION_PARSING_FAILED, validationEventHandler.getCause());
 				else throw e;
-			}	
+			}
 
 			// unmarshal WFS request
-			// TODO: add native support for GML 3.2
 			Object object = unmarshallerHandler.getResult();
 			if (!(object instanceof JAXBElement<?>))
-				throw new WFSException(WFSExceptionCode.OPERATION_PARSING_FAILED, "Failed to parse XML document received through HTTP POST.");
+				throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, "Failed to parse XML document received through HTTP POST.", KVPConstants.REQUEST);
 
-			JAXBElement<?> jaxbElement = (JAXBElement<?>)object;
-			handleRequest(jaxbElement.getValue(), jaxbElement.getName().toString(), namespaceFilter, request, response);
+			JAXBElement<?> element = (JAXBElement<?>) object;
+			operationName = element.getName().getLocalPart();
 
-		} catch (JAXBException e) {
-			exceptionReportHandler.sendErrorResponse(new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "Failed to unmarshal the XML message.", e), request, response); 
-		} catch (SAXException e) {			
-			exceptionReportHandler.sendErrorResponse(new WFSException(WFSExceptionCode.OPERATION_PARSING_FAILED, "Failed to parse the XML message.", e), request, response); 
-		} catch (ParserConfigurationException e) {
-			exceptionReportHandler.sendErrorResponse(new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "Failed to initialize a SAX parser for parsing the XML message.", e), request, response); 
+			// process request
+			handleRequest(element.getValue(), operationName, namespaceFilter, request, response);
+		} catch (JAXBException | SAXException | ParserConfigurationException e) {
+			exceptionReportHandler.sendErrorResponse(new WFSException(WFSExceptionCode.OPERATION_PARSING_FAILED, "Failed to parse the XML message.", e), operationName, request, response);
 		} catch (WFSException e) {
-			exceptionReportHandler.sendErrorResponse(e, request, response);
+			exceptionReportHandler.sendErrorResponse(e, operationName, request, response);
 		}
 	}
 
@@ -271,12 +271,6 @@ public class WFSService extends HttpServlet {
 		// check database connection
 		if (!connectionPool.isConnected())
 			DatabaseConnector.connect(config);
-
-		// create copy of the 3DCityDB configuration
-		Project project = config.getProject();
-		Config config = new Config(
-				new Project(project.getDatabase(), project.getImporter(), project.getExporter(), null, null, project.getGlobal()),
-				null, new Internal());
 
 		try {
 			if (wfsRequest instanceof GetFeatureType) {
@@ -298,7 +292,7 @@ public class WFSService extends HttpServlet {
 				describeFeatureTypeHandler.doOperation((DescribeFeatureTypeType)wfsRequest, getServletContext(), request, response);
 			}
 
-			else if (wfsRequest instanceof GetCapabilitiesType) {				
+			else if (wfsRequest instanceof GetCapabilitiesType) {
 				GetCapabilitiesHandler getCapabilitiesHandler = new GetCapabilitiesHandler(cityGMLBuilder, wfsConfig);
 				getCapabilitiesHandler.doOperation((GetCapabilitiesType)wfsRequest, request, response);
 			}
@@ -320,7 +314,7 @@ public class WFSService extends HttpServlet {
 				throw new WFSException(WFSExceptionCode.OPERATION_PARSING_FAILED, "Failed to parse the requested operation.");
 
 		} catch (JAXBException e) {
-			throw new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "A fatal JAXB error occurred whilst processing the request.", e);
+			throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "A fatal JAXB error occurred whilst processing the request.", operationName, e);
 		}
 	}
 
@@ -336,28 +330,27 @@ public class WFSService extends HttpServlet {
 	}
 
 	@Override
-	protected void doOptions(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void doOptions(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		// support CORS preflight requests
 		if (wfsConfig.getServer().isEnableCORS())
 			addCORSHeaders(request, response, true);
 	}
-	
+
 	private void addCORSHeaders(HttpServletRequest request, HttpServletResponse response, boolean isOptions) {
 		// do nothing if this is not a CORS request
 		if (request.getHeader("Origin") == null)
 			return;
-		
+
 		response.setHeader("Access-Control-Allow-Origin", "*");
-		
+
 		// add preflight headers
-		if (isOptions && request.getHeader("Access-Control-Request-Method") != null) {			
+		if (isOptions && request.getHeader("Access-Control-Request-Method") != null) {
 			response.setHeader("Access-Control-Allow-Methods", "GET, POST");
 			response.setHeader("Access-Control-Max-Age", "86400");
 
 			String requestCORSHeaders = request.getHeader("Access-Control-Request-Headers");
 			if (requestCORSHeaders != null)
 				response.setHeader("Access-Control-Allow-Headers", requestCORSHeaders);
-		}	
+		}
 	}
-
 }
