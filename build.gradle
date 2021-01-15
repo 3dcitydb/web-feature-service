@@ -38,7 +38,7 @@ repositories {
 }
 
 dependencies {
-    implementation('org.citydb:impexp-core:4.2.3') {
+    implementation('org.citydb:impexp-core:4.3.0-b20210114.1701') {
         exclude group: 'org.postgresql', module: 'postgresql'
         exclude group: 'net.postgis', module: 'postgis-jdbc'
     }
