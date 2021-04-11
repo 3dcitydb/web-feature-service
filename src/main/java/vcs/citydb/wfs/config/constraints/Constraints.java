@@ -4,12 +4,21 @@ import javax.xml.bind.annotation.XmlType;
 
 @XmlType(name="ConstraintsType", propOrder={})
 public class Constraints {
+	private Boolean currentVersionOnly = true;
 	private Boolean exportCityDBMetadata = false;
 	private Boolean stripGeometry = false;
 	private LodFilter lodFilter;
 
 	public Constraints() {
 		lodFilter = new LodFilter();
+	}
+
+	public boolean isCurrentVersionOnly() {
+		return currentVersionOnly;
+	}
+
+	public void setCurrentVersionOnly(boolean currentVersionOnly) {
+		this.currentVersionOnly = currentVersionOnly;
 	}
 
 	public boolean isExportCityDBMetadata() {

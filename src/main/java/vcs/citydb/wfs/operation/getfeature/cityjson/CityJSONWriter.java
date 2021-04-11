@@ -1,9 +1,9 @@
 package vcs.citydb.wfs.operation.getfeature.cityjson;
 
 import net.opengis.wfs._2.TruncatedResponse;
-import org.citydb.citygml.common.database.uid.UIDCache;
-import org.citydb.citygml.common.database.uid.UIDCacheManager;
-import org.citydb.citygml.common.database.uid.UIDCacheType;
+import org.citydb.citygml.common.cache.IdCache;
+import org.citydb.citygml.common.cache.IdCacheManager;
+import org.citydb.citygml.common.cache.IdCacheType;
 import org.citydb.citygml.exporter.util.InternalConfig;
 import org.citydb.citygml.exporter.writer.FeatureWriteException;
 import org.citydb.concurrent.SingleWorkerPool;
@@ -23,7 +23,7 @@ import vcs.citydb.wfs.util.GeometryStripper;
 public class CityJSONWriter implements FeatureWriter {
 	private final CityJSONChunkWriter writer;
 	private final GeometryStripper geometryStripper;
-	private final UIDCacheManager uidCacheManager;
+	private final IdCacheManager idCacheManager;
 	private final Object eventChannel;
 	private final InternalConfig internalConfig;
 
@@ -36,13 +36,13 @@ public class CityJSONWriter implements FeatureWriter {
 	public CityJSONWriter(
 			CityJSONChunkWriter writer,
 			GeometryStripper geometryStripper,
-			UIDCacheManager uidCacheManager,
+			IdCacheManager idCacheManager,
 			Object eventChannel,
 			InternalConfig internalConfig,
 			Config config) {
 		this.writer = writer;
 		this.geometryStripper = geometryStripper;
-		this.uidCacheManager = uidCacheManager;
+		this.idCacheManager = idCacheManager;
 		this.eventChannel = eventChannel;
 		this.internalConfig = internalConfig;
 
@@ -93,24 +93,31 @@ public class CityJSONWriter implements FeatureWriter {
 	@Override
 	public void write(AbstractFeature feature, long sequenceId) throws FeatureWriteException {
 		if (feature instanceof AbstractCityObject) {
-			if (checkForDuplicates && isFeatureAlreadyExported(feature))
+			if (checkForDuplicates && isFeatureAlreadyExported(feature)) {
 				return;
+			}
 
 			// security feature: strip geometry from features
-			if (geometryStripper != null)
+			if (geometryStripper != null) {
 				feature.accept(geometryStripper);
+			}
 
 			CityJSON cityJSON = new CityJSON();
-			AbstractCityObjectType dest = marshaller.marshal((AbstractCityObject) feature, cityJSON);
 
-			for (AbstractCityObjectType child : cityJSON.getCityObjects())
+			AbstractCityObjectType cityObject = marshaller.marshal((AbstractCityObject) feature, cityJSON);
+			for (AbstractCityObjectType child : cityJSON.getCityObjects()) {
 				writerPool.addWork(child);
+			}
 
-			if (cityJSON.isSetExtensionProperties())
+			if (cityJSON.isSetExtensionProperties()) {
 				cityJSON.getExtensionProperties().forEach(writer::addRootExtensionProperty);
+			}
 
-			hasContent = true;
-			writerPool.addWork(dest);
+			if (cityObject != null) {
+				writerPool.addWork(cityObject);
+			}
+
+			hasContent = cityObject != null || cityJSON.hasCityObjects();
 		}
 	}
 
@@ -133,21 +140,24 @@ public class CityJSONWriter implements FeatureWriter {
 	public void close() throws FeatureWriteException {
 		try {
 			writerPool.shutdownAndWait();
-			if (hasContent)
+			if (hasContent) {
 				writer.writeEndDocument();
+			}
 		} catch (InterruptedException | CityJSONWriteException e) {
 			throw new FeatureWriteException("Failed to close CityJSON response writer.", e);
 		} finally {
-			if (!writerPool.isTerminated())
+			if (!writerPool.isTerminated()) {
 				writerPool.shutdownNow();
+			}
 		}
 	}
 
 	private boolean isFeatureAlreadyExported(AbstractFeature feature) {
-		if (!feature.isSetId())
+		if (!feature.isSetId()) {
 			return false;
+		}
 
-		UIDCache server = uidCacheManager.getCache(UIDCacheType.OBJECT);
-		return server.get(feature.getId()) != null;
+		IdCache cache = idCacheManager.getCache(IdCacheType.OBJECT);
+		return cache.get(feature.getId()) != null;
 	}
 }

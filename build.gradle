@@ -20,6 +20,9 @@ java {
     sourceSets {
         main.java.srcDir genSrcDir
     }
+    if (JavaVersion.current().isJava9Compatible()) {
+        compileJava.options.compilerArgs.addAll(['--release', '8'])
+    }
 }
 
 configurations {
@@ -50,10 +53,10 @@ dependencies {
     jdbc ('net.postgis:postgis-jdbc:2.5.0') {
         exclude group: 'org.slf4j', module: 'slf4j-api'
     }
-
     jaxb 'org.glassfish.jaxb:jaxb-xjc:2.3.2'
     jaxb 'org.jvnet.jaxb2_commons:jaxb2-basics:0.12.0'
     jaxb 'org.jvnet.jaxb2_commons:jaxb2-namespace-prefix:1.3'
+    jaxb 'org.jvnet.jaxb2_commons:jaxb2-basics-annotate:1.1.0'
     jaxb 'org.slf4j:slf4j-simple:1.7.25'
 }
 
@@ -87,7 +90,7 @@ task generateJaxb(group: 'jaxb') {
                 extension: 'true',
                 encoding: 'UTF-8') {
             produces(dir: genSrcDir, includes: '**/*.java')
-            arg(line: '-Xnamespace-prefix -Xsetters -Xsetters-mode=direct -Xinheritance')
+            arg(line: '-Xnamespace-prefix -Xsetters -Xsetters-mode=direct -Xinheritance -Xannotate -XremoveAnnotation')
         }
 
         delete "$genSrcDir/net/opengis/citygml"

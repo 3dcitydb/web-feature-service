@@ -4,6 +4,7 @@ import org.citydb.config.project.database.DatabaseConnection;
 import org.citydb.config.project.database.DatabaseSrs;
 import org.citydb.config.project.database.DatabaseSrsList;
 
+import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 import java.util.List;
@@ -33,4 +34,11 @@ public class Database {
 		this.connection = connection;
 	}
 
+	void afterUnmarshal(Unmarshaller unmarshaller, Object parent) {
+		if (connection != null) {
+			if (connection.getSchema() != null && connection.getSchema().trim().isEmpty()) {
+				connection.setSchema(null);
+			}
+		}
+	}
 }

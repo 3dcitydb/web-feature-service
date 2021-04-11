@@ -4,9 +4,9 @@ import net.opengis.wfs._2.FeatureCollectionType;
 import net.opengis.wfs._2.MemberPropertyType;
 import net.opengis.wfs._2.ObjectFactory;
 import net.opengis.wfs._2.TruncatedResponse;
-import org.citydb.citygml.common.database.uid.UIDCache;
-import org.citydb.citygml.common.database.uid.UIDCacheManager;
-import org.citydb.citygml.common.database.uid.UIDCacheType;
+import org.citydb.citygml.common.cache.IdCache;
+import org.citydb.citygml.common.cache.IdCacheManager;
+import org.citydb.citygml.common.cache.IdCacheType;
 import org.citydb.citygml.exporter.util.InternalConfig;
 import org.citydb.citygml.exporter.writer.FeatureWriteException;
 import org.citydb.concurrent.SingleWorkerPool;
@@ -50,8 +50,7 @@ public class CityGMLWriter implements FeatureWriter {
 	private final CityGMLVersion version;
 	private final TransformerChainFactory transformerChainFactory;
 	private final GeometryStripper geometryStripper;
-	private final UIDCacheManager uidCacheManager;
-	private final Object eventChannel;
+	private final IdCacheManager idCacheManager;
 	private final InternalConfig internalConfig;
 	
 	private final SingleWorkerPool<SAXEventBuffer> writerPool;
@@ -70,7 +69,7 @@ public class CityGMLWriter implements FeatureWriter {
 			CityGMLVersion version,
 			TransformerChainFactory transformerChainFactory,
 			GeometryStripper geometryStripper,
-			UIDCacheManager uidCacheManager,
+			IdCacheManager idCacheManager,
 			Object eventChannel,
 			InternalConfig internalConfig,
 			Config config) throws DatatypeConfigurationException {
@@ -78,8 +77,7 @@ public class CityGMLWriter implements FeatureWriter {
 		this.version = version;
 		this.transformerChainFactory = transformerChainFactory;
 		this.geometryStripper = geometryStripper;
-		this.uidCacheManager = uidCacheManager;
-		this.eventChannel = eventChannel;
+		this.idCacheManager = idCacheManager;
 		this.internalConfig = internalConfig;
 		
 		cityGMLBuilder = ObjectRegistry.getInstance().getCityGMLBuilder();
@@ -262,8 +260,8 @@ public class CityGMLWriter implements FeatureWriter {
 		if (!feature.isSetId())
 			return false;
 
-		UIDCache server = uidCacheManager.getCache(UIDCacheType.OBJECT);
-		return server.get(feature.getId()) != null;
+		IdCache cache = idCacheManager.getCache(IdCacheType.OBJECT);
+		return cache.get(feature.getId()) != null;
 	}
 
 	private void writeFeatureCollection(long matchNo, long returnNo, WriteMode writeMode) throws FeatureWriteException {

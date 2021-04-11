@@ -136,7 +136,7 @@ public class GetFeatureHandler {
 			// create and populate query expression
 			QueryExpression queryExpression = new QueryExpression();
 			queryExpression.setLodFilter(lodFilter);
-			queryExpression.setIsGetFeatureById(query.isIsGetFeatureById());
+			queryExpression.setFeatureIdentifier(query.getFeatureIdentifier());
 			queryExpression.setHandle(queryHandle);
 			
 			// TODO: add support for coordinate transformation
@@ -167,6 +167,10 @@ public class GetFeatureHandler {
 			// get selection clause of query
 			if (query.isSetAbstractSelectionClause())
 				queryExpression.setSelection(filterHandler.getSelection(query.getAbstractSelectionClause(), queryHandle));
+
+			// only process non-terminated objects if required
+			if (wfsConfig.getConstraints().isCurrentVersionOnly())
+				filterHandler.addNotTerminatedFilter(queryExpression, queryHandle);
 
 			queryExpressions.add(queryExpression);
 		}

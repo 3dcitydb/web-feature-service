@@ -17,6 +17,7 @@ import net.opengis.ows._1.ValueType;
 import net.opengis.wfs._2.FeatureTypeListType;
 import net.opengis.wfs._2.FeatureTypeType;
 import net.opengis.wfs._2.GetCapabilitiesType;
+import net.opengis.wfs._2.ResolveValueType;
 import net.opengis.wfs._2.WFS_CapabilitiesType;
 import org.citydb.config.project.database.DatabaseSrs;
 import org.citydb.database.adapter.AbstractDatabaseAdapter;
@@ -262,6 +263,18 @@ public class GetCapabilitiesHandler {
 		}
 
 		operationsMetadata.getParameter().add(operationVersion);
+
+		// resolve parameter
+		DomainType resolveParameter = new DomainType();
+		resolveParameter.setName("resolve");
+		resolveParameter.setAllowedValues(new AllowedValues());
+		ValueType noneValue = new ValueType();
+		noneValue.setValue(ResolveValueType.NONE.value());
+		ValueType localValue = new ValueType();
+		localValue.setValue(ResolveValueType.LOCAL.value());
+		resolveParameter.getAllowedValues().getValueOrRange().add(noneValue);
+		resolveParameter.getAllowedValues().getValueOrRange().add(localValue);
+		operationsMetadata.getParameter().add(resolveParameter);
 
 		// mandatory constraints
 		LinkedHashMap<String, ValueType> constraints = new LinkedHashMap<>();

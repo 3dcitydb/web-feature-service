@@ -1,6 +1,8 @@
 package vcs.citydb.wfs.operation.storedquery;
 
 import net.opengis.fes._2.AbstractQueryExpressionType;
+import net.opengis.fes._2.FilterType;
+import net.opengis.fes._2.ResourceIdType;
 import net.opengis.wfs._2.Abstract;
 import net.opengis.wfs._2.ObjectFactory;
 import net.opengis.wfs._2.ParameterExpressionType;
@@ -98,8 +100,19 @@ public class StoredQueryManager {
 			StoredQuery storedQuery = getStoredQuery(new StoredQueryAdapter(query.getId()), handle);
 			if (storedQuery != null) {
 				if (storedQuery.getId().equals(DEFAULT_QUERY.getId())) {
-					QueryType queryType = (QueryType)storedQuery.compile(query, namespaceFilter).iterator().next();
-					queryType.setIsGetFeatureById(true);
+					QueryType queryType = (QueryType) storedQuery.compile(query, namespaceFilter).iterator().next();
+
+					if (queryType.isSetAbstractSelectionClause() && queryType.getAbstractSelectionClause().getValue() instanceof FilterType) {
+						FilterType filter = (FilterType) queryType.getAbstractSelectionClause().getValue();
+						if (filter.isSet_Id() && filter.get_Id().get(0).getValue() instanceof ResourceIdType) {
+							ResourceIdType resourceId = (ResourceIdType) filter.get_Id().get(0).getValue();
+							queryType.setFeatureIdentifier(resourceId.getRid());
+						}
+					}
+
+					if (!queryType.isSetFeatureIdentifier())
+						throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "Lacking identifier for the '" + DEFAULT_QUERY.getId() + "' stored query.", handle);
+
 					queries.add(queryType);
 				} else {
 					for (AbstractQueryExpressionType compiled : storedQuery.compile(query, namespaceFilter))

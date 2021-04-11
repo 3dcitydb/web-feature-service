@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jaxb:bindings version="2.1" xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" xmlns:namespace="http://jaxb2-commons.dev.java.net/namespace-prefix"
-	xmlns:inheritance="http://jaxb2-commons.dev.java.net/basic/inheritance" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  xmlns:inheritance="http://jaxb2-commons.dev.java.net/basic/inheritance" xmlns:annox="http://annox.dev.java.net" xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
 	<!-- Specific settings for the wfs mapping file -->
 	<jaxb:bindings schemaLocation="wfs/2.0.2/wfs.xsd" node="/xs:schema">
@@ -16,6 +16,14 @@
 		<jaxb:bindings node="//xs:simpleType[@name='StarStringType']//xs:enumeration[@value='*']">
 			<jaxb:typesafeEnumMember name="STAR"/>
 		</jaxb:bindings>
+	  <jaxb:bindings node="//xs:complexType[@name='BaseRequestType']//xs:attribute[@name='identifier']">
+	    <annox:annotate target="field">@javax.xml.bind.annotation.XmlTransient</annox:annotate>
+	    <annox:removeAnnotation target="field" class="javax.xml.bind.annotation.XmlAttribute"/>
+	  </jaxb:bindings>
+	  <jaxb:bindings node="//xs:complexType[@name='QueryType']//xs:attribute[@name='featureIdentifier']">
+	    <annox:annotate target="field">@javax.xml.bind.annotation.XmlTransient</annox:annotate>
+	    <annox:removeAnnotation target="field" class="javax.xml.bind.annotation.XmlAttribute"/>
+	  </jaxb:bindings>
 	</jaxb:bindings>
 
 	<!-- ========== -->
@@ -33,7 +41,7 @@
 	<!-- FES 2.0.3 -->
 	<!-- ========== -->
 
-	<!-- Specific settings for the FES 2..0 schema file -->
+	<!-- Specific settings for the FES 2.0.3 schema file -->
 	<jaxb:bindings schemaLocation="filter/2.0.3/filter.xsd" node="/xs:schema">
 		<jaxb:bindings>
 			<namespace:prefix name="fes"/>

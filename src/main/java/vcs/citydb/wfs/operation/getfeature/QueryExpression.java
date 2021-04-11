@@ -4,7 +4,7 @@ import org.citydb.query.Query;
 
 public class QueryExpression extends Query {
 	private String handle;
-	private boolean isGetFeatureById;
+	private String featureIdentifier;
 
 	public String getHandle() {
 		return handle;
@@ -15,11 +15,15 @@ public class QueryExpression extends Query {
 	}
 
 	public boolean isGetFeatureById() {
-		return isGetFeatureById;
+		return featureIdentifier != null;
 	}
 
-	public void setIsGetFeatureById(boolean isGetFeatureById) {
-		this.isGetFeatureById = isGetFeatureById;
+	public String getFeatureIdentifier() {
+		return featureIdentifier;
+	}
+
+	public void setFeatureIdentifier(String featureIdentifier) {
+		this.featureIdentifier = featureIdentifier;
 	}
 	
 }

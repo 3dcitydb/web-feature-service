@@ -37,6 +37,8 @@
       <xsd:attribute name="version" type="wfs:VersionStringType"
          use="required"/>
       <xsd:attribute name="handle" type="xsd:string"/>
+      <!-- 3DCityDB WFS extension -->
+      <xsd:attribute name="identifier" type="xsd:string"/>
    </xsd:complexType>
    <xsd:simpleType name="VersionStringType">
       <xsd:restriction base="xsd:string">
@@ -152,7 +154,7 @@
             <xsd:attribute name="srsName" type="xsd:anyURI"/>
             <xsd:attribute name="featureVersion" type="xsd:string"/>
             <!-- 3DCityDB WFS extension -->
-            <xsd:attribute name="isGetFeatureById" type="xsd:boolean" default="false"/>
+            <xsd:attribute name="featureIdentifier" type="xsd:string"/>
          </xsd:extension>
       </xsd:complexContent>
    </xsd:complexType>

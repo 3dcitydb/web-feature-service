@@ -2,7 +2,7 @@
 // Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.3.2 generiert 
 // Siehe <a href="https://javaee.github.io/jaxb-v2/">https://javaee.github.io/jaxb-v2/</a> 
 // Änderungen an dieser Datei gehen bei einer Neukompilierung des Quellschemas verloren. 
-// Generiert: 2019.02.13 um 03:40:03 PM CET 
+// Generiert: 2021.04.11 um 09:31:43 PM CEST 
 //
 
 
@@ -12,6 +12,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlSeeAlso;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 
@@ -27,6 +28,7 @@ import javax.xml.bind.annotation.XmlType;
  *       &lt;attribute name="service" use="required" type="{http://www.w3.org/2001/XMLSchema}string" fixed="WFS" /&gt;
  *       &lt;attribute name="version" use="required" type="{http://www.opengis.net/wfs/2.0}VersionStringType" /&gt;
  *       &lt;attribute name="handle" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *       &lt;attribute name="identifier" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
  *     &lt;/restriction&gt;
  *   &lt;/complexContent&gt;
  * &lt;/complexType&gt;
@@ -55,6 +57,8 @@ public abstract class BaseRequestType {
     protected String version;
     @XmlAttribute(name = "handle")
     protected String handle;
+    @XmlTransient
+    protected String identifier;
 
     /**
      * Ruft den Wert der service-Eigenschaft ab.
@@ -142,6 +146,34 @@ public abstract class BaseRequestType {
 
     public boolean isSetHandle() {
         return (this.handle!= null);
+    }
+
+    /**
+     * Ruft den Wert der identifier-Eigenschaft ab.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    /**
+     * Legt den Wert der identifier-Eigenschaft fest.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setIdentifier(String value) {
+        this.identifier = value;
+    }
+
+    public boolean isSetIdentifier() {
+        return (this.identifier!= null);
     }
 
 }

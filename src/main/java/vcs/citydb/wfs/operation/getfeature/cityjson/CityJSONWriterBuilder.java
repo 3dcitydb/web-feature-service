@@ -1,7 +1,7 @@
 package vcs.citydb.wfs.operation.getfeature.cityjson;
 
 import net.opengis.wfs._2.GetFeatureType;
-import org.citydb.citygml.common.database.uid.UIDCacheManager;
+import org.citydb.citygml.common.cache.IdCacheManager;
 import org.citydb.citygml.exporter.util.InternalConfig;
 import org.citydb.citygml.exporter.writer.FeatureWriteException;
 import org.citydb.config.Config;
@@ -37,7 +37,7 @@ public class CityJSONWriterBuilder implements GetFeatureResponseBuilder {
 	private CityJSONOutputFactory factory;
 	private Map<String, String> formatOptions;
 	private GeometryStripper geometryStripper;
-	private UIDCacheManager uidCacheManager;
+	private IdCacheManager idCacheManager;
 	private Object eventChannel;
 	private WFSConfig wfsConfig;
 	private InternalConfig internalConfig;
@@ -61,14 +61,14 @@ public class CityJSONWriterBuilder implements GetFeatureResponseBuilder {
 			List<QueryExpression> queryExpressions,
 			Map<String, String> formatOptions,
 			GeometryStripper geometryStripper,
-			UIDCacheManager uidCacheManager,
+			IdCacheManager idCacheManager,
 			Object eventChannel,
 			InternalConfig internalConfig,
 			WFSConfig wfsConfig,
 			Config config) throws FeatureWriteException {
 		this.formatOptions = formatOptions;
 		this.geometryStripper = geometryStripper;
-		this.uidCacheManager = uidCacheManager;
+		this.idCacheManager = idCacheManager;
 		this.eventChannel = eventChannel;
 		this.internalConfig = internalConfig;
 		this.wfsConfig = wfsConfig;
@@ -126,7 +126,7 @@ public class CityJSONWriterBuilder implements GetFeatureResponseBuilder {
 
 		chunkWriter.setMetadata(metadata);
 
-		CityJSONWriter cityJSONWriter = new CityJSONWriter(chunkWriter, geometryStripper, uidCacheManager, eventChannel, internalConfig, config);
+		CityJSONWriter cityJSONWriter = new CityJSONWriter(chunkWriter, geometryStripper, idCacheManager, eventChannel, internalConfig, config);
 
 		if ("true".equals(formatOptions.get(PRETTY_PRINT)))
 			cityJSONWriter.useIndentation(true);

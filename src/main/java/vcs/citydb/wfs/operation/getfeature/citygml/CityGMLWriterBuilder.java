@@ -4,7 +4,7 @@ import net.opengis.wfs._2.GetFeatureType;
 import net.opengis.wfs._2.ResultTypeType;
 import org.citydb.ade.model.module.CityDBADE100Module;
 import org.citydb.ade.model.module.CityDBADE200Module;
-import org.citydb.citygml.common.database.uid.UIDCacheManager;
+import org.citydb.citygml.common.cache.IdCacheManager;
 import org.citydb.citygml.exporter.util.InternalConfig;
 import org.citydb.citygml.exporter.writer.FeatureWriteException;
 import org.citydb.config.Config;
@@ -43,7 +43,7 @@ public class CityGMLWriterBuilder implements GetFeatureResponseBuilder {
 
 	private CityGMLVersion version;
 	private GeometryStripper geometryStripper;
-	private UIDCacheManager uidCacheManager;
+	private IdCacheManager idCacheManager;
 	private InternalConfig internalConfig;
 	private Config config;
 	private Object eventChannel;
@@ -67,13 +67,13 @@ public class CityGMLWriterBuilder implements GetFeatureResponseBuilder {
 			List<QueryExpression> queryExpressions,
 			Map<String, String> formatOptions,
 			GeometryStripper geometryStripper,
-			UIDCacheManager uidCacheManager,
+			IdCacheManager idCacheManager,
 			Object eventChannel,
 			InternalConfig internalConfig,
 			WFSConfig wfsConfig,
 			Config config) throws FeatureWriteException {
 		this.geometryStripper = geometryStripper;
-		this.uidCacheManager = uidCacheManager;
+		this.idCacheManager = idCacheManager;
 		this.eventChannel = eventChannel;
 		this.internalConfig = internalConfig;
 		this.config = config;
@@ -157,7 +157,7 @@ public class CityGMLWriterBuilder implements GetFeatureResponseBuilder {
 	public FeatureWriter buildFeatureWriter(Writer writer) throws FeatureWriteException {
 		try {
 			saxWriter.setOutput(writer);
-			return new CityGMLWriter(saxWriter, version, transformerChainFactory, geometryStripper, uidCacheManager, eventChannel, internalConfig, config);
+			return new CityGMLWriter(saxWriter, version, transformerChainFactory, geometryStripper, idCacheManager, eventChannel, internalConfig, config);
 		} catch (DatatypeConfigurationException e) {
 			throw new FeatureWriteException("Failed to create CityGML response writer.", e);
 		}

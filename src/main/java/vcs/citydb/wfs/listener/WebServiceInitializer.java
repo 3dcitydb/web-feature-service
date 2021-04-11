@@ -32,6 +32,7 @@ import vcs.citydb.wfs.config.logging.ConsoleLog;
 import vcs.citydb.wfs.config.logging.FileLog;
 import vcs.citydb.wfs.exception.WFSException;
 import vcs.citydb.wfs.util.DatabaseConnector;
+import vcs.citydb.wfs.util.RequestLimiter;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -122,6 +123,9 @@ public class WebServiceInitializer implements ServletContextListener {
 			context.setAttribute(Constants.INIT_ERROR_ATTRNAME, new ServletException("Failed to load WFS config from " + Constants.CONFIG_PATH + '/' + Constants.CONFIG_FILE + '.'));
 			return;
 		}
+
+		// create request limiter and register with object registry
+		registry.register(new RequestLimiter(wfsConfig));
 
 		// create 3DCityDB dummy configuration and register with object registry
 		initConfig(config, wfsConfig);

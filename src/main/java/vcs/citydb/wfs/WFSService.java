@@ -38,6 +38,7 @@ import vcs.citydb.wfs.operation.storedquery.StoredQueryManager;
 import vcs.citydb.wfs.util.CacheCleanerWork;
 import vcs.citydb.wfs.util.CacheCleanerWorker;
 import vcs.citydb.wfs.util.DatabaseConnector;
+import vcs.citydb.wfs.util.RequestLimiter;
 import vcs.citydb.wfs.xml.NamespaceFilter;
 import vcs.citydb.wfs.xml.ValidationEventHandlerImpl;
 
@@ -62,8 +63,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.TimeUnit;
 
 @WebServlet(Constants.WFS_SERVICE_PATH)
 public class WFSService extends HttpServlet {
@@ -72,12 +71,12 @@ public class WFSService extends HttpServlet {
 	private final DatabaseConnectionPool connectionPool = DatabaseConnectionPool.getInstance();
 
 	private CityGMLBuilder cityGMLBuilder;
+	private RequestLimiter limiter;
 	private WFSConfig wfsConfig;
 	private Config config;
 
 	private SAXParserFactory saxParserFactory;
 	private Schema wfsSchema;
-	private ArrayBlockingQueue<String> requestQueue;
 	private SingleWorkerPool<CacheCleanerWork> cacheCleanerPool;
 	private WFSExceptionReportHandler exceptionReportHandler;
 
@@ -94,9 +93,9 @@ public class WFSService extends HttpServlet {
 		ObjectRegistry registry = ObjectRegistry.getInstance();
 		config = registry.getConfig();
 		cityGMLBuilder = registry.getCityGMLBuilder();
+		limiter = registry.lookup(RequestLimiter.class);
 		wfsConfig = registry.lookup(WFSConfig.class);
 
-		requestQueue = new ArrayBlockingQueue<>(wfsConfig.getServer().getMaxParallelRequests(), true);
 		exceptionReportHandler = new WFSExceptionReportHandler(cityGMLBuilder);
 		saxParserFactory = SAXParserFactory.newInstance();
 		saxParserFactory.setNamespaceAware(true);
@@ -275,16 +274,9 @@ public class WFSService extends HttpServlet {
 		try {
 			if (wfsRequest instanceof GetFeatureType) {
 				// make sure we only serve a maximum number of requests in parallel
-				putRequestOnQueue(request.getRemoteAddr());
-
-				try {
-					// handle GetFeature request
-					GetFeatureHandler getFeatureHandler = new GetFeatureHandler(cityGMLBuilder, wfsConfig, config);
-					getFeatureHandler.doOperation((GetFeatureType)wfsRequest, namespaceFilter, request, response);
-				} finally {
-					// free slot from the request queue
-					requestQueue.remove(request.getRemoteAddr());
-				}
+				limiter.requireServiceSlot(request, operationName);
+				GetFeatureHandler getFeatureHandler = new GetFeatureHandler(cityGMLBuilder, wfsConfig, config);
+				getFeatureHandler.doOperation((GetFeatureType) wfsRequest, namespaceFilter, request, response);
 			}
 
 			else if (wfsRequest instanceof DescribeFeatureTypeType) {
@@ -315,17 +307,9 @@ public class WFSService extends HttpServlet {
 
 		} catch (JAXBException e) {
 			throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "A fatal JAXB error occurred whilst processing the request.", operationName, e);
-		}
-	}
-
-	private void putRequestOnQueue(String request) throws WFSException {
-		try {
-			// make sure we only serve a maximum number of requests in parallel
-			if (!requestQueue.offer(request, wfsConfig.getServer().getWaitTimeout(), TimeUnit.SECONDS))
-				throw new WFSException(WFSExceptionCode.SERVICE_UNAVAILABLE, "The service is currently unavailable because it is overloaded. " +
-						"Generally, this is a temporary state. Please retry later.");
-		} catch (InterruptedException e) {
-			throw new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "The service has internally interrupted the request.", e);
+		} finally {
+			// release slot from limiter
+			limiter.releaseServiceSlot(request);
 		}
 	}
 

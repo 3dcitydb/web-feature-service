@@ -33,6 +33,9 @@ public class GetFeatureReader extends KVPRequestReader {
 
 		try {			
 			// standard presentation parameters
+			if (parameters.containsKey(KVPConstants.START_INDEX))
+				wfsRequest.setStartIndex(new BigIntegerParser().parse(KVPConstants.START_INDEX, parameters.get(KVPConstants.START_INDEX)));
+
 			if (parameters.containsKey(KVPConstants.COUNT))
 				wfsRequest.setCount(new BigIntegerParser().parse(KVPConstants.COUNT, parameters.get(KVPConstants.COUNT)));
 

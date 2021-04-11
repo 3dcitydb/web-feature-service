@@ -141,6 +141,7 @@
 
   <xs:complexType name="ConstraintsType">
     <xs:all>
+      <xs:element name="currentVersionOnly" type="xs:boolean" minOccurs="0"/>
       <xs:element name="exportCityDBMetadata" type="xs:boolean" minOccurs="0"/>
       <xs:element name="stripGeometry" type="xs:boolean" minOccurs="0"/>
       <xs:element name="lodFilter" type="WFSLodFilterType" minOccurs="0"/>
@@ -201,17 +202,18 @@
   </xs:complexType>
 
   <xs:complexType name="ConnectionType">
-    <xs:sequence>
+    <xs:all>
       <xs:element name="description" type="xs:string" minOccurs="0"/>
       <xs:element name="type" type="DatabaseTypeType"/>
       <xs:element name="server" type="xs:anyURI"/>
       <xs:element name="port" type="xs:positiveInteger"/>
       <xs:element name="sid" type="xs:string"/>
       <xs:element name="schema" type="xs:string" minOccurs="0"/>
+      <xs:element name="workspace" type="WorkspaceType" minOccurs="0"/>
       <xs:element name="user" type="xs:string"/>
       <xs:element name="password" type="xs:string" minOccurs="0"/>
       <xs:element name="savePassword" type="xs:boolean" minOccurs="0"/>
-    </xs:sequence>
+    </xs:all>
     <xs:attribute name="id" type="xs:ID"/>
     <xs:attribute name="loginTimeout" type="xs:int"/>
     <xs:attribute name="initialSize" type="xs:int"/>
@@ -239,6 +241,13 @@
     <xs:attribute name="maxAge" type="xs:long"/>
     <xs:attribute name="useEquals" type="xs:boolean"/>
     <xs:attribute name="suspectTimeout" type="xs:int"/>
+  </xs:complexType>
+
+  <xs:complexType name="WorkspaceType">
+    <xs:sequence>
+      <xs:element name="name" type="xs:string" minOccurs="0"/>
+      <xs:element name="timestamp" type="xs:date" minOccurs="0"/>
+    </xs:sequence>
   </xs:complexType>
 
   <xs:complexType name="ServerType">
@@ -331,8 +340,8 @@
 
   <xs:simpleType name="DatabaseTypeType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="Oracle"/>
       <xs:enumeration value="PostGIS"/>
+      <xs:enumeration value="Oracle"/>
     </xs:restriction>
   </xs:simpleType>
 

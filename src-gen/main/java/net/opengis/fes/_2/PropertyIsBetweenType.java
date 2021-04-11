@@ -2,7 +2,7 @@
 // Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.3.2 generiert 
 // Siehe <a href="https://javaee.github.io/jaxb-v2/">https://javaee.github.io/jaxb-v2/</a> 
 // Änderungen an dieser Datei gehen bei einer Neukompilierung des Quellschemas verloren. 
-// Generiert: 2019.02.13 um 03:40:03 PM CET 
+// Generiert: 2021.04.11 um 09:31:43 PM CEST 
 //
 
 
@@ -59,8 +59,8 @@ public class PropertyIsBetweenType
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link FunctionType }{@code >}
      *     {@link JAXBElement }{@code <}{@link LiteralType }{@code >}
+     *     {@link JAXBElement }{@code <}{@link FunctionType }{@code >}
      *     {@link JAXBElement }{@code <}{@link String }{@code >}
      *     {@link JAXBElement }{@code <}{@link Object }{@code >}
      *     
@@ -74,8 +74,8 @@ public class PropertyIsBetweenType
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link FunctionType }{@code >}
      *     {@link JAXBElement }{@code <}{@link LiteralType }{@code >}
+     *     {@link JAXBElement }{@code <}{@link FunctionType }{@code >}
      *     {@link JAXBElement }{@code <}{@link String }{@code >}
      *     {@link JAXBElement }{@code <}{@link Object }{@code >}
      *     

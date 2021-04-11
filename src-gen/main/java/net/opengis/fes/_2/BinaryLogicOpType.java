@@ -2,7 +2,7 @@
 // Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.3.2 generiert 
 // Siehe <a href="https://javaee.github.io/jaxb-v2/">https://javaee.github.io/jaxb-v2/</a> 
 // Änderungen an dieser Datei gehen bei einer Neukompilierung des Quellschemas verloren. 
-// Generiert: 2019.02.13 um 03:40:03 PM CET 
+// Generiert: 2021.04.11 um 09:31:43 PM CEST 
 //
 
 
@@ -74,26 +74,26 @@ public class BinaryLogicOpType
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link JAXBElement }{@code <}{@link PropertyIsNullType }{@code >}
-     * {@link JAXBElement }{@code <}{@link PropertyIsBetweenType }{@code >}
+     * {@link JAXBElement }{@code <}{@link BinaryComparisonOpType }{@code >}
+     * {@link JAXBElement }{@code <}{@link PropertyIsNilType }{@code >}
+     * {@link JAXBElement }{@code <}{@link BinaryComparisonOpType }{@code >}
      * {@link JAXBElement }{@code <}{@link BinaryComparisonOpType }{@code >}
      * {@link JAXBElement }{@code <}{@link BinaryComparisonOpType }{@code >}
      * {@link JAXBElement }{@code <}{@link BinaryComparisonOpType }{@code >}
      * {@link JAXBElement }{@code <}{@link PropertyIsLikeType }{@code >}
+     * {@link JAXBElement }{@code <}{@link PropertyIsBetweenType }{@code >}
      * {@link JAXBElement }{@code <}{@link BinaryComparisonOpType }{@code >}
-     * {@link JAXBElement }{@code <}{@link BinaryComparisonOpType }{@code >}
-     * {@link JAXBElement }{@code <}{@link BinaryComparisonOpType }{@code >}
-     * {@link JAXBElement }{@code <}{@link PropertyIsNilType }{@code >}
+     * {@link JAXBElement }{@code <}{@link PropertyIsNullType }{@code >}
      * {@link JAXBElement }{@code <}{@link ComparisonOpsType }{@code >}
      * {@link JAXBElement }{@code <}{@link BinarySpatialOpType }{@code >}
+     * {@link JAXBElement }{@code <}{@link BinarySpatialOpType }{@code >}
      * {@link JAXBElement }{@code <}{@link DistanceBufferType }{@code >}
+     * {@link JAXBElement }{@code <}{@link BinarySpatialOpType }{@code >}
      * {@link JAXBElement }{@code <}{@link BinarySpatialOpType }{@code >}
      * {@link JAXBElement }{@code <}{@link BinarySpatialOpType }{@code >}
      * {@link JAXBElement }{@code <}{@link DistanceBufferType }{@code >}
      * {@link JAXBElement }{@code <}{@link BinarySpatialOpType }{@code >}
      * {@link JAXBElement }{@code <}{@link BBOXType }{@code >}
-     * {@link JAXBElement }{@code <}{@link BinarySpatialOpType }{@code >}
-     * {@link JAXBElement }{@code <}{@link BinarySpatialOpType }{@code >}
      * {@link JAXBElement }{@code <}{@link BinarySpatialOpType }{@code >}
      * {@link JAXBElement }{@code <}{@link BinarySpatialOpType }{@code >}
      * {@link JAXBElement }{@code <}{@link SpatialOpsType }{@code >}
@@ -113,8 +113,8 @@ public class BinaryLogicOpType
      * {@link JAXBElement }{@code <}{@link BinaryTemporalOpType }{@code >}
      * {@link JAXBElement }{@code <}{@link TemporalOpsType }{@code >}
      * {@link JAXBElement }{@code <}{@link BinaryLogicOpType }{@code >}
-     * {@link JAXBElement }{@code <}{@link BinaryLogicOpType }{@code >}
      * {@link JAXBElement }{@code <}{@link UnaryLogicOpType }{@code >}
+     * {@link JAXBElement }{@code <}{@link BinaryLogicOpType }{@code >}
      * {@link JAXBElement }{@code <}{@link LogicOpsType }{@code >}
      * {@link JAXBElement }{@code <}{@link ExtensionOpsType }{@code >}
      * {@link JAXBElement }{@code <}{@link FunctionType }{@code >}

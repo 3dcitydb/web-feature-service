@@ -220,15 +220,8 @@ public class QueryExecuter implements EventHandler {
 
 				else {
 					// the getFeatureById query requires a special not found exception message
-					QueryExpression getFeatureById = queryExpressions.get(0);
-					Predicate predicate = getFeatureById.getSelection().getPredicate();
-					if (predicate.getPredicateName() == PredicateName.ID_OPERATOR) {
-						String identifier = ((ResourceIdOperator)predicate).getResourceIds().iterator().next();
-						throw new WFSException(WFSExceptionCode.NOT_FOUND, "There is no feature with identifier '" + identifier + "'.", identifier);
-					}
-
-					throw new WFSException(WFSExceptionCode.INTERNAL_SERVER_ERROR, "Failed to generate NotFound exception message.");
-				}
+					String identifier = queryExpressions.get(0).getFeatureIdentifier();
+					throw new WFSException(WFSExceptionCode.NOT_FOUND, "There is no feature with identifier '" + identifier + "'.", identifier);				}
 			}
 
 		} catch (SQLException e) {
