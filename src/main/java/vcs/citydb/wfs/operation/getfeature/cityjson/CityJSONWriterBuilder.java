@@ -30,7 +30,6 @@ public class CityJSONWriterBuilder implements GetFeatureResponseBuilder {
 	private final Logger log = Logger.getInstance();
 	private final String PRETTY_PRINT = "prettyPrint";
 	private final String SIGNIFICANT_DIGITS = "significantDigits";
-	private final String SIGNIFICANT_TEXTURE_DIGITS = "significantTextureDigits";
 	private final String TRANSFORM_VERTICES = "transformVertices";
 	private final String GENERATE_CITYGML_METADATA = "generateCityGMLMetadata";
 
@@ -104,15 +103,6 @@ public class CityJSONWriterBuilder implements GetFeatureResponseBuilder {
 				chunkWriter.setVerticesBuilder(new DefaultVerticesBuilder().withSignificantDigits(significantDigits));
 			} catch (NumberFormatException e) {
 				log.warn("The '" + SIGNIFICANT_DIGITS + "' format options requires an integer value.");
-			}
-		}
-
-		if (formatOptions.containsKey(SIGNIFICANT_TEXTURE_DIGITS)) {
-			try {
-				int significantDigits = Integer.parseInt(formatOptions.get(SIGNIFICANT_TEXTURE_DIGITS));
-				chunkWriter.setTextureVerticesBuilder(new DefaultTextureVerticesBuilder().withSignificantDigits(significantDigits));
-			} catch (NumberFormatException e) {
-				log.warn("The '" + SIGNIFICANT_TEXTURE_DIGITS + "' format options requires an integer value.");
 			}
 		}
 

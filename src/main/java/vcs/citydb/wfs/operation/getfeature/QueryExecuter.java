@@ -71,7 +71,7 @@ public class QueryExecuter implements EventHandler {
 		this.internalConfig = internalConfig;
 
 		// get standard request parameters
-		long maxFeatureCount = Constants.COUNT_DEFAULT;
+		long maxFeatureCount = wfsConfig.getConstraints().getCountDefault();
 		count = wfsRequest.isSetCount() && wfsRequest.getCount().longValue() < maxFeatureCount ? wfsRequest.getCount().longValue() : maxFeatureCount;		
 		resultType = wfsRequest.getResultType();
 
