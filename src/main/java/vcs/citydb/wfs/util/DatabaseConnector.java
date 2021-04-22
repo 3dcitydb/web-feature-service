@@ -38,7 +38,7 @@ public class DatabaseConnector {
                 if (databaseConfig.getActiveConnection() == null) {
                     WFSExceptionMessage message = new WFSExceptionMessage(WFSExceptionCode.INTERNAL_SERVER_ERROR);
                     message.addExceptionText("Failed to connect to the database.");
-                    message.addExceptionText("No database connection provided in " + Constants.CONFIG_PATH + '/' + Constants.CONFIG_FILE + '.');
+                    message.addExceptionText("No database connection provided in " + Constants.CONFIG_FILE + '.');
                     throw new WFSException(message);
                 }
 

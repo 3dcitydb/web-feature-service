@@ -8,12 +8,11 @@ public class Constants {
 	public static final String DEFAULT_OWS_TITLE = "3D City Database Web Feature Service";
 	public static final long UNKNOWN_NUMBER_MATCHED = Long.MAX_VALUE;
 	public static final long COUNT_DEFAULT = Long.MAX_VALUE;
-	
-	public static final String CONFIG_PATH = "/WEB-INF";
-	public static final String CONFIG_FILE = "config.xml";
+
+	public static final String CONFIG_FILE = System.getenv("CITYDB_WFS_CONFIG_FILE") != null ? System.getenv("CITYDB_WFS_CONFIG_FILE") : "WEB-INF/config.xml";
 	public static final String CONFIG_SCHEMA_PATH = "src/main/webapp/WEB-INF/schemas/config";
 	public static final String CONFIG_SCHEMA_FILE = CONFIG_SCHEMA_PATH + "/config.xsd";
-	public static final String ADE_EXTENSIONS_PATH = "/WEB-INF/ade-extensions";
+	public static final String ADE_EXTENSIONS_PATH = System.getenv("CITYDB_WFS_ADE_EXTENSIONS_PATH") != null ? System.getenv("CITYDB_WFS_ADE_EXTENSIONS_PATH") : "WEB-INF/ade-extensions";
 	public static final String XSLT_STYLESHEETS_PATH = "/WEB-INF/xslt-stylesheets";
 	public static final String SCHEMAS_PATH = "/WEB-INF/schemas";
 	public static final String CITYGML_1_0_SCHEMAS_PATH = SCHEMAS_PATH + "/ogc/citygml/1.0.0";

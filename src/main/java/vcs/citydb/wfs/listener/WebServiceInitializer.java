@@ -80,8 +80,12 @@ public class WebServiceInitializer implements ServletContextListener {
 		}
 
 		// load ADE extensions
-		if (Files.exists(Paths.get(context.getRealPath(Constants.ADE_EXTENSIONS_PATH)))) {
-			try (Stream<Path> stream = Files.walk(Paths.get(context.getRealPath(Constants.ADE_EXTENSIONS_PATH)))
+		String adeExtensionsPath = Paths.get(Constants.ADE_EXTENSIONS_PATH).isAbsolute() ?
+				Constants.ADE_EXTENSIONS_PATH :
+				context.getRealPath(Constants.ADE_EXTENSIONS_PATH);
+
+		if (Files.exists(Paths.get(adeExtensionsPath))) {
+			try (Stream<Path> stream = Files.walk(Paths.get(adeExtensionsPath))
 					.filter(path -> path.getFileName().toString().toLowerCase().endsWith(".jar"))) {
 				stream.forEach(classLoader::addPath);
 				adeManager.loadExtensions(classLoader);
@@ -120,7 +124,7 @@ public class WebServiceInitializer implements ServletContextListener {
 			wfsConfig = WFSConfigLoader.load(context);
 			registry.register(wfsConfig);
 		} catch (JAXBException e) {
-			context.setAttribute(Constants.INIT_ERROR_ATTRNAME, new ServletException("Failed to load WFS config from " + Constants.CONFIG_PATH + '/' + Constants.CONFIG_FILE + '.'));
+			context.setAttribute(Constants.INIT_ERROR_ATTRNAME, new ServletException("Failed to load WFS config from " + Constants.CONFIG_FILE + '.'));
 			return;
 		}
 

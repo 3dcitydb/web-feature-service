@@ -9,6 +9,9 @@ import javax.servlet.ServletContext;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
@@ -28,7 +31,16 @@ public class WFSConfigLoader {
         JAXBContext configContext = JAXBContext.newInstance(WFSConfig.class);
         Unmarshaller um = configContext.createUnmarshaller();
 
-        Object object = um.unmarshal(context.getResourceAsStream(Constants.CONFIG_PATH + '/' + Constants.CONFIG_FILE));
+        InputStream inputStream;
+        try {
+            inputStream = Paths.get(Constants.CONFIG_FILE).isAbsolute() ?
+                    new FileInputStream(Constants.CONFIG_FILE) :
+                    context.getResourceAsStream(Constants.CONFIG_FILE);
+        } catch (FileNotFoundException e) {
+            throw new JAXBException("WFS config file '" + Constants.CONFIG_FILE + "' not found.", e);
+        }
+
+        Object object = um.unmarshal(inputStream);
         if (!(object instanceof WFSConfig))
             throw new JAXBException("Illegal XML root element used in config file.");
 
