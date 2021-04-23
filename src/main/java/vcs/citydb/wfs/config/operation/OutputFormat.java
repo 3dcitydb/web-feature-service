@@ -51,19 +51,19 @@ public class OutputFormat {
 	}
 	
 	@XmlType(name="OutputFormatListType")
-	protected final static class OutputFormatList {
+	public final static class OutputFormatList {
 		@XmlElement(name="outputFormat", nillable=false)
 		protected List<OutputFormat> outputFormats;
 	}
 
 	@XmlType(name="OutputFormatOptionListType")
-	private final static class OutputFormatOptionList {
+	public final static class OutputFormatOptionList {
 		@XmlElement(name="option", nillable=false)
 		private List<OutputFormatOption> options;
 	}
 	
 	@XmlType(name="OutputFormatOptionType")
-	private final static class OutputFormatOption {
+	public final static class OutputFormatOption {
 		@XmlAttribute(required=true)
 		private String name;
 		@XmlValue

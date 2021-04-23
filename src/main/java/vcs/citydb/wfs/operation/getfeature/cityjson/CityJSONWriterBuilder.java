@@ -12,7 +12,6 @@ import org.citygml4j.builder.cityjson.CityJSONBuilder;
 import org.citygml4j.builder.cityjson.CityJSONBuilderException;
 import org.citygml4j.builder.cityjson.json.io.writer.CityJSONChunkWriter;
 import org.citygml4j.builder.cityjson.json.io.writer.CityJSONOutputFactory;
-import org.citygml4j.builder.cityjson.marshal.util.DefaultTextureVerticesBuilder;
 import org.citygml4j.builder.cityjson.marshal.util.DefaultVerticesBuilder;
 import org.citygml4j.builder.cityjson.marshal.util.DefaultVerticesTransformer;
 import org.citygml4j.cityjson.metadata.MetadataType;
@@ -32,13 +31,13 @@ public class CityJSONWriterBuilder implements GetFeatureResponseBuilder {
 	private final String SIGNIFICANT_DIGITS = "significantDigits";
 	private final String TRANSFORM_VERTICES = "transformVertices";
 	private final String GENERATE_CITYGML_METADATA = "generateCityGMLMetadata";
+	private final String REMOVE_DUPLICATE_CHILD_GEOMETRIES = "removeDuplicateChildGeometries";
 
 	private CityJSONOutputFactory factory;
 	private Map<String, String> formatOptions;
 	private GeometryStripper geometryStripper;
 	private IdCacheManager idCacheManager;
 	private Object eventChannel;
-	private WFSConfig wfsConfig;
 	private InternalConfig internalConfig;
 	private Config config;
 
@@ -70,12 +69,21 @@ public class CityJSONWriterBuilder implements GetFeatureResponseBuilder {
 		this.idCacheManager = idCacheManager;
 		this.eventChannel = eventChannel;
 		this.internalConfig = internalConfig;
-		this.wfsConfig = wfsConfig;
 		this.config = config;
 
 		try {
 			CityJSONBuilder builder = CityGMLContext.getInstance().createCityJSONBuilder();
 			factory = builder.createCityJSONOutputFactory();
+
+			if ("false".equals(formatOptions.get(GENERATE_CITYGML_METADATA))) {
+				factory.setGenerateCityGMLMetadata(false);
+			} else {
+				factory.setGenerateCityGMLMetadata(true);
+			}
+
+			if ("true".equals(formatOptions.get(REMOVE_DUPLICATE_CHILD_GEOMETRIES))) {
+				factory.setRemoveDuplicateChildGeometries(true);
+			}
 		} catch (CityJSONBuilderException e) {
 			throw new FeatureWriteException("Failed to initialize CityJSON response builder.", e);
 		}
@@ -109,19 +117,14 @@ public class CityJSONWriterBuilder implements GetFeatureResponseBuilder {
 		if ("true".equals(formatOptions.get(TRANSFORM_VERTICES)))
 			chunkWriter.setVerticesTransformer(new DefaultVerticesTransformer());
 
-		if ("false".equals(formatOptions.get(GENERATE_CITYGML_METADATA)))
-			factory.setGenerateCityGMLMetadata(false);
-		else
-			factory.setGenerateCityGMLMetadata(true);
-
 		chunkWriter.setMetadata(metadata);
 
 		CityJSONWriter cityJSONWriter = new CityJSONWriter(chunkWriter, geometryStripper, idCacheManager, eventChannel, internalConfig, config);
 
-		if ("true".equals(formatOptions.get(PRETTY_PRINT)))
+		if ("true".equals(formatOptions.get(PRETTY_PRINT))) {
 			cityJSONWriter.useIndentation(true);
+		}
 		
 		return cityJSONWriter;
 	}
-
 }
