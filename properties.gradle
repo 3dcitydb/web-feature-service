@@ -2,11 +2,11 @@ ext {
     date = new Date()
 
     // vendor information
-    vendorName = 'virtualcitySYSTEMS GmbH'
+    vendorName = 'virtualcitysystems GmbH'
     vendorStreet = 'Tauentzienstraße 7 b/c'
     vendorTown = '10789 Berlin'
     vendorCountry = 'Germany'
-    vendorWebsiteUrl = 'http://www.virtualcitysystems.de'
+    vendorWebsiteUrl = 'https://vc.systems'
     vendorCopyright = '2015-' + date.format('yyyy')
 
     // 3D City Database

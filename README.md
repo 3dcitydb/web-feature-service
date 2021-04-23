@@ -3,7 +3,7 @@
 The OGC Web Feature Service (WFS) interface for the 3D City Database enables web-based access to the city objects stored
 in the database. WFS clients can directly connect to this standardized and open interface for requesting 3D content
 across the web using platform-independent calls. Users of the 3D City Database are therefore no longer limited to using
-the [Importer/Exporter](https://github.com/3dcitydb/importer-exporter) tool for data retrieval. The Web feature service
+the [Importer/Exporter](https://github.com/3dcitydb/importer-exporter) tool for data retrieval. The Web Feature Service
 allows clients to only retrieve the city objects they are seeking, rather than retrieving a file that contains the data
 they are seeking and possibly much more.
 
@@ -68,4 +68,4 @@ Developers
 
 The 3D City Database Web Feature Service has been developed by: 
 
-* Claus Nagel, [virtualcitySYSTEMS GmbH, Berlin](http://www.virtualcitysystems.de/)
+* Claus Nagel, [Virtual City Systems, Berlin](https://vc.systems/)
