@@ -1,6 +1,29 @@
 Change Log
 ==========
 
+### 4.3.0
+
+##### Changes
+* Improved export performance (up to 10-15 times faster in case the WFS is not running on the same machine or
+  in the same local network as the database server).
+* The default `config.xml` file and ADE extensions folder can now be changed using the environment variables
+  `VC_WFS_CONFIG_FILE` and `VC_WFS_ADE_EXTENSIONS_PATH`.
+* Enhanced LoD filter constraint with the option to only export the minimum or maximum LoD from the list of
+  selected LoDs.
+* Updated WFS web client UI and added support for XML highlighting to the input and output fields.
+* Added `countDefault` constraint to limit the maximum number of returned features.
+* Added CityJSON output format option `removeDuplicateChildGeometries` to avoid exporting duplicate geometries
+  for nested child objects.
+* This release is based on the Importer/Exporter version 4.3.0, and thus incorporates all bug fixes and updates
+  introduced in that version.
+
+##### Fixes
+* Fixed error when exporting to CityJSON and no top-level feature is returned.
+
+##### Miscellaneous
+* Updated citygml4j to 2.11.3.
+* Upgrade PostgreSQL driver to 42.2.14 and PostGIS to 2.5.0.
+
 ### 4.2.3 - 2020-07-16
 
 ##### Changes
