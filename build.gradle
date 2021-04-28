@@ -117,7 +117,6 @@ distributions.main {
         from 'README.md'
         into('lib') {
             from configurations.jdbc
-            from 'lib/ojdbc8-19.3.0.0.jar'
         }
         into('license') {
             from "$rootDir/resources/license/APACHE-2.0.txt"
