@@ -1,7 +1,7 @@
 Change Log
 ==========
 
-### 4.3.0
+### 4.3.0 - 2021-04-28
 
 ##### Changes
 * Improved export performance (up to 10-15 times faster in case the WFS is not running on the same machine or
