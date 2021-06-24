@@ -13,3 +13,7 @@ bin/
 *.iml
 *.iws
 out/
+
+# Docker
+docker-scripts/build.sh
+docker-scripts/run.sh
