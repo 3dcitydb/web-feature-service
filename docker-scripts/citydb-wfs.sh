@@ -9,10 +9,12 @@ if [ -z ${TOMCAT_MAX_HEAP+x} ]; then
   export TOMCAT_MAX_HEAP=1024m;
 fi
 
-export CATALINA_OPTS="-Djava.awt.headless=true
-  -Dfile.encoding=UTF-8
-  -server -Xms1024m -Xmx${TOMCAT_MAX_HEAP}
-  -XX:+DisableExplicitGC"
+if [ -z ${CATALINA_OPTS+x} ]; then
+  export CATALINA_OPTS="-Djava.awt.headless=true
+    -Dfile.encoding=UTF-8
+    -server -Xms$(awk '/MemTotal/ { printf "%d\n", $2/1024/1024/2}' /proc/meminfo)g
+    -Xmx$(awk '/MemTotal/ { printf "%d\n", $2/1024/1024}' /proc/meminfo)g"
+fi
 
 # Set default env #############################################################
 echo
@@ -89,12 +91,6 @@ xmlstarlet ed -L -N n="http://www.3dcitydb.org/importer-exporter/config" \
  -u "/n:wfs/n:database/n:connection/n:password" -v "$CITYDB_CONNECTION_PASSWORD" "/usr/local/tomcat/webapps/${CITYDB_WFS_CONTEXT_PATH}/WEB-INF/config.xml"
 
 echo "# Writing 3DCityDB WFS WEB-INF/config.xml ...done! #############################"
-
-cat "/usr/local/tomcat/webapps/${CITYDB_WFS_CONTEXT_PATH}/WEB-INF/config.xml"
-
-ls -lA /usr/local/tomcat/lib/ /usr/local/tomcat/webapps/${CITYDB_WFS_CONTEXT_PATH}
-
-echo "$@"
 
 # Switch to catalina.sh run
 exec "$@"
