@@ -11,7 +11,7 @@
 # Fetch & build stage #########################################################
 # ARGS
 ARG BUILDER_IMAGE_TAG='11.0.11-jdk-slim'
-ARG RUNTIME_IMAGE_TAG='9-jdk8'
+ARG RUNTIME_IMAGE_TAG='9-jdk11'
 
 # Base image
 FROM openjdk:${BUILDER_IMAGE_TAG} AS builder
@@ -47,17 +47,14 @@ RUN set -x && \
   apt-get install -y --no-install-recommends xmlstarlet && \
   rm -rf /var/lib/apt/lists/*
 
-# # Run as non-root user
-# RUN set -x && \
-#   groupadd --gid 1000 wfs && \
-#   useradd --uid 1000 --gid 1000 wfs
-
-# USER wfs
+# Run as non-root user
+RUN set -x && \
+  groupadd --gid 1000 wfs && \
+  useradd --uid 1000 --gid 1000 wfs
 
 # copy from builder
 WORKDIR /wfs
-# COPY --chown=wfs:wfs --from=builder /wfs .
-COPY --from=builder /wfs .
+COPY --chown wfs:wfs --from=builder /wfs .
 
 
 # Extract WAR to Tomcat apps folder and copy libs
@@ -65,7 +62,10 @@ RUN set -x && \
   unzip 'citydb-wfs.war' -d "/usr/local/tomcat/webapps/${CITYDB_WFS_CONTEXT_PATH}" && \
   mv -v lib/*.jar /usr/local/tomcat/lib/ && \
   mv -v citydb-wfs.sh /usr/local/bin/ && \
-  chmod -v u+x /usr/local/bin/citydb-wfs.sh
+  chmod -v u+x /usr/local/bin/citydb-wfs.sh && \
+  chown -R wfs:wfs /usr/local/tomcat
+
+USER wfs
 
 ENTRYPOINT ["citydb-wfs.sh"]
 CMD ["catalina.sh","run"]
