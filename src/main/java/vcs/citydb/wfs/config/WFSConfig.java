@@ -8,7 +8,6 @@ import vcs.citydb.wfs.config.filter.FilterCapabilities;
 import vcs.citydb.wfs.config.logging.Logging;
 import vcs.citydb.wfs.config.operation.Operations;
 import vcs.citydb.wfs.config.processing.PostProcessing;
-import vcs.citydb.wfs.config.processing.PreProcessing;
 import vcs.citydb.wfs.config.server.Server;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -22,7 +21,6 @@ import javax.xml.bind.annotation.XmlType;
 		"operations",
 		"filterCapabilities",
 		"constraints",
-		"preProcessing",
 		"postProcessing",
 		"database",
 		"server",
@@ -36,7 +34,6 @@ public class WFSConfig {
 	private Operations operations;
 	private FilterCapabilities filterCapabilities;
 	private Constraints constraints;
-	private PreProcessing preProcessing;
 	private PostProcessing postProcessing;
 	@XmlElement(required=true)
 	private Database database;
@@ -50,7 +47,6 @@ public class WFSConfig {
 		operations = new Operations();
 		filterCapabilities = new FilterCapabilities();
 		constraints = new Constraints();
-		preProcessing = new PreProcessing();
 		postProcessing = new PostProcessing();
 		database = new Database();
 		server = new Server();
@@ -95,14 +91,6 @@ public class WFSConfig {
 
 	public void setConstraints(Constraints constraints) {
 		this.constraints = constraints;
-	}
-
-	public PreProcessing getPreProcessing() {
-		return preProcessing;
-	}
-
-	public void setPreProcessing(PreProcessing preProcessing) {
-		this.preProcessing = preProcessing;
 	}
 
 	public PostProcessing getPostProcessing() {

@@ -49,7 +49,6 @@ public class WFSConfigLoader {
 
         WFSConfig wfsConfig = (WFSConfig) object;
         afterUnmarshal(wfsConfig.getCapabilities().getOwsMetadata());
-        afterUnmarshal(wfsConfig.getPreProcessing().getXSLTransformation());
         afterUnmarshal(wfsConfig.getPostProcessing().getXSLTransformation());
         afterUnmarshal(wfsConfig.getServer());
 
