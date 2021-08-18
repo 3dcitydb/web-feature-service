@@ -18,7 +18,6 @@
       <xs:element name="operations" type="OperationsType" minOccurs="0"/>
       <xs:element name="filterCapabilities" type="FilterCapabilitiesType" minOccurs="0"/>
       <xs:element name="constraints" type="ConstraintsType" minOccurs="0"/>
-      <xs:element name="preProcessing" type="PreProcessingType" minOccurs="0"/>
       <xs:element name="postProcessing" type="PostProcessingType" minOccurs="0"/>
       <xs:element name="database" type="WFSDatabaseType"/>
       <xs:element name="server" type="ServerType"/>
@@ -190,8 +189,6 @@
       <xs:element name="exportAppearance" type="xs:boolean" minOccurs="0"/>
       <xs:element name="useResultPaging" type="xs:boolean" minOccurs="0"/>
       <xs:element name="stripGeometry" type="xs:boolean" minOccurs="0"/>
-      <xs:element name="importAppearance" type="xs:boolean" minOccurs="0"/>
-      <xs:element name="deleteMode" type="DeleteModeType" minOccurs="0"/>
       <xs:element name="lodFilter" type="WFSLodFilterType" minOccurs="0"/>
     </xs:all>
   </xs:complexType>
@@ -214,7 +211,7 @@
     <xs:attribute name="searchDepth" type="xs:int"/>
   </xs:complexType>
 
-  <xs:complexType name="PreProcessingType">
+  <xs:complexType name="PostProcessingType">
     <xs:sequence>
       <xs:element name="xslTransformation" type="XSLTransformationType" minOccurs="0"/>
     </xs:sequence>
@@ -225,12 +222,6 @@
       <xs:element name="stylesheet" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
     <xs:attribute name="isEnabled" type="xs:boolean" use="required"/>
-  </xs:complexType>
-
-  <xs:complexType name="PostProcessingType">
-    <xs:sequence>
-      <xs:element name="xslTransformation" type="XSLTransformationType" minOccurs="0"/>
-    </xs:sequence>
   </xs:complexType>
 
   <xs:complexType name="WFSDatabaseType">
@@ -312,7 +303,6 @@
       <xs:element name="responseCacheTimeout" type="xs:positiveInteger" minOccurs="0"/>
       <xs:element name="enableCORS" type="xs:boolean" minOccurs="0"/>
       <xs:element name="timeZone" type="xs:string" minOccurs="0"/>
-      <xs:element name="importBasePath" type="xs:string" minOccurs="0"/>
       <xs:element name="textureServiceURL" type="xs:string" minOccurs="0"/>
       <xs:element name="textureCache" type="TextureCacheType" minOccurs="0"/>
       <xs:element name="security" type="SecurityType" minOccurs="0"/>
@@ -472,13 +462,6 @@
       <xs:enumeration value="DWithin"/>
       <xs:enumeration value="Beyond"/>
       <xs:enumeration value="BBOX"/>
-    </xs:restriction>
-  </xs:simpleType>
-
-  <xs:simpleType name="DeleteModeType">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="delete"/>
-      <xs:enumeration value="terminate"/>
     </xs:restriction>
   </xs:simpleType>
 

@@ -18,7 +18,6 @@ public class Server {
     private Integer responseCacheTimeout = 300;
     private Boolean enableCORS = true;
     private String timeZone;
-    private String importBasePath;
     private String textureServiceURL;
     private TextureCache textureCache;
     private Security security;
@@ -87,18 +86,6 @@ public class Server {
 
     public void setTimeZone(String timeZone) {
         this.timeZone = timeZone;
-    }
-
-    public String getImportBasePath() {
-        return importBasePath;
-    }
-
-    public boolean isSetImportBasePath() {
-        return importBasePath != null && !importBasePath.isEmpty();
-    }
-
-    public void setImportBasePath(String importBasePath) {
-        this.importBasePath = importBasePath;
     }
 
     public String getTextureServiceURL() {
