@@ -1,6 +1,5 @@
 package vcs.citydb.wfs.config.constraints;
 
-import org.citydb.config.project.deleter.DeleteMode;
 import vcs.citydb.wfs.config.Constants;
 
 import javax.xml.bind.annotation.XmlType;
@@ -16,8 +15,6 @@ public class Constraints {
 	private Boolean exportAppearance = false;
 	private Boolean useResultPaging = true;
 	private Boolean stripGeometry = false;
-	private Boolean importAppearance = false;
-	private DeleteMode deleteMode = DeleteMode.DELETE;
 	private LodFilter lodFilter;
 
 	public Constraints() {
@@ -98,22 +95,6 @@ public class Constraints {
 
 	public void setStripGeometry(boolean stripGeometry) {
 		this.stripGeometry = stripGeometry;
-	}
-
-	public boolean isImportAppearance() {
-		return importAppearance;
-	}
-
-	public void setImportAppearance(boolean importAppearance) {
-		this.importAppearance = importAppearance;
-	}
-
-	public DeleteMode getDeleteMode() {
-		return deleteMode;
-	}
-
-	public void setDeleteMode(DeleteMode deleteMode) {
-		this.deleteMode = deleteMode;
 	}
 
 	public LodFilter getLodFilter() {
