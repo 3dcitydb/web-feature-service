@@ -41,22 +41,12 @@ repositories {
 }
 
 dependencies {
-    implementation('org.citydb:impexp-core:4.3.0') {
-        exclude group: 'com.oracle.database.jdbc', module: 'ojdbc8'
-        exclude group: 'org.postgresql', module: 'postgresql'
-        exclude group: 'net.postgis', module: 'postgis-jdbc'
-    }
-    providedCompile 'javax.servlet:javax.servlet-api:3.1.0'
+    implementation 'org.citydb:impexp-core:4.4.0-SNAPSHOT'
+    implementation 'com.github.seancfoley:ipaddress:5.3.3'
+    implementation 'org.glassfish.jersey.containers:jersey-container-servlet:2.34'
+    implementation 'org.glassfish.jersey.inject:jersey-hk2:2.34'
 
-    jdbc 'org.postgresql:postgresql:42.2.14'
-    jdbc ('net.postgis:postgis-jdbc:2.5.0') {
-        exclude group: 'org.slf4j', module: 'slf4j-api'
-    }
-    jdbc ('com.oracle.database.jdbc:ojdbc8:19.3.0.0') {
-        exclude group: 'com.oracle.database.jdbc', module: 'ucp'
-        exclude group: 'com.oracle.database.ha'
-        exclude group: 'com.oracle.database.security'
-    }
+    providedCompile 'javax.servlet:javax.servlet-api:3.1.0'
 
     jaxb 'org.glassfish.jaxb:jaxb-xjc:2.3.2'
     jaxb 'org.jvnet.jaxb2_commons:jaxb2-basics:0.12.0'
@@ -115,9 +105,6 @@ distributions.main {
         from war
         from 'CHANGES.md'
         from 'README.md'
-        into('lib') {
-            from configurations.jdbc
-        }
         into('license') {
             from "$rootDir/resources/license/APACHE-2.0.txt"
             from processLicense

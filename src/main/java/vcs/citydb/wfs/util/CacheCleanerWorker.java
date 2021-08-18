@@ -1,7 +1,7 @@
 package vcs.citydb.wfs.util;
 
-import org.citydb.concurrent.DefaultWorker;
-import org.citydb.log.Logger;
+import org.citydb.util.concurrent.DefaultWorker;
+import org.citydb.util.log.Logger;
 
 public class CacheCleanerWorker extends DefaultWorker<CacheCleanerWork> {
 	private final Logger log = Logger.getInstance();

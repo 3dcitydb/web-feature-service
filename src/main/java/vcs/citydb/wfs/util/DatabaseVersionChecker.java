@@ -1,18 +1,17 @@
 package vcs.citydb.wfs.util;
 
 import org.citydb.config.project.database.DatabaseConfig;
-import org.citydb.database.adapter.AbstractDatabaseAdapter;
-import org.citydb.database.connection.DatabaseConnectionWarning;
-import org.citydb.database.connection.DatabaseConnectionWarning.ConnectionWarningType;
-import org.citydb.database.version.DatabaseVersion;
-import org.citydb.database.version.DatabaseVersionException;
-import org.citydb.database.version.DatabaseVersionSupport;
+import org.citydb.core.database.adapter.AbstractDatabaseAdapter;
+import org.citydb.core.database.connection.DatabaseConnectionWarning;
+import org.citydb.core.database.version.DatabaseVersion;
+import org.citydb.core.database.version.DatabaseVersionException;
+import org.citydb.core.database.version.DatabaseVersionSupport;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class DatabaseVersionChecker implements org.citydb.database.version.DatabaseVersionChecker {
+public class DatabaseVersionChecker implements org.citydb.core.database.version.DatabaseVersionChecker {
 	private final DatabaseVersionSupport[] supportedVersions = new DatabaseVersionSupport[]{
 			DatabaseVersionSupport.targetVersion(4, 1, 0).withBackwardsCompatibility(4, 0, 0).withRevisionForwardCompatibility(true),
 			DatabaseVersionSupport.targetVersion(3, 3, 1).withBackwardsCompatibility(3, 1, 0).withRevisionForwardCompatibility(true)
@@ -34,7 +33,7 @@ public class DatabaseVersionChecker implements org.citydb.database.version.Datab
 		for (DatabaseVersionSupport supportedVersion : supportedVersions) {
 			if (supportedVersion.getTargetVersion().compareTo(version) > 0) {
 				warnings.add(new DatabaseConnectionWarning("The version " + version + " of the " + DatabaseConfig.CITYDB_PRODUCT_NAME + " is out of date. Consider upgrading.",
-						null, DatabaseConfig.CITYDB_PRODUCT_NAME, ConnectionWarningType.OUTDATED_DATABASE_VERSION));
+						null, DatabaseConfig.CITYDB_PRODUCT_NAME, DatabaseConnectionWarning.ConnectionWarningType.OUTDATED_DATABASE_VERSION));
 				break;
 			}
 		}

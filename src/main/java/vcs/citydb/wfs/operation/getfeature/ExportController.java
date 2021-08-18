@@ -2,26 +2,27 @@ package vcs.citydb.wfs.operation.getfeature;
 
 import net.opengis.wfs._2.GetFeatureType;
 import net.opengis.wfs._2.ResultTypeType;
-import org.citydb.citygml.common.cache.CacheTableManager;
-import org.citydb.citygml.common.cache.IdCacheManager;
-import org.citydb.citygml.common.cache.IdCacheType;
-import org.citydb.citygml.common.xlink.DBXlink;
-import org.citydb.citygml.exporter.cache.GeometryGmlIdCache;
-import org.citydb.citygml.exporter.cache.ObjectGmlIdCache;
-import org.citydb.citygml.exporter.concurrent.DBExportWorkerFactory;
-import org.citydb.citygml.exporter.database.content.DBSplittingResult;
-import org.citydb.citygml.exporter.util.InternalConfig;
-import org.citydb.citygml.exporter.writer.FeatureWriteException;
-import org.citydb.concurrent.PoolSizeAdaptationStrategy;
-import org.citydb.concurrent.SingleWorkerPool;
-import org.citydb.concurrent.WorkerPool;
 import org.citydb.config.Config;
-import org.citydb.database.connection.DatabaseConnectionPool;
-import org.citydb.database.schema.mapping.SchemaMapping;
-import org.citydb.event.EventDispatcher;
-import org.citydb.query.Query;
-import org.citydb.registry.ObjectRegistry;
+import org.citydb.core.database.connection.DatabaseConnectionPool;
+import org.citydb.core.database.schema.mapping.SchemaMapping;
+import org.citydb.core.operation.common.cache.CacheTableManager;
+import org.citydb.core.operation.common.cache.IdCacheManager;
+import org.citydb.core.operation.common.cache.IdCacheType;
+import org.citydb.core.operation.common.xlink.DBXlink;
+import org.citydb.core.operation.exporter.cache.GeometryGmlIdCache;
+import org.citydb.core.operation.exporter.cache.ObjectGmlIdCache;
+import org.citydb.core.operation.exporter.concurrent.DBExportWorkerFactory;
+import org.citydb.core.operation.exporter.database.content.DBSplittingResult;
+import org.citydb.core.operation.exporter.util.InternalConfig;
+import org.citydb.core.operation.exporter.writer.FeatureWriteException;
+import org.citydb.core.query.Query;
+import org.citydb.core.registry.ObjectRegistry;
+import org.citydb.util.concurrent.PoolSizeAdaptationStrategy;
+import org.citydb.util.concurrent.SingleWorkerPool;
+import org.citydb.util.concurrent.WorkerPool;
+import org.citydb.util.event.EventDispatcher;
 import org.citygml4j.builder.jaxb.CityGMLBuilder;
+import vcs.citydb.wfs.config.Constants;
 import vcs.citydb.wfs.config.WFSConfig;
 import vcs.citydb.wfs.config.operation.GetFeatureOutputFormat;
 import vcs.citydb.wfs.config.operation.OutputFormat;
@@ -29,10 +30,9 @@ import vcs.citydb.wfs.exception.WFSException;
 import vcs.citydb.wfs.exception.WFSExceptionCode;
 import vcs.citydb.wfs.operation.getfeature.citygml.CityGMLWriterBuilder;
 import vcs.citydb.wfs.operation.getfeature.cityjson.CityJSONWriterBuilder;
-import vcs.citydb.wfs.util.CacheCleanerWork;
-import vcs.citydb.wfs.util.CacheCleanerWorker;
-import vcs.citydb.wfs.util.GeometryStripper;
-import vcs.citydb.wfs.util.NullWorker;
+import vcs.citydb.wfs.paging.GetFeatureRequest;
+import vcs.citydb.wfs.paging.PageRequest;
+import vcs.citydb.wfs.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -62,8 +62,17 @@ public class ExportController {
 		eventDispatcher = ObjectRegistry.getInstance().getEventDispatcher();
 	}
 
-	public void doExport(GetFeatureType wfsRequest,
+	public void doExport(GetFeatureRequest pageRequest, HttpServletRequest request, HttpServletResponse response) throws WFSException {
+		doExport(pageRequest.getWFSRequest(), pageRequest.getQueryExpressions(), pageRequest, request, response);
+	}
+
+	public void doExport(GetFeatureType wfsRequest, List<QueryExpression> queryExpressions, HttpServletRequest request, HttpServletResponse response) throws WFSException {
+		doExport(wfsRequest, queryExpressions, null, request, response);
+	}
+
+	private void doExport(GetFeatureType wfsRequest,
 			List<QueryExpression> queryExpressions,
+			PageRequest pageRequest,
 			HttpServletRequest request,
 			HttpServletResponse response) throws WFSException {
 		InternalConfig internalConfig = new InternalConfig();
@@ -71,8 +80,25 @@ public class ExportController {
 		// define queue size for worker pools
 		int queueSize = config.getExportConfig().getResources().getThreadPool().getMaxThreads() * 2;
 
-		// general appearance settings
-		internalConfig.setExportGlobalAppearances(false);
+		// check whether we have to export global appearances
+		try {
+			internalConfig.setExportGlobalAppearances(wfsConfig.getConstraints().isExportAppearance()
+					&& connectionPool.getActiveDatabaseAdapter().getUtil().containsGlobalAppearances());
+		} catch (SQLException e) {
+			throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "Database error while testing for global appearances.", e);
+		}
+
+		if (wfsConfig.getConstraints().isExportAppearance()) {
+			String serviceURL;
+			if (wfsConfig.getServer().isSetTextureServiceURL())
+				serviceURL = wfsConfig.getServer().getTextureServiceURL();
+			else if (wfsConfig.getServer().isSetExternalServiceURL())
+				serviceURL = wfsConfig.getServer().getExternalServiceURL();
+			else
+				serviceURL = ServerUtil.getServiceURL(request);
+
+			internalConfig.setExportTextureURI(serviceURL + Constants.TEXTURE_SERVICE_PATH);
+		}
 
 		IdCacheManager idCacheManager = null;
 		CacheTableManager cacheTableManager = null;
@@ -83,9 +109,7 @@ public class ExportController {
 		try {
 			// create instance of cache table manager
 			try {
-				cacheTableManager = new CacheTableManager(
-						config.getExportConfig().getResources().getThreadPool().getMaxThreads(),
-						config);
+				cacheTableManager = new CacheTableManager(config.getGlobalConfig().getCache());
 			} catch (SQLException | IOException e) {
 				throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "Failed to initialize internal cache manager.", e);
 			}
@@ -154,6 +178,7 @@ public class ExportController {
 							idCacheManager,
 							cacheTableManager,
 							dummy,
+							null,
 							internalConfig,
 							config,
 							eventDispatcher), 
@@ -169,9 +194,9 @@ public class ExportController {
 			databaseWorkerPool.prestartCoreWorker();
 
 			// ok, preparation done, start database query
-			QueryExecuter queryExecuter = new QueryExecuter(wfsRequest,
-					writer,
+			QueryExecuter queryExecuter = new QueryExecuter(writer,
 					databaseWorkerPool,
+					cacheTableManager,
 					eventChannel,
 					connectionPool,
 					cityGMLBuilder,
@@ -179,7 +204,7 @@ public class ExportController {
 					wfsConfig);
 
 			// execute database query
-			queryExecuter.executeQuery(queryExpressions, dummy, request);
+			queryExecuter.executeQuery(wfsRequest, queryExpressions, pageRequest, dummy, request);
 
 			// database query executed. shutdown pools.
 			try {
@@ -219,7 +244,7 @@ public class ExportController {
 			}
 
 			if (cacheTableManager != null)
-				cacheCleanerPool.addWork(cacheTableManager::dropAll);
+				cacheCleanerPool.addWork(cacheTableManager::close);
 		}
 	}
 

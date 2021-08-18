@@ -16,7 +16,9 @@
       <xs:element name="capabilities" type="CapabilitiesType"/>
       <xs:element name="featureTypes" type="FeatureTypesType"/>
       <xs:element name="operations" type="OperationsType" minOccurs="0"/>
+      <xs:element name="filterCapabilities" type="FilterCapabilitiesType" minOccurs="0"/>
       <xs:element name="constraints" type="ConstraintsType" minOccurs="0"/>
+      <xs:element name="preProcessing" type="PreProcessingType" minOccurs="0"/>
       <xs:element name="postProcessing" type="PostProcessingType" minOccurs="0"/>
       <xs:element name="database" type="WFSDatabaseType"/>
       <xs:element name="server" type="ServerType"/>
@@ -89,7 +91,9 @@
     <xs:all>
       <xs:element name="requestEncoding" type="RequestEncodingType" minOccurs="0"/>
       <xs:element name="DescribeFeatureType" type="DescribeFeatureTypeOperationType" minOccurs="0"/>
+      <xs:element name="GetPropertyValue" type="GetPropertyValueOperationType" minOccurs="0"/>
       <xs:element name="GetFeature" type="GetFeatureOperationType" minOccurs="0"/>
+      <xs:element name="ManageStoredQueries" type="ManagedStoredQueriesOperationType" minOccurs="0"/>
     </xs:all>
   </xs:complexType>
 
@@ -133,18 +137,61 @@
     </xs:simpleContent>
   </xs:complexType>
 
+  <xs:complexType name="GetPropertyValueOperationType">
+    <xs:sequence/>
+    <xs:attribute name="isEnabled" type="xs:boolean" use="required"/>
+  </xs:complexType>
+
   <xs:complexType name="GetFeatureOperationType">
     <xs:sequence>
       <xs:element name="outputFormats" type="OutputFormatListType" minOccurs="0"/>
     </xs:sequence>
   </xs:complexType>
 
+  <xs:complexType name="ManagedStoredQueriesOperationType">
+    <xs:sequence/>
+    <xs:attribute name="isEnabled" type="xs:boolean" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="FilterCapabilitiesType">
+    <xs:sequence>
+      <xs:element name="scalarCapabilities" type="ScalarCapabilitiesType" minOccurs="0"/>
+      <xs:element name="spatialCapabilities" type="SpatialCapabilitiesType" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ScalarCapabilitiesType">
+    <xs:sequence>
+      <xs:element name="logicalOperators" type="xs:boolean" minOccurs="0"/>
+      <xs:element name="comparisonOperators" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="operator" type="ComparisonOperatorNameType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="SpatialCapabilitiesType">
+    <xs:sequence>
+      <xs:element name="operator" type="SpatialOperatorNameType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
   <xs:complexType name="ConstraintsType">
     <xs:all>
+      <xs:element name="supportAdHocQueries" type="xs:boolean" minOccurs="0"/>
       <xs:element name="countDefault" type="xs:long" minOccurs="0"/>
+      <xs:element name="computeNumberMatched" type="xs:boolean" minOccurs="0"/>
+      <xs:element name="useDefaultSorting" type="xs:boolean" minOccurs="0"/>
       <xs:element name="currentVersionOnly" type="xs:boolean" minOccurs="0"/>
       <xs:element name="exportCityDBMetadata" type="xs:boolean" minOccurs="0"/>
+      <xs:element name="exportAppearance" type="xs:boolean" minOccurs="0"/>
+      <xs:element name="useResultPaging" type="xs:boolean" minOccurs="0"/>
       <xs:element name="stripGeometry" type="xs:boolean" minOccurs="0"/>
+      <xs:element name="importAppearance" type="xs:boolean" minOccurs="0"/>
+      <xs:element name="deleteMode" type="DeleteModeType" minOccurs="0"/>
       <xs:element name="lodFilter" type="WFSLodFilterType" minOccurs="0"/>
     </xs:all>
   </xs:complexType>
@@ -167,7 +214,7 @@
     <xs:attribute name="searchDepth" type="xs:int"/>
   </xs:complexType>
 
-  <xs:complexType name="PostProcessingType">
+  <xs:complexType name="PreProcessingType">
     <xs:sequence>
       <xs:element name="xslTransformation" type="XSLTransformationType" minOccurs="0"/>
     </xs:sequence>
@@ -178,6 +225,12 @@
       <xs:element name="stylesheet" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
     <xs:attribute name="isEnabled" type="xs:boolean" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="PostProcessingType">
+    <xs:sequence>
+      <xs:element name="xslTransformation" type="XSLTransformationType" minOccurs="0"/>
+    </xs:sequence>
   </xs:complexType>
 
   <xs:complexType name="WFSDatabaseType">
@@ -256,9 +309,78 @@
       <xs:element name="externalServiceURL" type="xs:string" minOccurs="0"/>
       <xs:element name="maxParallelRequests" type="xs:nonNegativeInteger" minOccurs="0"/>
       <xs:element name="waitTimeout" type="xs:positiveInteger" minOccurs="0"/>
+      <xs:element name="responseCacheTimeout" type="xs:positiveInteger" minOccurs="0"/>
       <xs:element name="enableCORS" type="xs:boolean" minOccurs="0"/>
+      <xs:element name="timeZone" type="xs:string" minOccurs="0"/>
+      <xs:element name="importBasePath" type="xs:string" minOccurs="0"/>
+      <xs:element name="textureServiceURL" type="xs:string" minOccurs="0"/>
+      <xs:element name="textureCache" type="TextureCacheType" minOccurs="0"/>
+      <xs:element name="security" type="SecurityType" minOccurs="0"/>
       <xs:element name="tempCache" type="CacheType" minOccurs="0"/>
     </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="TextureCacheType">
+    <xs:sequence>
+      <xs:element name="localCachePath" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="isEnabled" type="xs:boolean" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="SecurityType">
+    <xs:sequence>
+      <xs:element name="accessControl" type="AccessControlType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="isEnabled" type="xs:boolean" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="AccessControlType">
+    <xs:sequence>
+      <xs:element name="scope" type="AccessScopeType" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="allow" type="AllowAccessRuleType"/>
+        <xs:element name="deny" type="DenyAccessRuleType"/>
+      </xs:choice>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="AccessScopeType">
+    <xs:sequence/>
+    <xs:attribute name="operation" use="required">
+      <xs:simpleType>
+        <xs:list itemType="WFSOperationType"/>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:complexType name="AllowAccessRuleType">
+    <xs:complexContent>
+      <xs:extension base="AbstractAccessRuleType">
+        <xs:sequence/>
+        <xs:attribute name="token">
+          <xs:simpleType>
+            <xs:list itemType="xs:string"/>
+          </xs:simpleType>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="AbstractAccessRuleType" abstract="true">
+    <xs:sequence/>
+    <xs:attribute name="ip">
+      <xs:simpleType>
+        <xs:list itemType="xs:string"/>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:complexType name="DenyAccessRuleType">
+    <xs:complexContent>
+      <xs:extension base="AbstractAccessRuleType">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
 
   <xs:complexType name="CacheType">
@@ -323,6 +445,43 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <xs:simpleType name="ComparisonOperatorNameType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="PropertyIsEqualTo"/>
+      <xs:enumeration value="PropertyIsNotEqualTo"/>
+      <xs:enumeration value="PropertyIsLessThan"/>
+      <xs:enumeration value="PropertyIsGreaterThan"/>
+      <xs:enumeration value="PropertyIsLessThanOrEqualTo"/>
+      <xs:enumeration value="PropertyIsGreaterThanOrEqualTo"/>
+      <xs:enumeration value="PropertyIsLike"/>
+      <xs:enumeration value="PropertyIsNull"/>
+      <xs:enumeration value="PropertyIsNil"/>
+      <xs:enumeration value="PropertyIsBetween"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="SpatialOperatorNameType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Equals"/>
+      <xs:enumeration value="Disjoint"/>
+      <xs:enumeration value="Touches"/>
+      <xs:enumeration value="Within"/>
+      <xs:enumeration value="Overlaps"/>
+      <xs:enumeration value="Intersects"/>
+      <xs:enumeration value="Contains"/>
+      <xs:enumeration value="DWithin"/>
+      <xs:enumeration value="Beyond"/>
+      <xs:enumeration value="BBOX"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="DeleteModeType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="delete"/>
+      <xs:enumeration value="terminate"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:simpleType name="LodFilterModeType">
     <xs:restriction base="xs:string">
       <xs:enumeration value="or"/>
@@ -343,6 +502,19 @@
     <xs:restriction base="xs:string">
       <xs:enumeration value="PostGIS"/>
       <xs:enumeration value="Oracle"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="WFSOperationType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="GetCapabilities"/>
+      <xs:enumeration value="GetFeature"/>
+      <xs:enumeration value="GetPropertyValue"/>
+      <xs:enumeration value="DescribeFeatureType"/>
+      <xs:enumeration value="ListStoredQueries"/>
+      <xs:enumeration value="DescribeStoredQueries"/>
+      <xs:enumeration value="CreateStoredQuery"/>
+      <xs:enumeration value="DropStoredQuery"/>
     </xs:restriction>
   </xs:simpleType>
 

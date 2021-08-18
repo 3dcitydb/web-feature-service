@@ -1,17 +1,18 @@
 package vcs.citydb.wfs.operation.getfeature;
 
-import org.citydb.query.Query;
+import org.citydb.core.query.Query;
+import vcs.citydb.wfs.operation.AbstractQueryExpression;
 
-public class QueryExpression extends Query {
-	private String handle;
+public class QueryExpression extends AbstractQueryExpression {
 	private String featureIdentifier;
+	private long numberReturned;
+	private long startIndex;
 
-	public String getHandle() {
-		return handle;
+	public QueryExpression() {
 	}
 
-	public void setHandle(String handle) {
-		this.handle = handle;
+	public QueryExpression(QueryExpression other) {
+		super(other);
 	}
 
 	public boolean isGetFeatureById() {
@@ -25,5 +26,31 @@ public class QueryExpression extends Query {
 	public void setFeatureIdentifier(String featureIdentifier) {
 		this.featureIdentifier = featureIdentifier;
 	}
-	
+
+	public long getNumberReturned() {
+		return numberReturned;
+	}
+
+	public void setNumberReturned(long numberReturned) {
+		this.numberReturned = numberReturned;
+	}
+
+	long getStartIndex() {
+		return startIndex;
+	}
+
+	void setStartIndex(long startIndex) {
+		this.startIndex = startIndex;
+	}
+
+	@Override
+	public void copyFrom(Query query) {
+		super.copyFrom(query);
+		if (query instanceof QueryExpression) {
+			QueryExpression other = (QueryExpression) query;
+			featureIdentifier = other.featureIdentifier;
+			numberReturned = other.numberReturned;
+			startIndex = other.startIndex;
+		}
+	}
 }

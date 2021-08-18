@@ -2,8 +2,9 @@ package vcs.citydb.wfs.operation.filter;
 
 import net.opengis.fes._2.AbstractIdType;
 import net.opengis.fes._2.ResourceIdType;
-import org.citydb.query.filter.selection.Predicate;
-import org.citydb.query.filter.selection.operator.id.ResourceIdOperator;
+import org.citydb.core.query.filter.FilterException;
+import org.citydb.core.query.filter.selection.Predicate;
+import org.citydb.core.query.filter.selection.operator.id.ResourceIdOperator;
 import vcs.citydb.wfs.config.Constants;
 import vcs.citydb.wfs.exception.WFSException;
 import vcs.citydb.wfs.exception.WFSExceptionCode;
@@ -25,6 +26,17 @@ public class ResourceIdFilterBuilder {
 		}
 		
 		return predicate;
+	}
+	
+	public Predicate buildIdOperator(JAXBElement<?> idOpsElement, String handle) throws WFSException {
+		if (!idOpsElement.getName().getNamespaceURI().equals(Constants.FES_NAMESPACE_URI))
+			throw new WFSException(WFSExceptionCode.OPTION_NOT_SUPPORTED, "Only comparison operators associated with the namespace " + Constants.FES_NAMESPACE_URI + " are supported.", handle);
+
+		try {
+			return new ResourceIdOperator(getResourceId(idOpsElement, handle));
+		} catch (FilterException e) {
+			throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "Failed to build filter expression.", handle, e);
+		}
 	}
 	
 	private String getResourceId(JAXBElement<?> abstractIdElement, String handle) throws WFSException {

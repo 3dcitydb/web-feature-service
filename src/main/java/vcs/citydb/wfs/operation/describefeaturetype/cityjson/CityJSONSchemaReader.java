@@ -1,12 +1,8 @@
 package vcs.citydb.wfs.operation.describefeaturetype.cityjson;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
-import org.citydb.database.schema.mapping.FeatureType;
+import org.citydb.core.database.schema.mapping.FeatureType;
 import org.citygml4j.model.module.citygml.CityGMLVersion;
 import vcs.citydb.wfs.config.Constants;
 import vcs.citydb.wfs.exception.SchemaReaderException;
@@ -18,14 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class CityJSONSchemaReader implements SchemaReader {
 	private Set<FeatureType> featureTypes;

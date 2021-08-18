@@ -4,9 +4,11 @@ import vcs.citydb.wfs.config.capabilities.Capabilities;
 import vcs.citydb.wfs.config.constraints.Constraints;
 import vcs.citydb.wfs.config.database.Database;
 import vcs.citydb.wfs.config.feature.FeatureTypes;
+import vcs.citydb.wfs.config.filter.FilterCapabilities;
 import vcs.citydb.wfs.config.logging.Logging;
 import vcs.citydb.wfs.config.operation.Operations;
 import vcs.citydb.wfs.config.processing.PostProcessing;
+import vcs.citydb.wfs.config.processing.PreProcessing;
 import vcs.citydb.wfs.config.server.Server;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -18,7 +20,9 @@ import javax.xml.bind.annotation.XmlType;
 		"capabilities",
 		"featureTypes",
 		"operations",
+		"filterCapabilities",
 		"constraints",
+		"preProcessing",
 		"postProcessing",
 		"database",
 		"server",
@@ -30,7 +34,9 @@ public class WFSConfig {
 	@XmlElement(required=true)
 	private FeatureTypes featureTypes;
 	private Operations operations;
+	private FilterCapabilities filterCapabilities;
 	private Constraints constraints;
+	private PreProcessing preProcessing;
 	private PostProcessing postProcessing;
 	@XmlElement(required=true)
 	private Database database;
@@ -42,7 +48,9 @@ public class WFSConfig {
 		capabilities = new Capabilities();
 		featureTypes = new FeatureTypes();
 		operations = new Operations();
+		filterCapabilities = new FilterCapabilities();
 		constraints = new Constraints();
+		preProcessing = new PreProcessing();
 		postProcessing = new PostProcessing();
 		database = new Database();
 		server = new Server();
@@ -73,12 +81,28 @@ public class WFSConfig {
 		this.operations = operations;
 	}
 
+	public FilterCapabilities getFilterCapabilities() {
+		return filterCapabilities;
+	}
+
+	public void setFilterCapabilities(FilterCapabilities filterCapabilities) {
+		this.filterCapabilities = filterCapabilities;
+	}
+
 	public Constraints getConstraints() {
 		return constraints;
 	}
 
 	public void setConstraints(Constraints constraints) {
 		this.constraints = constraints;
+	}
+
+	public PreProcessing getPreProcessing() {
+		return preProcessing;
+	}
+
+	public void setPreProcessing(PreProcessing preProcessing) {
+		this.preProcessing = preProcessing;
 	}
 
 	public PostProcessing getPostProcessing() {

@@ -1,16 +1,12 @@
 package vcs.citydb.wfs;
 
-import net.opengis.wfs._2.DescribeFeatureTypeType;
-import net.opengis.wfs._2.DescribeStoredQueriesType;
-import net.opengis.wfs._2.GetCapabilitiesType;
-import net.opengis.wfs._2.GetFeatureType;
-import net.opengis.wfs._2.ListStoredQueriesType;
-import org.citydb.concurrent.SingleWorkerPool;
+import net.opengis.wfs._2.*;
 import org.citydb.config.Config;
-import org.citydb.database.connection.DatabaseConnectionPool;
-import org.citydb.log.Logger;
-import org.citydb.registry.ObjectRegistry;
-import org.citydb.util.Util;
+import org.citydb.core.database.connection.DatabaseConnectionPool;
+import org.citydb.core.registry.ObjectRegistry;
+import org.citydb.core.util.Util;
+import org.citydb.util.concurrent.SingleWorkerPool;
+import org.citydb.util.log.Logger;
 import org.citygml4j.builder.jaxb.CityGMLBuilder;
 import org.citygml4j.xml.schema.SchemaHandler;
 import org.xml.sax.InputSource;
@@ -19,26 +15,21 @@ import org.xml.sax.XMLReader;
 import vcs.citydb.wfs.config.Constants;
 import vcs.citydb.wfs.config.WFSConfig;
 import vcs.citydb.wfs.config.operation.EncodingMethod;
+import vcs.citydb.wfs.exception.AccessControlException;
 import vcs.citydb.wfs.exception.WFSException;
 import vcs.citydb.wfs.exception.WFSExceptionCode;
 import vcs.citydb.wfs.exception.WFSExceptionReportHandler;
-import vcs.citydb.wfs.kvp.DescribeFeatureTypeReader;
-import vcs.citydb.wfs.kvp.DescribeStoredQueriesReader;
-import vcs.citydb.wfs.kvp.GetCapabilitiesReader;
-import vcs.citydb.wfs.kvp.GetFeatureReader;
-import vcs.citydb.wfs.kvp.KVPConstants;
-import vcs.citydb.wfs.kvp.KVPRequestReader;
-import vcs.citydb.wfs.kvp.ListStoredQueriesReader;
+import vcs.citydb.wfs.kvp.*;
 import vcs.citydb.wfs.operation.describefeaturetype.DescribeFeatureTypeHandler;
 import vcs.citydb.wfs.operation.getcapabilities.GetCapabilitiesHandler;
 import vcs.citydb.wfs.operation.getfeature.GetFeatureHandler;
-import vcs.citydb.wfs.operation.storedquery.DescribeStoredQueriesHandler;
-import vcs.citydb.wfs.operation.storedquery.ListStoredQueriesHandler;
-import vcs.citydb.wfs.operation.storedquery.StoredQueryManager;
-import vcs.citydb.wfs.util.CacheCleanerWork;
-import vcs.citydb.wfs.util.CacheCleanerWorker;
-import vcs.citydb.wfs.util.DatabaseConnector;
-import vcs.citydb.wfs.util.RequestLimiter;
+import vcs.citydb.wfs.operation.getpropertyvalue.GetPropertyValueHandler;
+import vcs.citydb.wfs.operation.storedquery.*;
+import vcs.citydb.wfs.paging.PageRequest;
+import vcs.citydb.wfs.paging.PagingCacheManager;
+import vcs.citydb.wfs.paging.PagingHandler;
+import vcs.citydb.wfs.security.AccessController;
+import vcs.citydb.wfs.util.*;
 import vcs.citydb.wfs.xml.NamespaceFilter;
 import vcs.citydb.wfs.xml.ValidationEventHandlerImpl;
 
@@ -72,6 +63,7 @@ public class WFSService extends HttpServlet {
 
 	private CityGMLBuilder cityGMLBuilder;
 	private RequestLimiter limiter;
+	private AccessController accessController;
 	private WFSConfig wfsConfig;
 	private Config config;
 
@@ -94,6 +86,7 @@ public class WFSService extends HttpServlet {
 		config = registry.getConfig();
 		cityGMLBuilder = registry.getCityGMLBuilder();
 		limiter = registry.lookup(RequestLimiter.class);
+		accessController = registry.lookup(AccessController.class);
 		wfsConfig = registry.lookup(WFSConfig.class);
 
 		exceptionReportHandler = new WFSExceptionReportHandler(cityGMLBuilder);
@@ -101,7 +94,7 @@ public class WFSService extends HttpServlet {
 		saxParserFactory.setNamespaceAware(true);
 
 		try {
-			StoredQueryManager storedQueryManager = new StoredQueryManager(cityGMLBuilder, wfsConfig);
+			StoredQueryManager storedQueryManager = new StoredQueryManager(cityGMLBuilder, saxParserFactory, getServletContext().getRealPath(Constants.STORED_QUERIES_PATH), wfsConfig);
 			registry.register(storedQueryManager);
 		} catch (Throwable e) {
 			String message = "Failed to initialize stored query manager.";
@@ -115,6 +108,7 @@ public class WFSService extends HttpServlet {
 			try {
 				SchemaHandler schemaHandler = registry.lookup(SchemaHandler.class);
 				schemaHandler.parseSchema(new File(getServletContext().getRealPath(Constants.SCHEMAS_PATH + "/ogc/wfs/2.0.2/wfs.xsd")));
+				schemaHandler.parseSchema(new File(getServletContext().getRealPath(Constants.SCHEMAS_PATH + "/ogc/wfs/extensions/wfs-vcs.xsd")));
 				SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
 				wfsSchema = schemaFactory.newSchema(schemaHandler.getSchemaSources());
 			} catch (SAXException e) {
@@ -133,6 +127,12 @@ public class WFSService extends HttpServlet {
 
 		cacheCleanerPool.prestartCoreWorker();
 		registry.register(CacheCleanerWorker.class.getName(), cacheCleanerPool);
+
+		// register paging cache manager
+		if (wfsConfig.getConstraints().isUseResultPaging()) {
+			PagingCacheManager pagingCacheManager = new PagingCacheManager(cacheCleanerPool, wfsConfig);
+			registry.register(pagingCacheManager);
+		}
 	}
 
 	@Override
@@ -156,9 +156,14 @@ public class WFSService extends HttpServlet {
 			addCORSHeaders(request, response, false);
 
 		KVPRequestReader reader = null;
+		boolean isPagingRequest = ServerUtil.containsParameter(request, KVPConstants.PAGE_ID);
+
 		try {
-			if (wfsConfig.getOperations().getRequestEncoding().getMethod() == EncodingMethod.XML)
+			if (wfsConfig.getOperations().getRequestEncoding().getMethod() == EncodingMethod.XML && !isPagingRequest)
 				throw new WFSException(WFSExceptionCode.OPTION_NOT_SUPPORTED, "KVP encoding of requests is not advertised.");
+
+			if (isPagingRequest && !wfsConfig.getConstraints().isUseResultPaging())
+				throw new WFSException(WFSExceptionCode.OPTION_NOT_SUPPORTED, "Result paging is not advertised.");
 
 			// parse parameters
 			Map<String, String> parameters = new HashMap<>();
@@ -188,8 +193,11 @@ public class WFSService extends HttpServlet {
 					case KVPConstants.DESCRIBE_FEATURE_TYPE:
 						reader = new DescribeFeatureTypeReader(parameters, wfsConfig);
 						break;
+					case KVPConstants.GET_PROPERTY_VALUE:
+						reader = new GetPropertyValueReader(parameters, wfsSchema, cityGMLBuilder, wfsConfig);
+						break;
 					case KVPConstants.GET_FEATURE:
-						reader = new GetFeatureReader(parameters, wfsConfig);
+						reader = new GetFeatureReader(parameters, wfsSchema, cityGMLBuilder, wfsConfig);
 						break;
 					case KVPConstants.LIST_STORED_QUERIES:
 						reader = new ListStoredQueriesReader(parameters, wfsConfig);
@@ -197,9 +205,15 @@ public class WFSService extends HttpServlet {
 					case KVPConstants.DESCRIBE_STORED_QUERIES:
 						reader = new DescribeStoredQueriesReader(parameters, wfsConfig);
 						break;
+					case KVPConstants.DROP_STORED_QUERY:
+						reader = new DropStoredQueryReader(parameters, wfsConfig);
+						break;
+					case KVPConstants.CREATE_STORED_QUERY:
 					default:
 						throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, "The operation " + operationName + " is not supported by this WFS implementation.", KVPConstants.REQUEST);
 				}
+			} else if (isPagingRequest) {
+				reader = new PagingReader(parameters, wfsConfig);
 			} else
 				throw new WFSException(WFSExceptionCode.MISSING_PARAMETER_VALUE, "The request lacks the mandatory " + KVPConstants.REQUEST + " parameter.", KVPConstants.REQUEST);
 
@@ -267,6 +281,17 @@ public class WFSService extends HttpServlet {
 	}
 
 	private void handleRequest(Object wfsRequest, String operationName, NamespaceFilter namespaceFilter, HttpServletRequest request, HttpServletResponse response) throws WFSException {
+		// check access permission
+		try {
+			accessController.requireAccess(operationName, request);
+		} catch (AccessControlException e) {
+			log.error("Access denied: " + e.getMessage());
+			if (e.getCause() != null)
+				log.logStackTrace(e.getCause());
+
+			throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "Access denied for client '" + request.getRemoteHost() + "'.");
+		}
+
 		// check database connection
 		if (!connectionPool.isConnected())
 			DatabaseConnector.connect(config);
@@ -277,6 +302,13 @@ public class WFSService extends HttpServlet {
 				limiter.requireServiceSlot(request, operationName);
 				GetFeatureHandler getFeatureHandler = new GetFeatureHandler(cityGMLBuilder, wfsConfig, config);
 				getFeatureHandler.doOperation((GetFeatureType) wfsRequest, namespaceFilter, request, response);
+			}
+
+			else if (wfsRequest instanceof GetPropertyValueType) {
+				// make sure we only serve a maximum number of requests in parallel
+				limiter.requireServiceSlot(request, operationName);
+				GetPropertyValueHandler getPropertyValueHandler = new GetPropertyValueHandler(cityGMLBuilder, wfsConfig, config);
+				getPropertyValueHandler.doOperation((GetPropertyValueType) wfsRequest, namespaceFilter, request, response);
 			}
 
 			else if (wfsRequest instanceof DescribeFeatureTypeType) {
@@ -299,11 +331,25 @@ public class WFSService extends HttpServlet {
 				describeStoredQueriesHandler.doOperation((DescribeStoredQueriesType)wfsRequest, request, response);
 			}
 
-			else if (wfsRequest != null)
-				throw new WFSException(WFSExceptionCode.OPERATION_NOT_SUPPORTED, "The operation " + operationName + " is not supported by this WFS implementation.");
+			else if (wfsRequest instanceof CreateStoredQueryType) {
+				CreateStoredQueryHandler createStoredQueriesHandler = new CreateStoredQueryHandler(cityGMLBuilder, wfsConfig);
+				createStoredQueriesHandler.doOperation((CreateStoredQueryType)wfsRequest, namespaceFilter, request, response);
+			}
+
+			else if (wfsRequest instanceof DropStoredQueryType) {
+				DropStoredQueryHandler dropStoredQueriesHandler = new DropStoredQueryHandler(cityGMLBuilder, wfsConfig);
+				dropStoredQueriesHandler.doOperation((DropStoredQueryType)wfsRequest, request, response);
+			}
+
+			else if (wfsRequest instanceof PageRequest) {
+				// make sure we only serve a maximum number of requests in parallel
+				limiter.requireServiceSlot(request, operationName);
+				PagingHandler pagingHandler = new PagingHandler(cityGMLBuilder, wfsConfig, config);
+				pagingHandler.doOperation((PageRequest) wfsRequest, request, response);
+			}
 
 			else
-				throw new WFSException(WFSExceptionCode.OPERATION_PARSING_FAILED, "Failed to parse the requested operation.");
+				throw new WFSException(WFSExceptionCode.OPERATION_NOT_SUPPORTED, "The operation " + operationName + " is not supported by this WFS implementation.", operationName);
 
 		} catch (JAXBException e) {
 			throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "A fatal JAXB error occurred whilst processing the request.", operationName, e);

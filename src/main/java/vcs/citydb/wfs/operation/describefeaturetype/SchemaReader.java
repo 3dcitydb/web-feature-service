@@ -1,6 +1,6 @@
 package vcs.citydb.wfs.operation.describefeaturetype;
 
-import org.citydb.database.schema.mapping.FeatureType;
+import org.citydb.core.database.schema.mapping.FeatureType;
 import org.citygml4j.model.module.citygml.CityGMLVersion;
 import vcs.citydb.wfs.exception.SchemaReaderException;
 

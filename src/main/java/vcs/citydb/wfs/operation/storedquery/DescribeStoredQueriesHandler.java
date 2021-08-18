@@ -1,8 +1,8 @@
 package vcs.citydb.wfs.operation.storedquery;
 
 import net.opengis.wfs._2.DescribeStoredQueriesType;
-import org.citydb.log.Logger;
-import org.citydb.registry.ObjectRegistry;
+import org.citydb.core.registry.ObjectRegistry;
+import org.citydb.util.log.Logger;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import vcs.citydb.wfs.config.Constants;

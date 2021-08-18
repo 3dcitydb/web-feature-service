@@ -1,14 +1,7 @@
 package vcs.citydb.wfs.operation.storedquery;
 
 import net.opengis.fes._2.AbstractQueryExpressionType;
-import net.opengis.wfs._2.DescribeStoredQueriesResponseType;
-import net.opengis.wfs._2.GetFeatureType;
-import net.opengis.wfs._2.ParameterExpressionType;
-import net.opengis.wfs._2.ParameterType;
-import net.opengis.wfs._2.QueryExpressionTextType;
-import net.opengis.wfs._2.StoredQueryDescriptionType;
-import net.opengis.wfs._2.StoredQueryType;
-import net.opengis.wfs._2.Title;
+import net.opengis.wfs._2.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -32,14 +25,8 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

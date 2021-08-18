@@ -9,9 +9,12 @@ import javax.servlet.ServletContext;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
@@ -46,6 +49,7 @@ public class WFSConfigLoader {
 
         WFSConfig wfsConfig = (WFSConfig) object;
         afterUnmarshal(wfsConfig.getCapabilities().getOwsMetadata());
+        afterUnmarshal(wfsConfig.getPreProcessing().getXSLTransformation());
         afterUnmarshal(wfsConfig.getPostProcessing().getXSLTransformation());
         afterUnmarshal(wfsConfig.getServer());
 
@@ -84,6 +88,10 @@ public class WFSConfigLoader {
 
     private void afterUnmarshal(Server server) {
         server.setExternalServiceURL(processServiceURL(server.getExternalServiceURL()));
+        server.setTextureServiceURL(processServiceURL(server.getTextureServiceURL()));
+
+        Path tempDir = ((File) context.getAttribute(context.TEMPDIR)).toPath();
+        server.setTempDir(Files.isWritable(tempDir) ? tempDir : Paths.get(System.getProperty("java.io.tmpdir")));
     }
 
     private String processServiceURL(String serviceURL) {

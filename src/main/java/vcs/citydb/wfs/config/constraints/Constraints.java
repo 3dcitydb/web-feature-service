@@ -1,19 +1,35 @@
 package vcs.citydb.wfs.config.constraints;
 
+import org.citydb.config.project.deleter.DeleteMode;
 import vcs.citydb.wfs.config.Constants;
 
 import javax.xml.bind.annotation.XmlType;
 
 @XmlType(name="ConstraintsType", propOrder={})
 public class Constraints {
+	private Boolean supportAdHocQueries = true;
 	private Long countDefault = Constants.COUNT_DEFAULT;
+	private Boolean computeNumberMatched = true;
+	private Boolean useDefaultSorting = false;
 	private Boolean currentVersionOnly = true;
 	private Boolean exportCityDBMetadata = false;
+	private Boolean exportAppearance = false;
+	private Boolean useResultPaging = true;
 	private Boolean stripGeometry = false;
+	private Boolean importAppearance = false;
+	private DeleteMode deleteMode = DeleteMode.DELETE;
 	private LodFilter lodFilter;
 
 	public Constraints() {
 		lodFilter = new LodFilter();
+	}
+
+	public boolean isSupportAdHocQueries() {
+		return supportAdHocQueries;
+	}
+
+	public void setSupportAdHocQueries(boolean supportAdHocQueries) {
+		this.supportAdHocQueries = supportAdHocQueries;
 	}
 
 	public long getCountDefault() {
@@ -26,6 +42,22 @@ public class Constraints {
 
 	public boolean isSetCountDefault() {
 		return countDefault != Constants.COUNT_DEFAULT;
+	}
+
+	public boolean isComputeNumberMatched() {
+		return computeNumberMatched;
+	}
+
+	public void setComputeNumberMatched(boolean computeNumberMatched) {
+		this.computeNumberMatched = computeNumberMatched;
+	}
+
+	public boolean isUseDefaultSorting() {
+		return useDefaultSorting;
+	}
+
+	public void setUseDefaultSorting(boolean useDefaultSorting) {
+		this.useDefaultSorting = useDefaultSorting;
 	}
 
 	public boolean isCurrentVersionOnly() {
@@ -44,12 +76,44 @@ public class Constraints {
 		this.exportCityDBMetadata = exportCityDBMetadata;
 	}
 
-	public boolean isStripGeometry() {		
+	public boolean isExportAppearance() {
+		return exportAppearance;
+	}
+
+	public void setExportAppearance(boolean exportAppearance) {
+		this.exportAppearance = exportAppearance;
+	}
+
+	public boolean isUseResultPaging() {
+		return useResultPaging;
+	}
+
+	public void setUseResultPaging(boolean useResultPaging) {
+		this.useResultPaging = useResultPaging;
+	}
+
+	public boolean isStripGeometry() {
 		return stripGeometry;
 	}
 
 	public void setStripGeometry(boolean stripGeometry) {
 		this.stripGeometry = stripGeometry;
+	}
+
+	public boolean isImportAppearance() {
+		return importAppearance;
+	}
+
+	public void setImportAppearance(boolean importAppearance) {
+		this.importAppearance = importAppearance;
+	}
+
+	public DeleteMode getDeleteMode() {
+		return deleteMode;
+	}
+
+	public void setDeleteMode(DeleteMode deleteMode) {
+		this.deleteMode = deleteMode;
 	}
 
 	public LodFilter getLodFilter() {
