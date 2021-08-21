@@ -58,10 +58,10 @@ public class FilterHandler {
 			predicate = buildPredicate(filter.getSpatialOps(), featureType, namespaceFilter, handle);
 		else if (filter.getLogicOps() != null)
 			predicate = buildPredicate(filter.getLogicOps(), featureType, namespaceFilter, handle);
-		else if (filter.get_Id() != null)
+		else if (filter.isSet_Id() && !filter.get_Id().isEmpty())
 			predicate = buildPredicate(filter.get_Id(), handle);
 		else
-			throw new WFSException(WFSExceptionCode.OPTION_NOT_SUPPORTED, "The filer expression '" + selectionClauseElement.getName() + "' is not supported." , handle);
+			throw new WFSException(WFSExceptionCode.OPTION_NOT_SUPPORTED, "No supported filter expression provided for the '" + selectionClauseElement.getName() + "' element." , handle);
 
 		return predicate != null ? new SelectionFilter(predicate) : null;
 	}
