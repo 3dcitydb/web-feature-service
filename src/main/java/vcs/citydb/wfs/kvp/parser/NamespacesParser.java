@@ -2,6 +2,7 @@ package vcs.citydb.wfs.kvp.parser;
 
 import org.citygml4j.model.module.Module;
 import org.citygml4j.model.module.Modules;
+import org.citygml4j.model.module.ade.ADEModule;
 import org.citygml4j.model.module.citygml.CityGMLModule;
 import org.citygml4j.model.module.citygml.CityGMLVersion;
 import org.xml.sax.SAXException;
@@ -35,22 +36,29 @@ public class NamespacesParser extends ValueParser<NamespaceFilter> {
 				String prefix = module.getNamespacePrefix();
 				String namespaceURI = module.getNamespaceURI();
 
+				CityGMLVersion moduleVersion = null;
 				if (module instanceof CityGMLModule) {
-					CityGMLVersion moduleVersion = CityGMLVersion.fromCityGMLModule((CityGMLModule)module);
-					if (moduleVersion == wfsConfig.getFeatureTypes().getDefaultVersion())
-						namespaceFilter.startPrefixMapping(prefix, namespaceURI);
+					moduleVersion = CityGMLVersion.fromCityGMLModule((CityGMLModule) module);
+				} else if (module instanceof ADEModule) {
+				    moduleVersion = ((ADEModule) module).getCityGMLVersion();
+                }
+
+				if (moduleVersion != null) {
+					if (moduleVersion == wfsConfig.getFeatureTypes().getDefaultVersion()) {
+					    namespaceFilter.startPrefixMapping(prefix, namespaceURI);
+                    }
 
 					prefix += (moduleVersion == CityGMLVersion.v2_0_0) ? "2" : "1";
 				}
 
 				namespaceFilter.startPrefixMapping(prefix, namespaceURI);
 			}
-			
+
 			// add WFS namespace declarations
 			namespaceFilter.startPrefixMapping(Constants.WFS_NAMESPACE_PREFIX, Constants.WFS_NAMESPACE_URI);
 			namespaceFilter.startPrefixMapping(Constants.FES_NAMESPACE_PREFIX, Constants.FES_NAMESPACE_URI);
 			namespaceFilter.startPrefixMapping(Constants.OWS_NAMESPACE_PREFIX, Constants.OWS_NAMESPACE_URI);
-			
+
 		} catch (SAXException e) {
 			//
 		}
@@ -67,8 +75,9 @@ public class NamespacesParser extends ValueParser<NamespaceFilter> {
 
 						prefix = prefix != null ? prefix.trim() : XMLConstants.DEFAULT_NS_PREFIX;
 						namespaceURI = namespaceURI != null ? namespaceURI.trim() : "";
-						if (namespaceURI.isEmpty())
-							throw new KVPParseException("The " + key + " parameter must not contain an empty namespace URI.", key);
+						if (namespaceURI.isEmpty()) {
+						    throw new KVPParseException("The " + key + " parameter must not contain an empty namespace URI.", key);
+                        }
 
 						namespaceFilter.startPrefixMapping(prefix, namespaceURI);
 					}
