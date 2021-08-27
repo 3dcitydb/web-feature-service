@@ -5,7 +5,7 @@
   <capabilities>
     <owsMetadata>
       <ows:ServiceIdentification>
-        <ows:Title>3D City Database Web Feature Service</ows:Title>
+        <ows:Title>3DCityDB Web Feature Service</ows:Title>
         <ows:ServiceType>WFS</ows:ServiceType>
         <ows:ServiceTypeVersion>2.0.0</ows:ServiceTypeVersion>
       </ows:ServiceIdentification>
@@ -43,6 +43,42 @@
       </outputFormats>
     </GetFeature>
   </operations>
+  <filterCapabilities>
+    <scalarCapabilities>
+      <logicalOperators>true</logicalOperators>
+      <comparisonOperators>
+        <operator>PropertyIsEqualTo</operator>
+        <operator>PropertyIsNotEqualTo</operator>
+        <operator>PropertyIsLessThan</operator>
+        <operator>PropertyIsGreaterThan</operator>
+        <operator>PropertyIsLessThanOrEqualTo</operator>
+        <operator>PropertyIsGreaterThanOrEqualTo</operator>
+        <operator>PropertyIsLike</operator>
+        <operator>PropertyIsNull</operator>
+        <operator>PropertyIsNil</operator>
+        <operator>PropertyIsBetween</operator>
+      </comparisonOperators>
+    </scalarCapabilities>
+    <spatialCapabilities>
+      <operator>BBOX</operator>
+      <operator>Equals</operator>
+      <operator>Disjoint</operator>
+      <operator>Touches</operator>
+      <operator>Within</operator>
+      <operator>Overlaps</operator>
+      <operator>Intersects</operator>
+      <operator>Contains</operator>
+      <operator>DWithin</operator>
+      <operator>Beyond</operator>
+    </spatialCapabilities>
+  </filterCapabilities>
+  <constraints>
+    <supportAdHocQueries>true</supportAdHocQueries>
+    <currentVersionOnly>true</currentVersionOnly>
+    <exportCityDBMetadata>false</exportCityDBMetadata>
+    <exportAppearance>false</exportAppearance>
+    <useResultPaging>true</useResultPaging>
+  </constraints>
   <database>
     <referenceSystems>
       <referenceSystem id="WGS84">
@@ -72,6 +108,7 @@
   <server>
     <maxParallelRequests>30</maxParallelRequests>
     <waitTimeout>60</waitTimeout>
+    <responseCacheTimeout>300</responseCacheTimeout>
     <tempCache>
       <mode>database</mode>
     </tempCache>

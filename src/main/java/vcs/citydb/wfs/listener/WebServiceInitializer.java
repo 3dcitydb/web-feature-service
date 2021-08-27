@@ -1,20 +1,20 @@
 package vcs.citydb.wfs.listener;
 
-import org.citydb.ade.ADEExtensionManager;
 import org.citydb.config.Config;
 import org.citydb.config.project.database.DatabaseConfig;
 import org.citydb.config.project.exporter.ExportConfig;
 import org.citydb.config.project.global.GlobalConfig;
 import org.citydb.config.project.global.LogFileMode;
-import org.citydb.database.connection.DatabaseConnectionPool;
-import org.citydb.database.schema.mapping.SchemaMapping;
-import org.citydb.database.schema.mapping.SchemaMappingException;
-import org.citydb.database.schema.mapping.SchemaMappingValidationException;
-import org.citydb.database.schema.util.SchemaMappingUtil;
-import org.citydb.log.Logger;
-import org.citydb.registry.ObjectRegistry;
-import org.citydb.util.CoreConstants;
-import org.citydb.util.Util.URLClassLoader;
+import org.citydb.core.ade.ADEExtensionManager;
+import org.citydb.core.database.connection.DatabaseConnectionPool;
+import org.citydb.core.database.schema.mapping.SchemaMapping;
+import org.citydb.core.database.schema.mapping.SchemaMappingException;
+import org.citydb.core.database.schema.mapping.SchemaMappingValidationException;
+import org.citydb.core.database.schema.util.SchemaMappingUtil;
+import org.citydb.core.registry.ObjectRegistry;
+import org.citydb.core.util.CoreConstants;
+import org.citydb.core.util.Util;
+import org.citydb.util.log.Logger;
 import org.citygml4j.CityGMLContext;
 import org.citygml4j.builder.jaxb.CityGMLBuilder;
 import org.citygml4j.builder.jaxb.CityGMLBuilderException;
@@ -30,7 +30,9 @@ import vcs.citydb.wfs.config.WFSConfig;
 import vcs.citydb.wfs.config.WFSConfigLoader;
 import vcs.citydb.wfs.config.logging.ConsoleLog;
 import vcs.citydb.wfs.config.logging.FileLog;
+import vcs.citydb.wfs.exception.AccessControlException;
 import vcs.citydb.wfs.exception.WFSException;
+import vcs.citydb.wfs.security.AccessController;
 import vcs.citydb.wfs.util.DatabaseConnector;
 import vcs.citydb.wfs.util.RequestLimiter;
 
@@ -46,15 +48,16 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Driver;
 import java.sql.DriverManager;
+import java.time.DateTimeException;
+import java.time.ZoneId;
 import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.TimeZone;
 import java.util.stream.Stream;
 
 @WebListener
 public class WebServiceInitializer implements ServletContextListener {
 	private final Logger log = Logger.getInstance();
-	private final URLClassLoader classLoader = new URLClassLoader(getClass().getClassLoader());
+	private final Util.URLClassLoader classLoader = new Util.URLClassLoader(getClass().getClassLoader());
 
 	@Override
 	public void contextInitialized(ServletContextEvent event) {
@@ -131,16 +134,40 @@ public class WebServiceInitializer implements ServletContextListener {
 		// create request limiter and register with object registry
 		registry.register(new RequestLimiter(wfsConfig));
 
+		// create access controller and register with object registry
+		try {
+			AccessController accessController = AccessController.build(wfsConfig);
+			registry.register(accessController);
+		} catch (AccessControlException e) {
+			context.setAttribute(Constants.INIT_ERROR_ATTRNAME, new ServletException("Failed to initialize access control rules.", e));
+			return;
+		}
+
 		// create 3DCityDB dummy configuration and register with object registry
 		initConfig(config, wfsConfig);
 
 		// initialize logging
-		try {			
+		try {
 			initLogging(wfsConfig, context);
+			log.info("Starting " + getClass().getPackage().getImplementationTitle() +
+					", version " + getClass().getPackage().getImplementationVersion() + ".");
 		} catch (ServletException e) {
 			context.setAttribute(Constants.INIT_ERROR_ATTRNAME, e);
 			registry.getEventDispatcher().shutdownNow();
 			return;
+		}
+
+		// switch time zone
+		if (wfsConfig.getServer().isSetTimeZone()) {
+			log.debug("Setting time zone to " + wfsConfig.getServer().getTimeZone() + ".");
+			try {
+				TimeZone timeZone = TimeZone.getTimeZone(ZoneId.of(wfsConfig.getServer().getTimeZone()));
+				TimeZone.setDefault(timeZone);
+				log.info("Time zone set to " + wfsConfig.getServer().getTimeZone() + " [" + timeZone.getDisplayName() + "].");
+			} catch (DateTimeException e) {
+				context.setAttribute(Constants.INIT_ERROR_ATTRNAME, new ServletException("Failed to set time zone to " + wfsConfig.getServer().getTimeZone() + ".", e));
+				return;
+			}
 		}
 
 		// initialize database connection pool
@@ -158,7 +185,7 @@ public class WebServiceInitializer implements ServletContextListener {
 		// preprocess advertised CityGML and ADE feature types
 		wfsConfig.getFeatureTypes().preprocessFeatureTypes();
 
-		// geotools - don't allow the connection to the EPSG database to time out
+		// GeoTools - don't allow the connection to the EPSG database to time out
 		System.setProperty("org.geotools.epsg.factory.timeout", "-1");
 		CRS.cleanupThreadLocals();
 	}
@@ -187,29 +214,24 @@ public class WebServiceInitializer implements ServletContextListener {
 			}
 		}
 
-		// deregister JDBC drivers that were not loaded through the connection pool		
-		ClassLoader loader = getClass().getClassLoader();
+		// deregister JDBC drivers loaded by this web application
+		ClassLoader loader = Thread.currentThread().getContextClassLoader();
 		Enumeration<Driver> drivers = DriverManager.getDrivers();
-		Set<Driver> driversToUnload = new HashSet<>();
 
 		while (drivers.hasMoreElements()) {
 			Driver driver = drivers.nextElement();
-			ClassLoader driverLoader = driver.getClass().getClassLoader();
-			if (loader.equals(driverLoader))
-				driversToUnload.add(driver);
-		}
-
-		for (Driver driver : driversToUnload) {
-			try {
-				DriverManager.deregisterDriver(driver);
-				log.info("Unregistered JDBC driver " + driver);
-			} catch(Exception e) {
-				log.error("Could now unload driver " + driver.getClass() + " " + e.getMessage());
-				e.printStackTrace();
+			if (driver.getClass().getClassLoader() == loader) {
+				try {
+					DriverManager.deregisterDriver(driver);
+					log.info("Unregistered JDBC driver " + driver);
+				} catch (Exception e) {
+					log.error("Failed to unload JDBC driver " + driver, e);
+					e.printStackTrace();
+				}
 			}
 		}
 
-		// some geotools related stuff
+		// some GeoTools related stuff
 		WeakCollectionCleaner.DEFAULT.exit();
 		CRS.cleanupThreadLocals();
 		DeferredAuthorityFactory.exit();
@@ -239,8 +261,13 @@ public class WebServiceInitializer implements ServletContextListener {
 		ExportConfig exportConfig = config.getExportConfig();
 		exportConfig.getContinuation().setExportCityDBMetadata(wfsConfig.getConstraints().isExportCityDBMetadata());
 		exportConfig.getCityObjectGroup().setExportMemberAsXLinks(true);
-		exportConfig.getAppearances().setExportAppearances(false);
-		exportConfig.getAppearances().setExportTextureFiles(false);
+		exportConfig.getAppearances().setExportAppearances(wfsConfig.getConstraints().isExportAppearance());
+		if (wfsConfig.getConstraints().isExportAppearance()) {
+			exportConfig.getAppearances().setExportTextureFiles(false);
+			exportConfig.getAppearances().setUniqueTextureFileNames(true);
+			exportConfig.getAppearances().getTexturePath().setUseBuckets(true);
+			exportConfig.getAppearances().getTexturePath().setNoOfBuckets(Constants.TEXTURE_CACHE_BUCKETS);
+		}
 	}
 
 	private void initLogging(WFSConfig wfsConfig, ServletContext context) throws ServletException {

@@ -1,6 +1,6 @@
 package vcs.citydb.wfs.util;
 
-import org.citydb.concurrent.DefaultWorker;
+import org.citydb.util.concurrent.DefaultWorker;
 
 public class NullWorker<T> extends DefaultWorker<T> {
 

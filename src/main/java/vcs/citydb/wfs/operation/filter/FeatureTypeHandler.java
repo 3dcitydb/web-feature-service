@@ -1,12 +1,8 @@
 package vcs.citydb.wfs.operation.filter;
 
-import org.citydb.database.schema.mapping.AbstractObjectType;
-import org.citydb.database.schema.mapping.FeatureType;
-import org.citydb.database.schema.mapping.Namespace;
-import org.citydb.database.schema.mapping.ObjectType;
-import org.citydb.database.schema.mapping.SchemaMapping;
-import org.citydb.registry.ObjectRegistry;
-import org.citydb.util.Util;
+import org.citydb.core.database.schema.mapping.*;
+import org.citydb.core.registry.ObjectRegistry;
+import org.citydb.core.util.Util;
 import org.citygml4j.model.citygml.CityGML;
 import org.citygml4j.model.gml.base.AbstractGML;
 import org.citygml4j.model.gml.feature.AbstractFeature;

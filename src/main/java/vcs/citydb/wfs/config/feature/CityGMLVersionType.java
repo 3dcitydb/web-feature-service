@@ -2,11 +2,7 @@ package vcs.citydb.wfs.config.feature;
 
 import org.citygml4j.model.module.citygml.CityGMLVersion;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlEnumValue;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.XmlValue;
+import javax.xml.bind.annotation.*;
 import java.util.Objects;
 
 @XmlType(name="CityGMLVersionType")

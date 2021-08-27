@@ -4,16 +4,21 @@ import net.opengis.wfs._2.FeatureCollectionType;
 import net.opengis.wfs._2.MemberPropertyType;
 import net.opengis.wfs._2.ObjectFactory;
 import net.opengis.wfs._2.TruncatedResponse;
-import org.citydb.citygml.common.cache.IdCache;
-import org.citydb.citygml.common.cache.IdCacheManager;
-import org.citydb.citygml.common.cache.IdCacheType;
-import org.citydb.citygml.exporter.util.InternalConfig;
-import org.citydb.citygml.exporter.writer.FeatureWriteException;
-import org.citydb.concurrent.SingleWorkerPool;
 import org.citydb.config.Config;
-import org.citydb.registry.ObjectRegistry;
-import org.citydb.util.CoreConstants;
-import org.citydb.writer.XMLWriterWorkerFactory;
+import org.citydb.core.operation.common.cache.IdCache;
+import org.citydb.core.operation.common.cache.IdCacheManager;
+import org.citydb.core.operation.common.cache.IdCacheType;
+import org.citydb.core.operation.exporter.util.InternalConfig;
+import org.citydb.core.operation.exporter.writer.FeatureWriteException;
+import org.citydb.core.registry.ObjectRegistry;
+import org.citydb.core.util.CoreConstants;
+import org.citydb.core.writer.SequentialWriter;
+import org.citydb.core.writer.XMLWriterWorkerFactory;
+import org.citydb.util.concurrent.SingleWorkerPool;
+import org.citydb.util.event.Event;
+import org.citydb.util.event.EventDispatcher;
+import org.citydb.util.event.EventHandler;
+import org.citydb.util.event.global.EventType;
 import org.citygml4j.builder.jaxb.CityGMLBuilder;
 import org.citygml4j.builder.jaxb.marshal.JAXBMarshaller;
 import org.citygml4j.model.citygml.appearance.Appearance;
@@ -45,25 +50,29 @@ import javax.xml.transform.sax.SAXResult;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 
-public class CityGMLWriter implements FeatureWriter {
+public class CityGMLWriter implements FeatureWriter, EventHandler {
 	private final SAXWriter saxWriter;
 	private final CityGMLVersion version;
 	private final TransformerChainFactory transformerChainFactory;
 	private final GeometryStripper geometryStripper;
 	private final IdCacheManager idCacheManager;
+	private final Object eventChannel;
 	private final InternalConfig internalConfig;
-	
+
 	private final SingleWorkerPool<SAXEventBuffer> writerPool;
 	private final CityGMLBuilder cityGMLBuilder;
 	private final JAXBMarshaller jaxbMarshaller;
 	private final ObjectFactory wfsFactory;
 	private final DatatypeFactory datatypeFactory;
 	private final AdditionalObjectsHandler additionalObjectsHandler;
+	private final EventDispatcher eventDispatcher;
 
 	private int level;
 	private boolean isWriteSingleFeature;
 	private boolean checkForDuplicates;
-	
+	private boolean useSequentialWriting;
+	private SequentialWriter<SAXEventBuffer> sequentialWriter;
+
 	public CityGMLWriter(
 			SAXWriter saxWriter,
 			CityGMLVersion version,
@@ -78,18 +87,22 @@ public class CityGMLWriter implements FeatureWriter {
 		this.transformerChainFactory = transformerChainFactory;
 		this.geometryStripper = geometryStripper;
 		this.idCacheManager = idCacheManager;
+		this.eventChannel = eventChannel;
 		this.internalConfig = internalConfig;
-		
+
 		cityGMLBuilder = ObjectRegistry.getInstance().getCityGMLBuilder();
 		jaxbMarshaller = cityGMLBuilder.createJAXBMarshaller(version);
 		wfsFactory = new ObjectFactory();
 		datatypeFactory = DatatypeFactory.newInstance();
 		additionalObjectsHandler = new AdditionalObjectsHandler(saxWriter, version, cityGMLBuilder, transformerChainFactory, eventChannel);
+
+		eventDispatcher = ObjectRegistry.getInstance().getEventDispatcher();
+		eventDispatcher.addEventHandler(EventType.INTERRUPT, this);
 		
 		int queueSize = config.getExportConfig().getResources().getThreadPool().getMaxThreads() * 2;
 		writerPool = new SingleWorkerPool<>(
 				"citygml_writer_pool",
-				new XMLWriterWorkerFactory(saxWriter, ObjectRegistry.getInstance().getEventDispatcher()),
+				new XMLWriterWorkerFactory(saxWriter, eventDispatcher),
 				queueSize,
 				false);
 
@@ -113,14 +126,19 @@ public class CityGMLWriter implements FeatureWriter {
 	}
 
 	@Override
-	public void startFeatureCollection(long matchNo, long returnNo) throws FeatureWriteException {
+	public void startFeatureCollection(long matchNo, long returnNo, String previous, String next) throws FeatureWriteException {
 		level++;
-		writeFeatureCollection(matchNo, returnNo, WriteMode.HEAD);
+		writeFeatureCollection(matchNo, returnNo, previous, next, WriteMode.HEAD);
+	}
+
+	@Override
+	public void startFeatureCollection(long matchNo, long returnNo) throws FeatureWriteException {
+		startFeatureCollection(matchNo, returnNo, null, null);
 	}
 
 	@Override
 	public void endFeatureCollection() throws FeatureWriteException {
-		writeFeatureCollection(0, 0, WriteMode.TAIL);
+		writeFeatureCollection(0, 0, null, null, WriteMode.TAIL);
 		level--;
 		
 		// we only have to check for duplicates after the first set of features
@@ -144,6 +162,23 @@ public class CityGMLWriter implements FeatureWriter {
 		} catch (SAXException e) {
 			throw new FeatureWriteException("Failed to marshal additional objects collection element.", e);
 		}
+	}
+
+	@Override
+	public long setSequentialWriting(boolean useSequentialWriting)  {
+		long sequenceId = 0;
+
+		if (useSequentialWriting) {
+			if (this.useSequentialWriting)
+				sequenceId = sequentialWriter.getCurrentSequenceId();
+			else if (sequentialWriter != null)
+				sequenceId = sequentialWriter.reset();
+			else
+				sequentialWriter = new SequentialWriter<>(writerPool);
+		}
+
+		this.useSequentialWriting = useSequentialWriting;
+		return sequenceId;
 	}
 
 	@Override
@@ -210,7 +245,26 @@ public class CityGMLWriter implements FeatureWriter {
 		if (buffer.isEmpty())
 			throw new FeatureWriteException("Failed to write feature with gml:id '" + feature.getId() + "'.");
 
-		writerPool.addWork(buffer);
+		if (!useSequentialWriting)
+			writerPool.addWork(buffer);
+		else {
+			try {
+				sequentialWriter.write(buffer, sequenceId);
+			} catch (InterruptedException e) {
+				throw new FeatureWriteException("Failed to write feature with gml:id '" + feature.getId() + "'.", e);
+			}
+		}
+	}
+
+	@Override
+	public void updateSequenceId(long sequenceId) throws FeatureWriteException {
+		if (useSequentialWriting) {
+			try {
+				sequentialWriter.updateSequenceId(sequenceId);
+			} catch (InterruptedException e) {
+				throw new FeatureWriteException("Failed to update sequence id.", e);
+			}
+		}
 	}
 
 	@Override
@@ -237,11 +291,6 @@ public class CityGMLWriter implements FeatureWriter {
 	}
 
 	@Override
-	public void updateSequenceId(long sequenceId) throws FeatureWriteException {
-		// nothing to do
-	}
-
-	@Override
 	public void close() throws FeatureWriteException {
 		try {
 			writerPool.shutdownAndWait();
@@ -253,6 +302,8 @@ public class CityGMLWriter implements FeatureWriter {
 
 			if (additionalObjectsHandler.hasAdditionalObjects())
 				additionalObjectsHandler.cleanCache();
+
+			eventDispatcher.removeEventHandler(this);
 		}
 	}
 	
@@ -264,7 +315,7 @@ public class CityGMLWriter implements FeatureWriter {
 		return cache.get(feature.getId()) != null;
 	}
 
-	private void writeFeatureCollection(long matchNo, long returnNo, WriteMode writeMode) throws FeatureWriteException {
+	private void writeFeatureCollection(long matchNo, long returnNo, String previous, String next, WriteMode writeMode) throws FeatureWriteException {
 		try {
 			FeatureCollectionType featureCollection = new FeatureCollectionType();
 
@@ -272,6 +323,11 @@ public class CityGMLWriter implements FeatureWriter {
 				featureCollection.setTimeStamp(getTimeStamp());
 				featureCollection.setNumberMatched(matchNo != Constants.UNKNOWN_NUMBER_MATCHED ? String.valueOf(matchNo) : "unknown");
 				featureCollection.setNumberReturned(BigInteger.valueOf(returnNo));
+
+				if (level == 1) {
+					featureCollection.setPrevious(previous);
+					featureCollection.setNext(next);
+				}
 			}
 
 			JAXBElement<?> output;
@@ -306,4 +362,11 @@ public class CityGMLWriter implements FeatureWriter {
 				DatatypeConstants.FIELD_UNDEFINED,
 				DatatypeConstants.FIELD_UNDEFINED);
 	}
+
+	@Override
+	public void handleEvent(Event event) throws Exception {
+		if (event.getChannel() == eventChannel && sequentialWriter != null)
+			sequentialWriter.interrupt();
+	}
+
 }

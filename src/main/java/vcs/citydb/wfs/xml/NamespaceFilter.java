@@ -9,11 +9,7 @@ import vcs.citydb.wfs.config.Constants;
 
 import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 
 public class NamespaceFilter extends XMLFilterImpl implements NamespaceContext {
 	private HashMap<String, String> prefixToUri;

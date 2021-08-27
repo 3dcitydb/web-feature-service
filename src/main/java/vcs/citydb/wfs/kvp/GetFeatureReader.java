@@ -2,6 +2,7 @@ package vcs.citydb.wfs.kvp;
 
 import net.opengis.fes._2.AbstractQueryExpressionType;
 import net.opengis.wfs._2.GetFeatureType;
+import org.citygml4j.builder.jaxb.CityGMLBuilder;
 import vcs.citydb.wfs.config.WFSConfig;
 import vcs.citydb.wfs.exception.KVPParseException;
 import vcs.citydb.wfs.exception.WFSException;
@@ -12,6 +13,7 @@ import vcs.citydb.wfs.kvp.parser.ResultTypeParser;
 import vcs.citydb.wfs.kvp.parser.StringParser;
 
 import javax.xml.bind.JAXBElement;
+import javax.xml.validation.Schema;
 import java.util.List;
 import java.util.Map;
 
@@ -19,11 +21,16 @@ public class GetFeatureReader extends KVPRequestReader {
 	private final BaseRequestReader baseRequestReader;
 	private final QueryExpressionReader queryExpressionReader;
 	
-	public GetFeatureReader(Map<String, String> parameters, WFSConfig wfsConfig) {
+	public GetFeatureReader(Map<String, String> parameters, Schema wfsSchema, CityGMLBuilder cityGMLBuilder, WFSConfig wfsConfig) {
 		super(parameters, wfsConfig);
-		
 		baseRequestReader = new BaseRequestReader();
-		queryExpressionReader = new QueryExpressionReader(new net.opengis.wfs._2.ObjectFactory());
+		queryExpressionReader = new QueryExpressionReader(
+				new net.opengis.wfs._2.ObjectFactory(), 
+				new net.opengis.fes._2.ObjectFactory(), 
+				new net.opengis.gml.ObjectFactory(),
+				wfsSchema, 
+				cityGMLBuilder, 
+				wfsConfig);
 	}
 
 	@Override
@@ -60,7 +67,7 @@ public class GetFeatureReader extends KVPRequestReader {
 		}
 		
 		// queries
-		List<JAXBElement<? extends AbstractQueryExpressionType>> queries = queryExpressionReader.read(parameters);
+		List<JAXBElement<? extends AbstractQueryExpressionType>> queries = queryExpressionReader.read(parameters, KVPConstants.GET_FEATURE, getNamespaces(), true);
 		wfsRequest.getAbstractQueryExpression().addAll(queries);
 		
 		return wfsRequest;

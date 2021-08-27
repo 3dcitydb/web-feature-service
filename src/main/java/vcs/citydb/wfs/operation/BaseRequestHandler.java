@@ -1,7 +1,7 @@
 package vcs.citydb.wfs.operation;
 
 import net.opengis.wfs._2.BaseRequestType;
-import org.citydb.util.Util;
+import org.citydb.core.util.Util;
 import vcs.citydb.wfs.config.Constants;
 import vcs.citydb.wfs.config.WFSConfig;
 import vcs.citydb.wfs.exception.WFSException;

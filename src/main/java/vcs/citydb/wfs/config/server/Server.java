@@ -14,13 +14,21 @@ public class Server {
     private Integer maxParallelRequests = 30;
     @XmlSchemaType(name = "positiveInteger")
     private Integer waitTimeout = 60;
-	private Boolean enableCORS = true;
+    @XmlSchemaType(name = "positiveInteger")
+    private Integer responseCacheTimeout = 300;
+    private Boolean enableCORS = true;
+    private String timeZone;
+    private String textureServiceURL;
+    private TextureCache textureCache;
+    private Security security;
     private Cache tempCache;
 
     @XmlTransient
     private Path tempDir;
 
     public Server() {
+        textureCache = new TextureCache();
+        security = new Security();
         tempCache = new Cache();
     }
 
@@ -51,14 +59,62 @@ public class Server {
     public void setWaitTimeout(int waitTimeout) {
         this.waitTimeout = waitTimeout > 0 ? waitTimeout : 60;
     }
-	
-	public boolean isEnableCORS() {
-		return enableCORS;
-	}
 
-	public void setEnableCORS(boolean enableCORS) {
-		this.enableCORS = enableCORS;
-	}
+    public int getResponseCacheTimeout() {
+        return responseCacheTimeout;
+    }
+
+    public void setCacheTimeout(int responseCacheTimeout) {
+        this.responseCacheTimeout = responseCacheTimeout > 0 ? responseCacheTimeout : 300;
+    }
+
+    public boolean isEnableCORS() {
+        return enableCORS;
+    }
+
+    public void setEnableCORS(boolean enableCORS) {
+        this.enableCORS = enableCORS;
+    }
+
+    public String getTimeZone() {
+        return timeZone;
+    }
+
+    public boolean isSetTimeZone() {
+        return timeZone != null && !timeZone.isEmpty();
+    }
+
+    public void setTimeZone(String timeZone) {
+        this.timeZone = timeZone;
+    }
+
+    public String getTextureServiceURL() {
+        return textureServiceURL;
+    }
+
+    public boolean isSetTextureServiceURL() {
+        return textureServiceURL != null && !textureServiceURL.isEmpty();
+    }
+
+    public void setTextureServiceURL(String textureServiceURL) {
+        this.textureServiceURL = textureServiceURL;
+    }
+
+    public TextureCache getTextureCache() {
+        return textureCache;
+    }
+
+    public void setTextureCache(TextureCache textureCache) {
+        this.textureCache = textureCache;
+    }
+
+    public Security getSecurity() {
+        return security;
+    }
+
+    public void setSecurity(Security security) {
+        this.security = security;
+    }
 
     public Cache getTempCache() {
         return tempCache;

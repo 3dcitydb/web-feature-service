@@ -1,17 +1,18 @@
 package vcs.citydb.wfs.operation.getfeature.cityjson;
 
 import net.opengis.wfs._2.GetFeatureType;
-import org.citydb.citygml.common.cache.IdCacheManager;
-import org.citydb.citygml.exporter.util.InternalConfig;
-import org.citydb.citygml.exporter.writer.FeatureWriteException;
 import org.citydb.config.Config;
 import org.citydb.config.project.database.DatabaseSrs;
-import org.citydb.log.Logger;
+import org.citydb.core.operation.common.cache.IdCacheManager;
+import org.citydb.core.operation.exporter.util.InternalConfig;
+import org.citydb.core.operation.exporter.writer.FeatureWriteException;
+import org.citydb.util.log.Logger;
 import org.citygml4j.CityGMLContext;
 import org.citygml4j.builder.cityjson.CityJSONBuilder;
 import org.citygml4j.builder.cityjson.CityJSONBuilderException;
 import org.citygml4j.builder.cityjson.json.io.writer.CityJSONChunkWriter;
 import org.citygml4j.builder.cityjson.json.io.writer.CityJSONOutputFactory;
+import org.citygml4j.builder.cityjson.marshal.util.DefaultTextureVerticesBuilder;
 import org.citygml4j.builder.cityjson.marshal.util.DefaultVerticesBuilder;
 import org.citygml4j.builder.cityjson.marshal.util.DefaultVerticesTransformer;
 import org.citygml4j.cityjson.metadata.MetadataType;
@@ -29,7 +30,9 @@ public class CityJSONWriterBuilder implements GetFeatureResponseBuilder {
 	private final Logger log = Logger.getInstance();
 	private final String PRETTY_PRINT = "prettyPrint";
 	private final String SIGNIFICANT_DIGITS = "significantDigits";
+	private final String SIGNIFICANT_TEXTURE_DIGITS = "significantTextureDigits";
 	private final String TRANSFORM_VERTICES = "transformVertices";
+	private final String ADD_SEQUENCE_ID = "addSequenceIdWhenSorting";
 	private final String GENERATE_CITYGML_METADATA = "generateCityGMLMetadata";
 	private final String REMOVE_DUPLICATE_CHILD_GEOMETRIES = "removeDuplicateChildGeometries";
 
@@ -38,6 +41,7 @@ public class CityJSONWriterBuilder implements GetFeatureResponseBuilder {
 	private GeometryStripper geometryStripper;
 	private IdCacheManager idCacheManager;
 	private Object eventChannel;
+	private WFSConfig wfsConfig;
 	private InternalConfig internalConfig;
 	private Config config;
 
@@ -69,6 +73,7 @@ public class CityJSONWriterBuilder implements GetFeatureResponseBuilder {
 		this.idCacheManager = idCacheManager;
 		this.eventChannel = eventChannel;
 		this.internalConfig = internalConfig;
+		this.wfsConfig = wfsConfig;
 		this.config = config;
 
 		try {
@@ -92,10 +97,11 @@ public class CityJSONWriterBuilder implements GetFeatureResponseBuilder {
 		DatabaseSrs targetSRS = null;
 		
 		for (QueryExpression queryExpression : queryExpressions) {
-			if (targetSRS == null)
+			if (targetSRS == null) {
 				targetSRS = queryExpression.getTargetSrs();
-			else if (targetSRS.getSrid() != queryExpression.getTargetSrs().getSrid())
+			} else if (targetSRS.getSrid() != queryExpression.getTargetSrs().getSrid()) {
 				throw new FeatureWriteException("Multiple target coordinate reference systems are not supported by CityJSON.");
+			}
 		}
 		
 		metadata.setReferenceSystem(targetSRS.getSrid());
@@ -114,8 +120,22 @@ public class CityJSONWriterBuilder implements GetFeatureResponseBuilder {
 			}
 		}
 
-		if ("true".equals(formatOptions.get(TRANSFORM_VERTICES)))
+		if (formatOptions.containsKey(SIGNIFICANT_TEXTURE_DIGITS)) {
+			try {
+				int significantDigits = Integer.parseInt(formatOptions.get(SIGNIFICANT_TEXTURE_DIGITS));
+				chunkWriter.setTextureVerticesBuilder(new DefaultTextureVerticesBuilder().withSignificantDigits(significantDigits));
+			} catch (NumberFormatException e) {
+				log.warn("The '" + SIGNIFICANT_TEXTURE_DIGITS + "' format options requires an integer value.");
+			}
+		}
+
+		if ("true".equals(formatOptions.get(TRANSFORM_VERTICES))) {
 			chunkWriter.setVerticesTransformer(new DefaultVerticesTransformer());
+		}
+
+		if (wfsConfig.getConstraints().isExportAppearance()) {
+			chunkWriter.setTextureFileHandler(imageURI -> imageURI);
+		}
 
 		chunkWriter.setMetadata(metadata);
 
@@ -124,7 +144,11 @@ public class CityJSONWriterBuilder implements GetFeatureResponseBuilder {
 		if ("true".equals(formatOptions.get(PRETTY_PRINT))) {
 			cityJSONWriter.useIndentation(true);
 		}
-		
+
+		if ("true".equals(formatOptions.get(ADD_SEQUENCE_ID))) {
+			cityJSONWriter.addSequenceIdWhenSorting(true);
+		}
+
 		return cityJSONWriter;
 	}
 }

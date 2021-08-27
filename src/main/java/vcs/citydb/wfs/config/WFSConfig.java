@@ -4,6 +4,7 @@ import vcs.citydb.wfs.config.capabilities.Capabilities;
 import vcs.citydb.wfs.config.constraints.Constraints;
 import vcs.citydb.wfs.config.database.Database;
 import vcs.citydb.wfs.config.feature.FeatureTypes;
+import vcs.citydb.wfs.config.filter.FilterCapabilities;
 import vcs.citydb.wfs.config.logging.Logging;
 import vcs.citydb.wfs.config.operation.Operations;
 import vcs.citydb.wfs.config.processing.PostProcessing;
@@ -18,6 +19,7 @@ import javax.xml.bind.annotation.XmlType;
 		"capabilities",
 		"featureTypes",
 		"operations",
+		"filterCapabilities",
 		"constraints",
 		"postProcessing",
 		"database",
@@ -30,6 +32,7 @@ public class WFSConfig {
 	@XmlElement(required=true)
 	private FeatureTypes featureTypes;
 	private Operations operations;
+	private FilterCapabilities filterCapabilities;
 	private Constraints constraints;
 	private PostProcessing postProcessing;
 	@XmlElement(required=true)
@@ -42,6 +45,7 @@ public class WFSConfig {
 		capabilities = new Capabilities();
 		featureTypes = new FeatureTypes();
 		operations = new Operations();
+		filterCapabilities = new FilterCapabilities();
 		constraints = new Constraints();
 		postProcessing = new PostProcessing();
 		database = new Database();
@@ -71,6 +75,14 @@ public class WFSConfig {
 
 	public void setOperations(Operations operations) {
 		this.operations = operations;
+	}
+
+	public FilterCapabilities getFilterCapabilities() {
+		return filterCapabilities;
+	}
+
+	public void setFilterCapabilities(FilterCapabilities filterCapabilities) {
+		this.filterCapabilities = filterCapabilities;
 	}
 
 	public Constraints getConstraints() {
