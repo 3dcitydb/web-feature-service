@@ -1,10 +1,10 @@
 package vcs.citydb.wfs.config.feature;
 
-import org.citydb.ade.ADEExtension;
-import org.citydb.ade.ADEExtensionManager;
-import org.citydb.database.schema.mapping.SchemaMapping;
-import org.citydb.log.Logger;
-import org.citydb.registry.ObjectRegistry;
+import org.citydb.core.ade.ADEExtension;
+import org.citydb.core.ade.ADEExtensionManager;
+import org.citydb.core.database.schema.mapping.SchemaMapping;
+import org.citydb.core.registry.ObjectRegistry;
+import org.citydb.util.log.Logger;
 import org.citygml4j.model.citygml.ade.ADEException;
 import org.citygml4j.model.citygml.ade.binding.ADEContext;
 import org.citygml4j.model.module.Module;
@@ -19,14 +19,7 @@ import javax.xml.namespace.QName;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @XmlType(name="FeatureTypesType", propOrder={
@@ -118,7 +111,7 @@ public class FeatureTypes {
 				continue;
 
 			try {
-				org.citydb.database.schema.mapping.FeatureType featureType = schemaMapping.getFeatureType(name);
+				org.citydb.core.database.schema.mapping.FeatureType featureType = schemaMapping.getFeatureType(name);
 				if (featureType == null)
 					throw new ADEException("Failed to find a definition for the feature type in the database schema mapping.");
 

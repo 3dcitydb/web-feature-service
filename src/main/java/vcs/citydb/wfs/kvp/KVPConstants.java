@@ -7,12 +7,18 @@ public class KVPConstants {
 	public static final String ITEM_DELIMITER = ",";
 	public static final String LIST_DELIMITER = "\\)\\(";
 	public static final String DEFAULT_FILTER_LANGUAGE = "urn:ogc:def:queryLanguage:OGC-FES:Filter";
-	
+
+	public static final String ACCESS_CONTROL_TOKEN = "token";
+	public static final String PAGE_ID = "pageId";
+
 	public static final String GET_CAPABILITIES = "GetCapabilities";
 	public static final String DESCRIBE_FEATURE_TYPE = "DescribeFeatureType";
+	public static final String GET_PROPERTY_VALUE = "GetPropertyValue";
 	public static final String GET_FEATURE = "GetFeature";
 	public static final String LIST_STORED_QUERIES = "ListStoredQueries";
 	public static final String DESCRIBE_STORED_QUERIES = "DescribeStoredQueries";
+	public static final String CREATE_STORED_QUERY = "CreateStoredQuery";
+	public static final String DROP_STORED_QUERY = "DropStoredQuery";
 
 	public static final String REQUEST = "REQUEST";
 	public static final String SERVICE = "SERVICE";
@@ -37,6 +43,7 @@ public class KVPConstants {
 	public static final String SORT_BY = "SORTBY";
 	public static final String STOREDQUERY_ID = "STOREDQUERY_ID";
 	public static final String VALUE_REFERENCE = "VALUEREFERENCE";
+	public static final String VALUE = "VALUE";
 	public static final String ACCEPT_VERSIONS = "ACCEPTVERSIONS";
 	public static final String NAMESPACES = "NAMESPACES";
 	public static final String LOCK_ID = "LOCKID";

@@ -12,7 +12,7 @@ import java.io.IOException;
 public class WFSConfigSchemaWriter {
 
 	public static void main(String[] args) throws Exception {
-		System.out.print("Generting XML schema in " + Constants.CONFIG_SCHEMA_FILE + "... ");
+		System.out.print("Generating XML schema in " + Constants.CONFIG_SCHEMA_FILE + "... ");
 		
 		JAXBContext ctx = JAXBContext.newInstance(WFSConfig.class);
 		ctx.generateSchema(new SchemaOutputResolver() {

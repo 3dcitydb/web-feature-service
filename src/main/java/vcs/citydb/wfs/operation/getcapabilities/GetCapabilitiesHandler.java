@@ -1,29 +1,16 @@
 package vcs.citydb.wfs.operation.getcapabilities;
 
 import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
-import net.opengis.fes._2.ConformanceType;
-import net.opengis.fes._2.Filter_Capabilities;
-import net.opengis.fes._2.Id_CapabilitiesType;
-import net.opengis.fes._2.ResourceIdentifierType;
-import net.opengis.ows._1.AllowedValues;
-import net.opengis.ows._1.DCP;
-import net.opengis.ows._1.DomainType;
-import net.opengis.ows._1.HTTP;
-import net.opengis.ows._1.NoValues;
-import net.opengis.ows._1.Operation;
-import net.opengis.ows._1.OperationsMetadata;
-import net.opengis.ows._1.RequestMethodType;
-import net.opengis.ows._1.ValueType;
-import net.opengis.wfs._2.FeatureTypeListType;
-import net.opengis.wfs._2.FeatureTypeType;
+import net.opengis.fes._2.*;
+import net.opengis.fes._2.GeometryOperandsType.GeometryOperand;
+import net.opengis.ows._1.*;
 import net.opengis.wfs._2.GetCapabilitiesType;
-import net.opengis.wfs._2.ResolveValueType;
-import net.opengis.wfs._2.WFS_CapabilitiesType;
+import net.opengis.wfs._2.*;
 import org.citydb.config.project.database.DatabaseSrs;
-import org.citydb.database.adapter.AbstractDatabaseAdapter;
-import org.citydb.database.connection.DatabaseConnectionPool;
-import org.citydb.log.Logger;
-import org.citydb.util.Util;
+import org.citydb.core.database.adapter.AbstractDatabaseAdapter;
+import org.citydb.core.database.connection.DatabaseConnectionPool;
+import org.citydb.core.util.Util;
+import org.citydb.util.log.Logger;
 import org.citygml4j.builder.jaxb.CityGMLBuilder;
 import org.citygml4j.model.module.Module;
 import org.citygml4j.model.module.citygml.CityGMLModule;
@@ -36,6 +23,9 @@ import vcs.citydb.wfs.config.WFSConfig;
 import vcs.citydb.wfs.config.capabilities.OWSMetadata;
 import vcs.citydb.wfs.config.conformance.Conformance;
 import vcs.citydb.wfs.config.feature.FeatureType;
+import vcs.citydb.wfs.config.filter.ComparisonOperatorName;
+import vcs.citydb.wfs.config.filter.SpatialOperandName;
+import vcs.citydb.wfs.config.filter.SpatialOperatorName;
 import vcs.citydb.wfs.config.operation.OutputFormat;
 import vcs.citydb.wfs.exception.WFSException;
 import vcs.citydb.wfs.exception.WFSExceptionCode;
@@ -214,6 +204,24 @@ public class GetCapabilitiesHandler {
 			}
 		}
 
+		// GetPropertyValue operation
+		if (wfsConfig.getOperations().getGetPropertyValue().isEnabled()) {
+			Operation getPropertyValue = new Operation();
+			getPropertyValue.setName(KVPConstants.GET_PROPERTY_VALUE);		
+			getPropertyValue.getDCP().add(getAndPost);
+			operationsMetadata.getOperation().add(getPropertyValue);		
+
+			DomainType outputFormat = new DomainType();
+			getPropertyValue.getParameter().add(outputFormat);
+			outputFormat.setName("outputFormat");
+			outputFormat.setAllowedValues(new AllowedValues());
+			for (OutputFormat format : wfsConfig.getOperations().getGetPropertyValue().getOutputFormats()) {
+				ValueType value = new ValueType();
+				value.setValue(format.getName());
+				outputFormat.getAllowedValues().getValueOrRange().add(value);
+			}
+		}
+
 		// GetFeature operation
 		{
 			Operation getFeature = new Operation();
@@ -246,6 +254,21 @@ public class GetCapabilitiesHandler {
 			describeStoredQueries.setName(KVPConstants.DESCRIBE_STORED_QUERIES);		
 			describeStoredQueries.getDCP().add(getAndPost);
 			operationsMetadata.getOperation().add(describeStoredQueries);
+		}
+
+		// manage stored query operations
+		if (wfsConfig.getOperations().getManagedStoredQueries().isEnabled()) {
+			Operation dropStoredQueries = new Operation();
+			dropStoredQueries.setName(KVPConstants.DROP_STORED_QUERY);		
+			dropStoredQueries.getDCP().add(getAndPost);
+			operationsMetadata.getOperation().add(dropStoredQueries);
+
+			if (conformance.implementsXMLEncoding()) {
+				Operation createStoredQueries = new Operation();
+				createStoredQueries.setName(KVPConstants.CREATE_STORED_QUERY);		
+				createStoredQueries.getDCP().add(post);
+				operationsMetadata.getOperation().add(createStoredQueries);
+			}
 		}
 	}
 
@@ -313,10 +336,33 @@ public class GetCapabilitiesHandler {
 			operationsMetadata.getConstraint().add(countDefault);
 		}
 
+		// result paging constraints
+		if (conformance.implementsResultPaging()) {
+			DomainType responseCacheTimeout = new DomainType();
+			responseCacheTimeout.setName("ResponseCacheTimeout");
+			ValueType responseCacheTimeoutValue = new ValueType();
+			responseCacheTimeoutValue.setValue(String.valueOf(wfsConfig.getServer().getResponseCacheTimeout()));
+			responseCacheTimeout.setDefaultValue(responseCacheTimeoutValue);
+			responseCacheTimeout.setNoValues(new NoValues());
+			operationsMetadata.getConstraint().add(responseCacheTimeout);
+
+			DomainType pagingIsTransactionSafe = new DomainType();
+			pagingIsTransactionSafe.setName("PagingIsTransactionSafe");
+			pagingIsTransactionSafe.setDefaultValue(FALSE);
+			pagingIsTransactionSafe.setNoValues(new NoValues());
+			operationsMetadata.getConstraint().add(pagingIsTransactionSafe);
+		}
+
 		// announce supported query types
 		DomainType queryExpressions = new DomainType();
 		queryExpressions.setName("QueryExpressions");
 		queryExpressions.setAllowedValues(new AllowedValues());
+
+		if (conformance.implementsAdHocQuery()) {
+			ValueType queryValue = new ValueType();
+			queryValue.setValue(Constants.WFS_NAMESPACE_PREFIX + ":" + "Query");
+			queryExpressions.getAllowedValues().getValueOrRange().add(queryValue);
+		}
 
 		ValueType storedQueryValue = new ValueType();
 		storedQueryValue.setValue(Constants.WFS_NAMESPACE_PREFIX + ":" + "StoredQuery");
@@ -408,6 +454,52 @@ public class GetCapabilitiesHandler {
 		ResourceIdentifierType resourceIdentifier = new ResourceIdentifierType();
 		resourceIdentifier.setName(new QName(Constants.FES_NAMESPACE_URI, "ResourceId"));
 		idCapabilities.getResourceIdentifier().add(resourceIdentifier);
+
+		// scalar capabilities
+		if (wfsConfig.getFilterCapabilities().isSetScalarCapabilities()) {
+			Scalar_CapabilitiesType scalarCapabilities = new Scalar_CapabilitiesType();
+			filterCapabilities.setScalar_Capabilities(scalarCapabilities);
+
+			if (wfsConfig.getFilterCapabilities().getScalarCapabilities().isSetLogicalOperators()) {
+				LogicalOperators logicalOperators = new LogicalOperators();
+				scalarCapabilities.setLogicalOperators(logicalOperators);
+			}
+
+			if (wfsConfig.getFilterCapabilities().getScalarCapabilities().isSetComparisonOperators()) {
+				ComparisonOperatorsType comparisonOperators = new ComparisonOperatorsType();
+				scalarCapabilities.setComparisonOperators(comparisonOperators);
+
+				for (ComparisonOperatorName operator : wfsConfig.getFilterCapabilities().getScalarCapabilities().getComparisonOperators()) {
+					ComparisonOperatorType comparisonOperator = new ComparisonOperatorType();
+					comparisonOperator.setName(operator.toString());
+					comparisonOperators.getComparisonOperator().add(comparisonOperator);
+				}
+			}
+		}
+
+		// spatial capabilities
+		if (wfsConfig.getFilterCapabilities().isSetSpatialCapabilities()) {
+			Spatial_CapabilitiesType spatialCapabilities = new Spatial_CapabilitiesType();
+			filterCapabilities.setSpatial_Capabilities(spatialCapabilities);
+
+			GeometryOperandsType geometryOperands = new GeometryOperandsType();
+			spatialCapabilities.setGeometryOperands(geometryOperands);
+
+			for (SpatialOperandName operand : SpatialOperandName.values()) {
+				GeometryOperand geometryOperand = new GeometryOperand();
+				geometryOperand.setName(new QName(GMLCoreModule.v3_1_1.getNamespaceURI(), operand.getName()));
+				geometryOperands.getGeometryOperand().add(geometryOperand);
+			}
+
+			SpatialOperatorsType spatialOperators = new SpatialOperatorsType();
+			spatialCapabilities.setSpatialOperators(spatialOperators);
+
+			for (SpatialOperatorName operator : wfsConfig.getFilterCapabilities().getSpatialCapabilities().getSpatialOperators()) {
+				SpatialOperatorType spatialOperator = new SpatialOperatorType();
+				spatialOperator.setName(operator.toString());
+				spatialOperators.getSpatialOperator().add(spatialOperator);				
+			}
+		}
 	}
 
 	private void printCapabilitiesDocument(HttpServletRequest request, HttpServletResponse response, WFS_CapabilitiesType capabilities) throws WFSException {

@@ -15,6 +15,9 @@ public class WFSExceptionCode {
 	public static final WFSExceptionCode OPTION_NOT_SUPPORTED = new WFSExceptionCode("OptionNotSupported", HttpServletResponse.SC_NOT_IMPLEMENTED);
 	public static final WFSExceptionCode NO_APPLICABLE_CODE = new WFSExceptionCode("NoApplicableCode", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 
+	// FES 2.0 exception codes
+	public static final WFSExceptionCode DUPLICATE_SORT_KEY = new WFSExceptionCode("DuplicateSortKey", HttpServletResponse.SC_BAD_REQUEST);
+
 	// WFS 2.0 exception codes
 	public static final WFSExceptionCode CANNOT_LOCK_ALL_FEATURES = new WFSExceptionCode("CannotLockAllFeatures", HttpServletResponse.SC_BAD_REQUEST);
 	public static final WFSExceptionCode DUPLICATE_STORED_QUERY_ID_VALUE = new WFSExceptionCode("DuplicateStoredQueryIdValue", HttpServletResponse.SC_CONFLICT);

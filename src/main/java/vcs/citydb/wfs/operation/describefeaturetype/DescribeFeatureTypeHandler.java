@@ -1,8 +1,8 @@
 package vcs.citydb.wfs.operation.describefeaturetype;
 
 import net.opengis.wfs._2.DescribeFeatureTypeType;
-import org.citydb.database.schema.mapping.FeatureType;
-import org.citydb.log.Logger;
+import org.citydb.core.database.schema.mapping.FeatureType;
+import org.citydb.util.log.Logger;
 import org.citygml4j.model.module.citygml.CityGMLVersion;
 import vcs.citydb.wfs.config.WFSConfig;
 import vcs.citydb.wfs.config.operation.DescribeFeatureTypeOutputFormat;

@@ -97,7 +97,5 @@ public class OutputFormat {
 			
 			return !list.options.isEmpty() ? list : null;
 		}
-
 	}
-
 }

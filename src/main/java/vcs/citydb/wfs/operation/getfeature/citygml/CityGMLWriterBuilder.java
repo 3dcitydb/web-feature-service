@@ -4,12 +4,12 @@ import net.opengis.wfs._2.GetFeatureType;
 import net.opengis.wfs._2.ResultTypeType;
 import org.citydb.ade.model.module.CityDBADE100Module;
 import org.citydb.ade.model.module.CityDBADE200Module;
-import org.citydb.citygml.common.cache.IdCacheManager;
-import org.citydb.citygml.exporter.util.InternalConfig;
-import org.citydb.citygml.exporter.writer.FeatureWriteException;
 import org.citydb.config.Config;
-import org.citydb.database.schema.mapping.FeatureType;
-import org.citydb.log.Logger;
+import org.citydb.core.database.schema.mapping.FeatureType;
+import org.citydb.core.operation.common.cache.IdCacheManager;
+import org.citydb.core.operation.exporter.util.InternalConfig;
+import org.citydb.core.operation.exporter.writer.FeatureWriteException;
+import org.citydb.util.log.Logger;
 import org.citygml4j.model.module.Module;
 import org.citygml4j.model.module.ModuleContext;
 import org.citygml4j.model.module.Modules;
@@ -102,6 +102,11 @@ public class CityGMLWriterBuilder implements GetFeatureResponseBuilder {
 			saxWriter.setPrefix(core.getNamespacePrefix(), core.getNamespaceURI());
 			saxWriter.setPrefix(generics.getNamespacePrefix(), generics.getNamespaceURI());
 			saxWriter.setSchemaLocation(generics.getNamespaceURI(), generics.getSchemaLocation());
+			if (wfsConfig.getConstraints().isExportAppearance()) {
+				Module appearance = moduleContext.getModule(CityGMLModuleType.APPEARANCE);
+				saxWriter.setPrefix(appearance.getNamespacePrefix(), appearance.getNamespaceURI());
+				saxWriter.setSchemaLocation(appearance.getNamespaceURI(), appearance.getSchemaLocation());
+			}
 
 			// add XML prefixes and schema locations for non-CityGML modules
 			for (Module module : moduleContext.getModules()) {

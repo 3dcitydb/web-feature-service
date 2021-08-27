@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jaxb:bindings version="2.1" xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" xmlns:namespace="http://jaxb2-commons.dev.java.net/namespace-prefix"
-  xmlns:inheritance="http://jaxb2-commons.dev.java.net/basic/inheritance" xmlns:annox="http://annox.dev.java.net" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<jaxb:bindings version="2.1" xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+	xmlns:namespace="http://jaxb2-commons.dev.java.net/namespace-prefix"
+	xmlns:inheritance="http://jaxb2-commons.dev.java.net/basic/inheritance"
+	xmlns:annox="http://annox.dev.java.net" xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
 	<!-- Specific settings for the wfs mapping file -->
 	<jaxb:bindings schemaLocation="wfs/2.0.2/wfs.xsd" node="/xs:schema">
@@ -16,14 +18,16 @@
 		<jaxb:bindings node="//xs:simpleType[@name='StarStringType']//xs:enumeration[@value='*']">
 			<jaxb:typesafeEnumMember name="STAR"/>
 		</jaxb:bindings>
-	  <jaxb:bindings node="//xs:complexType[@name='BaseRequestType']//xs:attribute[@name='identifier']">
-	    <annox:annotate target="field">@javax.xml.bind.annotation.XmlTransient</annox:annotate>
-	    <annox:removeAnnotation target="field" class="javax.xml.bind.annotation.XmlAttribute"/>
-	  </jaxb:bindings>
-	  <jaxb:bindings node="//xs:complexType[@name='QueryType']//xs:attribute[@name='featureIdentifier']">
-	    <annox:annotate target="field">@javax.xml.bind.annotation.XmlTransient</annox:annotate>
-	    <annox:removeAnnotation target="field" class="javax.xml.bind.annotation.XmlAttribute"/>
-	  </jaxb:bindings>
+		<jaxb:bindings
+			node="//xs:complexType[@name='BaseRequestType']//xs:attribute[@name='identifier']">
+			<annox:annotate target="field">@javax.xml.bind.annotation.XmlTransient</annox:annotate>
+			<annox:removeAnnotation target="field" class="javax.xml.bind.annotation.XmlAttribute"/>
+		</jaxb:bindings>
+		<jaxb:bindings
+			node="//xs:complexType[@name='QueryType']//xs:attribute[@name='featureIdentifier']">
+			<annox:annotate target="field">@javax.xml.bind.annotation.XmlTransient</annox:annotate>
+			<annox:removeAnnotation target="field" class="javax.xml.bind.annotation.XmlAttribute"/>
+		</jaxb:bindings>
 	</jaxb:bindings>
 
 	<!-- ========== -->
@@ -45,6 +49,76 @@
 	<jaxb:bindings schemaLocation="filter/2.0.3/filter.xsd" node="/xs:schema">
 		<jaxb:bindings>
 			<namespace:prefix name="fes"/>
+		</jaxb:bindings>
+	</jaxb:bindings>
+
+	<!-- ============= -->
+	<!-- CityGML 2.0.0 -->
+	<!-- ============= -->
+
+	<!-- Specific settings for the CityGML Core module schema file -->
+	<jaxb:bindings schemaLocation="citygml/2.0.0/cityGMLBase.xsd" node="/xs:schema">
+		<jaxb:bindings>
+			<namespace:prefix name="core"/>
+		</jaxb:bindings>
+	</jaxb:bindings>
+
+	<!-- Specific settings for the CityGML Appearance module schema file -->
+	<jaxb:bindings schemaLocation="citygml/2.0.0/appearance.xsd" node="/xs:schema">
+		<jaxb:bindings>
+			<namespace:prefix name="app"/>
+		</jaxb:bindings>
+
+		<!-- The global elements 'Appearance' and 'appearance' cannot be automatically
+            mapped to two different classes by JAXB  -->
+		<jaxb:bindings node="//xs:element[@name='appearance']">
+			<jaxb:class name="AppearancePropertyElement"/>
+		</jaxb:bindings>
+	</jaxb:bindings>
+
+	<!-- Specific settings for the CityGML Generics module schema file -->
+	<jaxb:bindings schemaLocation="citygml/2.0.0/generics.xsd" node="/xs:schema">
+		<jaxb:bindings>
+			<namespace:prefix name="gen"/>
+		</jaxb:bindings>
+
+		<!-- changing data type of DoubleAttributeType -->
+		<jaxb:bindings node="//xs:complexType[@name='DoubleAttributeType']">
+			<jaxb:bindings node=".//xs:element[@name='value']">
+				<jaxb:javaType name="Double"/>
+			</jaxb:bindings>
+		</jaxb:bindings>
+	</jaxb:bindings>
+
+	<!-- ========= -->
+	<!-- GML 3.1.1 -->
+	<!-- ========= -->
+
+	<!-- Specific settings for the GML schema file -->
+	<jaxb:bindings schemaLocation="gml/3.1.1/base/gml.xsd" node="/xs:schema">
+		<jaxb:bindings>
+			<namespace:prefix name="gml"/>
+		</jaxb:bindings>
+	</jaxb:bindings>
+
+	<!-- Specific settings for the GML schema file 'defaultStyle.xsd' -->
+	<jaxb:bindings schemaLocation="gml/3.1.1/base/defaultStyle.xsd" node="/xs:schema">
+		<!-- This is tricky. The schema file, for example, denotes both the element 'featureStyle' as well as 'FeatureStyle'.
+			As both elements are mapped to the Java class 'FeatureStyle', a renaming is necessary. -->
+		<jaxb:bindings node="xs:element[@name='graphStyle']">
+			<jaxb:class name="GraphStyleRef"/>
+		</jaxb:bindings>
+		<jaxb:bindings node="xs:element[@name='topologyStyle']">
+			<jaxb:class name="TopologyStyleRef"/>
+		</jaxb:bindings>
+		<jaxb:bindings node="xs:element[@name='featureStyle']">
+			<jaxb:class name="FeatureStyleRef"/>
+		</jaxb:bindings>
+		<jaxb:bindings node="xs:element[@name='geometryStyle']">
+			<jaxb:class name="GeometryStyleRef"/>
+		</jaxb:bindings>
+		<jaxb:bindings node="xs:element[@name='labelStyle']">
+			<jaxb:class name="LabelStyleRef"/>
 		</jaxb:bindings>
 	</jaxb:bindings>
 
@@ -70,6 +144,23 @@
 					<jaxb:property name="titleElement"/>
 				</jaxb:bindings>
 			</jaxb:bindings>
+		</jaxb:bindings>
+	</jaxb:bindings>
+
+	<!-- ======= -->
+	<!-- xAL 2.0 -->
+	<!-- ======= -->
+
+	<!-- Specific settings for the xAl schema file -->
+	<jaxb:bindings schemaLocation="xal/2.0/xAl.xsd" node="/xs:schema">
+		<jaxb:schemaBindings>
+			<!-- append "Element" to element declarations -->
+			<jaxb:nameXmlTransform>
+				<jaxb:elementName suffix="Element"/>
+			</jaxb:nameXmlTransform>
+		</jaxb:schemaBindings>
+		<jaxb:bindings>
+			<namespace:prefix name="xal"/>
 		</jaxb:bindings>
 	</jaxb:bindings>
 

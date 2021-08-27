@@ -1,6 +1,8 @@
 package vcs.citydb.wfs.config.conformance;
 
 import vcs.citydb.wfs.config.WFSConfig;
+import vcs.citydb.wfs.config.filter.ComparisonOperatorName;
+import vcs.citydb.wfs.config.filter.SpatialOperatorName;
 import vcs.citydb.wfs.config.operation.EncodingMethod;
 
 public class Conformance {
@@ -11,7 +13,11 @@ public class Conformance {
 	}
 
 	public boolean implementsBasicWFS() {
-		return false;
+		return wfsConfig.getOperations().getGetPropertyValue().isEnabled() 
+				&& wfsConfig.getConstraints().isSupportAdHocQueries()
+				&& wfsConfig.getConstraints().isUseDefaultSorting()
+				&& wfsConfig.getFilterCapabilities().isSetSpatialCapabilities()
+				&& wfsConfig.getFilterCapabilities().getSpatialCapabilities().containsAll(SpatialOperatorName.MIN_SPATIAL_FILTER);
 	}
 
 	public boolean implementsTransactionalWFS() {
@@ -35,7 +41,7 @@ public class Conformance {
 	}
 
 	public boolean implementsInheritance() {
-		return false;
+		return true;
 	}
 
 	public boolean implementsRemoteResolve() {
@@ -43,7 +49,7 @@ public class Conformance {
 	}
 
 	public boolean implementsResultPaging() {
-		return false;
+		return wfsConfig.getConstraints().isUseResultPaging();
 	}
 
 	public boolean implementsStandardJoins() {
@@ -63,7 +69,7 @@ public class Conformance {
 	}
 
 	public boolean implementsManageStoredQueries() {
-		return false;
+		return wfsConfig.getOperations().getManagedStoredQueries().isEnabled();
 	}
 
 	public boolean implementsQuery() {
@@ -71,7 +77,7 @@ public class Conformance {
 	}
 
 	public boolean implementsAdHocQuery() {
-		return false;
+		return wfsConfig.getConstraints().isSupportAdHocQueries();
 	}
 
 	public boolean implementsFunctions() {
@@ -79,23 +85,31 @@ public class Conformance {
 	}
 
 	public boolean implementsResourceld() {
-		return false;
+		return true;
 	}
 
 	public boolean implementsMinStandardFilter() {
-		return false;
+		return wfsConfig.getFilterCapabilities().isSetScalarCapabilities()
+				&& wfsConfig.getFilterCapabilities().getScalarCapabilities().isSetLogicalOperators() 
+				&& wfsConfig.getFilterCapabilities().getScalarCapabilities().isSetComparisonOperators()
+				&& wfsConfig.getFilterCapabilities().getScalarCapabilities().containsAll(ComparisonOperatorName.MIN_STANDARD_FILTER);
 	}
 
 	public boolean implementsStandardFilter() {
-		return false;
+		return wfsConfig.getFilterCapabilities().isSetScalarCapabilities()
+				&& wfsConfig.getFilterCapabilities().getScalarCapabilities().isSetLogicalOperators() 
+				&& wfsConfig.getFilterCapabilities().getScalarCapabilities().isSetComparisonOperators()
+				&& wfsConfig.getFilterCapabilities().getScalarCapabilities().containsAll(ComparisonOperatorName.STANDARD_FILTER);
 	}
 
 	public boolean implementsMinSpatialFilter() {
-		return false;
+		return wfsConfig.getFilterCapabilities().isSetSpatialCapabilities()
+				&& wfsConfig.getFilterCapabilities().getSpatialCapabilities().containsAll(SpatialOperatorName.MIN_SPATIAL_FILTER);
 	}
 
 	public boolean implementsSpatialFilter() {
-		return false;
+		return implementsMinSpatialFilter()
+				&& wfsConfig.getFilterCapabilities().getSpatialCapabilities().getSpatialOperators().size() > 1;
 	}
 
 	public boolean implementsMinTemporalFilter() {
@@ -111,7 +125,7 @@ public class Conformance {
 	}
 
 	public boolean implementsSorting() {
-		return false;
+		return true;
 	}
 
 	public boolean implementsExtendedOperators() {
@@ -119,10 +133,10 @@ public class Conformance {
 	}
 
 	public boolean implementsMinimumXPath() {
-		return false;
+		return true;
 	}
 
 	public boolean implementsSchemaElementFunc() {
-		return false;
+		return true;
 	}
 }

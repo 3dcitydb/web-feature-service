@@ -3,7 +3,7 @@ package vcs.citydb.wfs.exception;
 import net.opengis.ows._1.ExceptionReport;
 import net.opengis.ows._1.ExceptionType;
 import net.opengis.ows._1.ObjectFactory;
-import org.citydb.log.Logger;
+import org.citydb.util.log.Logger;
 import org.citygml4j.builder.jaxb.CityGMLBuilder;
 import org.citygml4j.util.xml.SAXWriter;
 import vcs.citydb.wfs.config.Constants;

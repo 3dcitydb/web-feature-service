@@ -1,9 +1,9 @@
 package vcs.citydb.wfs.operation.describefeaturetype.citygml;
 
-import org.citydb.ade.ADEExtension;
-import org.citydb.ade.ADEExtensionManager;
-import org.citydb.database.schema.mapping.FeatureType;
-import org.citydb.database.schema.mapping.Namespace;
+import org.citydb.core.ade.ADEExtension;
+import org.citydb.core.ade.ADEExtensionManager;
+import org.citydb.core.database.schema.mapping.FeatureType;
+import org.citydb.core.database.schema.mapping.Namespace;
 import org.citygml4j.model.citygml.ade.binding.ADEContext;
 import org.citygml4j.model.module.Module;
 import org.citygml4j.model.module.Modules;
@@ -48,7 +48,7 @@ public class CityGMLSchemaReader implements SchemaReader {
 		if (!featureTypes.isEmpty()) {
 			modules = new HashSet<>();
 			for (FeatureType featureType : featureTypes) {
-				Namespace namespace = featureType.getSchema().getNamespace(version);			
+				Namespace namespace = featureType.getSchema().getNamespace(version);
 				Module module = Modules.getModule(namespace.getURI());
 				if (module == null)
 					throw new SchemaReaderException("The feature type '" + new QName(namespace.getURI(), featureType.getPath()) + "' is not part of CityGML.");
