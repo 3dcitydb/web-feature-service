@@ -9,11 +9,11 @@ public class Constants {
 	public static final long UNKNOWN_NUMBER_MATCHED = Long.MAX_VALUE;
 	public static final long COUNT_DEFAULT = Long.MAX_VALUE;
 
-	public static final String CONFIG_FILE = System.getenv("VC_WFS_CONFIG_FILE") != null ? System.getenv("VC_WFS_CONFIG_FILE") : "WEB-INF/config.xml";
+	public static final String CONFIG_FILE;
 	public static final String CONFIG_SCHEMA_PATH = "src/main/webapp/WEB-INF/schemas/config";
 	public static final String CONFIG_SCHEMA_FILE = CONFIG_SCHEMA_PATH + "/config.xsd";
 	public static final String STORED_QUERIES_PATH = "/WEB-INF/stored-queries";
-	public static final String ADE_EXTENSIONS_PATH = System.getenv("VC_WFS_ADE_EXTENSIONS_PATH") != null ? System.getenv("VC_WFS_ADE_EXTENSIONS_PATH") : "WEB-INF/ade-extensions";
+	public static final String ADE_EXTENSIONS_PATH;
 	public static final String XSLT_STYLESHEETS_PATH = "/WEB-INF/xslt-stylesheets";
 	public static final String SCHEMAS_PATH = "/WEB-INF/schemas";
 	public static final String CITYGML_1_0_SCHEMAS_PATH = SCHEMAS_PATH + "/ogc/citygml/1.0.0";
@@ -44,4 +44,24 @@ public class Constants {
 	public static final String TEXTURE_SERVICE_PATH = "/texture";
 	public static final String TEXTURE_CACHE_PATH = "/WEB-INF/texture_cache";
 	public static final int TEXTURE_CACHE_BUCKETS = 1000;
+
+	static {
+		if (System.getenv("WFS_CONFIG_FILE") != null) {
+			CONFIG_FILE = System.getenv("WFS_CONFIG_FILE");
+		} else if (System.getenv("VC_WFS_CONFIG_FILE") != null) {
+			// VC_WFS_CONFIG_FILE is deprecated but still supported for backwards compatibility
+			CONFIG_FILE = System.getenv("VC_WFS_CONFIG_FILE");
+		} else {
+			CONFIG_FILE = "WEB-INF/config.xml";
+		}
+
+		if (System.getenv("WFS_ADE_EXTENSIONS_PATH") != null) {
+			ADE_EXTENSIONS_PATH = System.getenv("WFS_ADE_EXTENSIONS_PATH");
+		} else if (System.getenv("VC_WFS_ADE_EXTENSIONS_PATH") != null) {
+			// VC_WFS_ADE_EXTENSIONS_PATH is deprecated but still supported for backwards compatibility
+			ADE_EXTENSIONS_PATH = System.getenv("VC_WFS_ADE_EXTENSIONS_PATH");
+		} else {
+			ADE_EXTENSIONS_PATH = "WEB-INF/ade-extensions";
+		}
+	}
 }
