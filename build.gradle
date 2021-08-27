@@ -100,7 +100,7 @@ task cleanJaxb(type: Delete, group: 'jaxb') {
 }
 
 distributions.main {
-    baseName = project.appName
+    distributionBaseName = project.appName
     contents {
         from war
         from 'CHANGES.md'
