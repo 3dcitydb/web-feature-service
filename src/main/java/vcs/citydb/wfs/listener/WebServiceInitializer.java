@@ -188,6 +188,16 @@ public class WebServiceInitializer implements ServletContextListener {
 		// GeoTools - don't allow the connection to the EPSG database to time out
 		System.setProperty("org.geotools.epsg.factory.timeout", "-1");
 		CRS.cleanupThreadLocals();
+
+		// log registered JDBC drivers
+		ClassLoader loader = Thread.currentThread().getContextClassLoader();
+		Enumeration<Driver> drivers = DriverManager.getDrivers();
+		while (drivers.hasMoreElements()) {
+			Driver driver = drivers.nextElement();
+			if (driver.getClass().getClassLoader() == loader) {
+				log.debug("Registered JDBC driver " + driver);
+			}
+		}
 	}
 
 	@Override
@@ -217,16 +227,14 @@ public class WebServiceInitializer implements ServletContextListener {
 		// deregister JDBC drivers loaded by this web application
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();
 		Enumeration<Driver> drivers = DriverManager.getDrivers();
-
 		while (drivers.hasMoreElements()) {
 			Driver driver = drivers.nextElement();
 			if (driver.getClass().getClassLoader() == loader) {
 				try {
 					DriverManager.deregisterDriver(driver);
-					log.info("Unregistered JDBC driver " + driver);
+					log.debug("Unregistered JDBC driver " + driver);
 				} catch (Exception e) {
 					log.error("Failed to unload JDBC driver " + driver, e);
-					e.printStackTrace();
 				}
 			}
 		}
