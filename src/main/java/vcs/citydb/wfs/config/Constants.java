@@ -45,6 +45,8 @@ public class Constants {
 	public static final String TEXTURE_CACHE_PATH = "/WEB-INF/texture_cache";
 	public static final int TEXTURE_CACHE_BUCKETS = 1000;
 
+	public static final String MANAGEMENT_SERVICE_PATH = "/service";
+
 	static {
 		if (System.getenv("WFS_CONFIG_FILE") != null) {
 			CONFIG_FILE = System.getenv("WFS_CONFIG_FILE");

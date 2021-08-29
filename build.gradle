@@ -71,6 +71,22 @@ task processLicense(type: Copy) {
     into "$buildDir/tmp/license"
 }
 
+processResources {
+    filesMatching('**/application.properties') {
+        filteringCharset = 'UTF-8'
+        filter(ReplaceTokens, tokens: [
+                name: project.citydbWfsName,
+                version: project.version,
+                vendorName: project.vendorName,
+                vendorStreet: project.vendorStreet,
+                vendorTown: project.vendorTown,
+                vendorCountry: project.vendorCountry,
+                vendorCopyright: project.vendorCopyright,
+                vendorWebsiteUrl: project.vendorWebsiteUrl
+        ])
+    }
+}
+
 task generateJaxb(group: 'jaxb') {
     outputs.dir genSrcDir
 
