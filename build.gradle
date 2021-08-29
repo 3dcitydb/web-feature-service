@@ -41,7 +41,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.citydb:impexp-core:4.4.0-SNAPSHOT'
+    implementation 'org.citydb:impexp-core:5.0.0-SNAPSHOT'
     implementation 'com.github.seancfoley:ipaddress:5.3.3'
     implementation 'org.glassfish.jersey.containers:jersey-container-servlet:2.34'
     implementation 'org.glassfish.jersey.inject:jersey-hk2:2.34'
@@ -69,6 +69,22 @@ task processLicense(type: Copy) {
         ])
     }
     into "$buildDir/tmp/license"
+}
+
+processResources {
+    filesMatching('**/application.properties') {
+        filteringCharset = 'UTF-8'
+        filter(ReplaceTokens, tokens: [
+                name: project.citydbWfsName,
+                version: project.version,
+                vendorName: project.vendorName,
+                vendorStreet: project.vendorStreet,
+                vendorTown: project.vendorTown,
+                vendorCountry: project.vendorCountry,
+                vendorCopyright: project.vendorCopyright,
+                vendorWebsiteUrl: project.vendorWebsiteUrl
+        ])
+    }
 }
 
 task generateJaxb(group: 'jaxb') {
@@ -100,7 +116,7 @@ task cleanJaxb(type: Delete, group: 'jaxb') {
 }
 
 distributions.main {
-    baseName = project.appName
+    distributionBaseName = project.appName
     contents {
         from war
         from 'CHANGES.md'
