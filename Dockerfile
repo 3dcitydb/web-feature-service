@@ -11,9 +11,14 @@ ARG RUNTIME_IMAGE_TAG='9-jdk11'
 # Base image
 FROM openjdk:${BUILDER_IMAGE_TAG} AS builder
 
+ARG DEFAULT_CONFIG='default-config.xml'
+
 # Copy source code
 WORKDIR /build
 COPY . /build
+
+# Copy default config
+COPY resources/docker/${DEFAULT_CONFIG} src/main/webapp/WEB-INF/config.xml
 
 # Build
 RUN chmod u+x ./gradlew && ./gradlew installDist
