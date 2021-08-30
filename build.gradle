@@ -72,8 +72,8 @@ task processLicense(type: Copy) {
 }
 
 processResources {
+    filteringCharset = 'ISO-8859-1'
     filesMatching('**/application.properties') {
-        filteringCharset = 'UTF-8'
         filter(ReplaceTokens, tokens: [
                 name: project.citydbWfsName,
                 version: project.version,
