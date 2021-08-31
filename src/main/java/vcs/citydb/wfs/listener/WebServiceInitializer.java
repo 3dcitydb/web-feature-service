@@ -282,9 +282,9 @@ public class WebServiceInitializer implements ServletContextListener {
 		FileLog fileLog = wfsConfig.getLogging().getFile();
 		ConsoleLog consoleLog = wfsConfig.getLogging().getConsole();
 
-		// set console logger as default in case logging is not configured
+		// set file logger as default in case logging is not configured
 		if (fileLog == null && consoleLog == null) {
-			consoleLog = new ConsoleLog();
+			fileLog = new FileLog();
 		}
 
 		// log to console
