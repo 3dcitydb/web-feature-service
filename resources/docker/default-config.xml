@@ -220,6 +220,7 @@
     </tempCache>
   </server>
   <logging>
+    <console logLevel="info"/>
     <file logLevel="info"/>
   </logging>
 </wfs>
