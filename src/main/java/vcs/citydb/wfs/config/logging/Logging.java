@@ -9,11 +9,7 @@ import javax.xml.bind.annotation.XmlType;
 public class Logging {
 	private FileLog file;
 	private ConsoleLog console;
-	
-	public Logging() {
-		file = new FileLog();
-	}
-	
+
 	public ConsoleLog getConsole() {
 		return console;
 	}
