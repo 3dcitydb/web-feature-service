@@ -32,10 +32,6 @@ ARG TOMCAT_USER='tomcat'
 ARG TOMCAT_GROUP='tomcat'
 
 # Run as non-root user user
-# RUN groupadd --gid 1000 -r  && \
-#     useradd --uid 1000 --gid 1000 -d /citydb-wfs -m -r --no-log-init ${TOMCAT_USER} && \
-#     chown -R 1000:1000 ${CATALINA_HOME}
-
 RUN addgroup -g 1000 -S ${TOMCAT_GROUP} && \
     adduser -u 1000 -G ${TOMCAT_USER} -h /citydb-wfs -S ${TOMCAT_USER} && \
     chown -R 1000:1000 ${CATALINA_HOME}
