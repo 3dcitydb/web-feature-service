@@ -27,7 +27,6 @@ RUN chmod u+x ./gradlew && ./gradlew installDist
 # Base image
 FROM tomcat:${RUNTIME_IMAGE_TAG} AS runtime
 
-ARG CONTEXT_PATH='ROOT'
 ARG TOMCAT_USER='tomcat'
 ARG TOMCAT_GROUP='tomcat'
 
@@ -38,7 +37,7 @@ RUN groupadd --gid 1000 -r ${TOMCAT_GROUP} && \
 
 # Copy WAR to webapps folder
 COPY --from=builder --chown=1000:1000 /build/build/install/3DCityDB-Web-Feature-Service/citydb-wfs.war \
-       ${CATALINA_HOME}/webapps/${CONTEXT_PATH}.war
+       ${CATALINA_HOME}/webapps/ROOT.war
 
 COPY --chown=1000:1000 resources/docker/citydb-wfs-entrypoint.sh /usr/local/bin/
 
