@@ -13,7 +13,7 @@ if [ -z ${CATALINA_OPTS+x} ]; then
 fi
 
 # Adapt context path of the WFS service #######################################
-if [ ! -z ${WFS_CONTEXT_PATH+x} ]; then
+if [ ! -z ${WFS_CONTEXT_PATH} ]; then
   mv ${CATALINA_HOME}/webapps/ROOT.war ${CATALINA_HOME}/webapps/${WFS_CONTEXT_PATH}.war
 fi
 
