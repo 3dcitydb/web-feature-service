@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<wfs xmlns="http://www.3dcitydb.org/importer-exporter/config" xmlns:ows="http://www.opengis.net/ows/1.1"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.3dcitydb.org/importer-exporter/config ../../src/main/webapp/WEB-INF/schemas/config/config.xsd">
+  <capabilities>
+    <owsMetadata>
+      <ows:ServiceIdentification>
+        <ows:Title>3DCityDB Web Feature Service</ows:Title>
+        <ows:ServiceType>WFS</ows:ServiceType>
+        <ows:ServiceTypeVersion>2.0.0</ows:ServiceTypeVersion>
+      </ows:ServiceIdentification>
+      <ows:ServiceProvider>
+        <ows:ProviderName/>
+        <ows:ServiceContact/>
+      </ows:ServiceProvider>
+    </owsMetadata>
+  </capabilities>
+  <featureTypes>
+    <featureType>
+      <name>Bridge</name>
+      <ows:WGS84BoundingBox>
+        <ows:LowerCorner>-180 -90</ows:LowerCorner>
+        <ows:UpperCorner>180 90</ows:UpperCorner>
+      </ows:WGS84BoundingBox>
+    </featureType>
+    <featureType>
+      <name>Building</name>
+      <ows:WGS84BoundingBox>
+        <ows:LowerCorner>-180 -90</ows:LowerCorner>
+        <ows:UpperCorner>180 90</ows:UpperCorner>
+      </ows:WGS84BoundingBox>
+    </featureType>
+    <featureType>
+      <name>CityFurniture</name>
+      <ows:WGS84BoundingBox>
+        <ows:LowerCorner>-180 -90</ows:LowerCorner>
+        <ows:UpperCorner>180 90</ows:UpperCorner>
+      </ows:WGS84BoundingBox>
+    </featureType>
+    <featureType>
+      <name>CityObjectGroup</name>
+      <ows:WGS84BoundingBox>
+        <ows:LowerCorner>-180 -90</ows:LowerCorner>
+        <ows:UpperCorner>180 90</ows:UpperCorner>
+      </ows:WGS84BoundingBox>
+    </featureType>
+    <featureType>
+      <name>GenericCityObject</name>
+      <ows:WGS84BoundingBox>
+        <ows:LowerCorner>-180 -90</ows:LowerCorner>
+        <ows:UpperCorner>180 90</ows:UpperCorner>
+      </ows:WGS84BoundingBox>
+    </featureType>
+    <featureType>
+      <name>LandUse</name>
+      <ows:WGS84BoundingBox>
+        <ows:LowerCorner>-180 -90</ows:LowerCorner>
+        <ows:UpperCorner>180 90</ows:UpperCorner>
+      </ows:WGS84BoundingBox>
+    </featureType>
+    <featureType>
+      <name>PlantCover</name>
+      <ows:WGS84BoundingBox>
+        <ows:LowerCorner>-180 -90</ows:LowerCorner>
+        <ows:UpperCorner>180 90</ows:UpperCorner>
+      </ows:WGS84BoundingBox>
+    </featureType>
+    <featureType>
+      <name>Railway</name>
+      <ows:WGS84BoundingBox>
+        <ows:LowerCorner>-180 -90</ows:LowerCorner>
+        <ows:UpperCorner>180 90</ows:UpperCorner>
+      </ows:WGS84BoundingBox>
+    </featureType>
+    <featureType>
+      <name>ReliefFeature</name>
+      <ows:WGS84BoundingBox>
+        <ows:LowerCorner>-180 -90</ows:LowerCorner>
+        <ows:UpperCorner>180 90</ows:UpperCorner>
+      </ows:WGS84BoundingBox>
+    </featureType>
+    <featureType>
+      <name>Road</name>
+      <ows:WGS84BoundingBox>
+        <ows:LowerCorner>-180 -90</ows:LowerCorner>
+        <ows:UpperCorner>180 90</ows:UpperCorner>
+      </ows:WGS84BoundingBox>
+    </featureType>
+    <featureType>
+      <name>SolitaryVegetationObject</name>
+      <ows:WGS84BoundingBox>
+        <ows:LowerCorner>-180 -90</ows:LowerCorner>
+        <ows:UpperCorner>180 90</ows:UpperCorner>
+      </ows:WGS84BoundingBox>
+    </featureType>
+    <featureType>
+      <name>Square</name>
+      <ows:WGS84BoundingBox>
+        <ows:LowerCorner>-180 -90</ows:LowerCorner>
+        <ows:UpperCorner>180 90</ows:UpperCorner>
+      </ows:WGS84BoundingBox>
+    </featureType>
+    <featureType>
+      <name>Track</name>
+      <ows:WGS84BoundingBox>
+        <ows:LowerCorner>-180 -90</ows:LowerCorner>
+        <ows:UpperCorner>180 90</ows:UpperCorner>
+      </ows:WGS84BoundingBox>
+    </featureType>
+    <featureType>
+      <name>TransportationComplex</name>
+      <ows:WGS84BoundingBox>
+        <ows:LowerCorner>-180 -90</ows:LowerCorner>
+        <ows:UpperCorner>180 90</ows:UpperCorner>
+      </ows:WGS84BoundingBox>
+    </featureType>
+    <featureType>
+      <name>Tunnel</name>
+      <ows:WGS84BoundingBox>
+        <ows:LowerCorner>-180 -90</ows:LowerCorner>
+        <ows:UpperCorner>180 90</ows:UpperCorner>
+      </ows:WGS84BoundingBox>
+    </featureType>
+    <featureType>
+      <name>WaterBody</name>
+      <ows:WGS84BoundingBox>
+        <ows:LowerCorner>-180 -90</ows:LowerCorner>
+        <ows:UpperCorner>180 90</ows:UpperCorner>
+      </ows:WGS84BoundingBox>
+    </featureType>
+    <version>2.0</version>
+  </featureTypes>
+  <operations>
+    <requestEncoding>
+      <method>KVP+XML</method>
+      <useXMLValidation>true</useXMLValidation>
+    </requestEncoding>
+    <DescribeFeatureType>
+      <outputFormats>
+        <outputFormat name="application/gml+xml; version=3.1"/>
+        <outputFormat name="application/json"/>
+      </outputFormats>
+    </DescribeFeatureType>
+    <GetFeature>
+      <outputFormats>
+        <outputFormat name="application/gml+xml; version=3.1"/>
+        <outputFormat name="application/json"/>
+      </outputFormats>
+    </GetFeature>
+  </operations>
+  <filterCapabilities>
+    <scalarCapabilities>
+      <logicalOperators>true</logicalOperators>
+      <comparisonOperators>
+        <operator>PropertyIsEqualTo</operator>
+        <operator>PropertyIsNotEqualTo</operator>
+        <operator>PropertyIsLessThan</operator>
+        <operator>PropertyIsGreaterThan</operator>
+        <operator>PropertyIsLessThanOrEqualTo</operator>
+        <operator>PropertyIsGreaterThanOrEqualTo</operator>
+        <operator>PropertyIsLike</operator>
+        <operator>PropertyIsNull</operator>
+        <operator>PropertyIsNil</operator>
+        <operator>PropertyIsBetween</operator>
+      </comparisonOperators>
+    </scalarCapabilities>
+    <spatialCapabilities>
+      <operator>BBOX</operator>
+      <operator>Equals</operator>
+      <operator>Disjoint</operator>
+      <operator>Touches</operator>
+      <operator>Within</operator>
+      <operator>Overlaps</operator>
+      <operator>Intersects</operator>
+      <operator>Contains</operator>
+      <operator>DWithin</operator>
+      <operator>Beyond</operator>
+    </spatialCapabilities>
+  </filterCapabilities>
+  <constraints>
+    <supportAdHocQueries>true</supportAdHocQueries>
+    <currentVersionOnly>true</currentVersionOnly>
+    <exportCityDBMetadata>false</exportCityDBMetadata>
+    <exportAppearance>true</exportAppearance>
+    <useResultPaging>true</useResultPaging>
+  </constraints>
+  <database>
+    <referenceSystems>
+      <referenceSystem id="WGS84">
+        <srid>4326</srid>
+        <gmlSrsName>http://www.opengis.net/def/crs/epsg/0/4326</gmlSrsName>
+        <description>WGS 84</description>
+      </referenceSystem>
+    </referenceSystems>
+    <connection
+      initialSize="10"
+      maxActive="100"
+      maxIdle="50"
+      minIdle="0"
+      suspectTimeout="60"
+      timeBetweenEvictionRunsMillis="30000"
+      minEvictableIdleTimeMillis="60000">
+      <description/>
+      <type>PostGIS</type>
+      <server/>
+      <port>5432</port>
+      <sid/>
+      <schema/>
+      <user/>
+      <password/>
+    </connection>
+  </database>
+  <server>
+    <maxParallelRequests>30</maxParallelRequests>
+    <waitTimeout>60</waitTimeout>
+    <responseCacheTimeout>300</responseCacheTimeout>
+    <enableCORS>true</enableCORS>
+    <tempCache>
+      <mode>local</mode>
+    </tempCache>
+  </server>
+  <logging>
+    <console logLevel="info"/>
+  </logging>
+</wfs>

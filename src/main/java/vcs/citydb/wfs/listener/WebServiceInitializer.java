@@ -282,34 +282,42 @@ public class WebServiceInitializer implements ServletContextListener {
 		FileLog fileLog = wfsConfig.getLogging().getFile();
 		ConsoleLog consoleLog = wfsConfig.getLogging().getConsole();
 
-		// try and read log filename from configuration file
-		Path logFile;
-		if (fileLog.getFileName() != null) {
-			logFile = Paths.get(fileLog.getFileName());
-			if (Files.isDirectory(logFile)) {
-				logFile = logFile.resolve(Constants.LOG_FILE);
-			}
-		} else {
-			logFile = Paths.get(Constants.LOG_FILE);
-		}
-
-		// choose default log filename if we did not succeed
-		if (!logFile.isAbsolute()) {
-			String logPath = context.getRealPath(Constants.LOG_PATH);
-			if (logPath == null) {
-				throw new ServletException("Failed to access local log path at '" + Constants.LOG_PATH + "'.");
-			}
-
-			logFile = Paths.get(logPath).resolve(logFile);
+		// set file logger as default in case logging is not configured
+		if (fileLog == null && consoleLog == null) {
+			fileLog = new FileLog();
 		}
 
 		// log to console
 		log.enableConsoleLogging(consoleLog != null);
-		if (consoleLog != null)
+		if (consoleLog != null) {
 			log.setConsoleLogLevel(consoleLog.getLogLevel());
+		}
 
 		// log to file
-		log.setFileLogLevel(fileLog.getLogLevel());
-		log.appendLogFile(logFile, LogFileMode.APPEND);
+		if (fileLog != null) {
+			// try and read log filename from configuration file
+			Path logFile;
+			if (fileLog.getFileName() != null) {
+				logFile = Paths.get(fileLog.getFileName());
+				if (Files.isDirectory(logFile)) {
+					logFile = logFile.resolve(Constants.LOG_FILE);
+				}
+			} else {
+				logFile = Paths.get(Constants.LOG_FILE);
+			}
+
+			// choose default log filename if we did not succeed
+			if (!logFile.isAbsolute()) {
+				String logPath = context.getRealPath(Constants.LOG_PATH);
+				if (logPath == null) {
+					throw new ServletException("Failed to access local log path at '" + Constants.LOG_PATH + "'.");
+				}
+
+				logFile = Paths.get(logPath).resolve(logFile);
+			}
+
+			log.setFileLogLevel(fileLog.getLogLevel());
+			log.appendLogFile(logFile, LogFileMode.APPEND);
+		}
 	}
 }
