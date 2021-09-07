@@ -41,8 +41,9 @@ COPY --from=builder --chown=1000:1000 /build/build/install/3DCityDB-Web-Feature-
 
 COPY --chown=1000:1000 resources/docker/citydb-wfs-entrypoint.sh /usr/local/bin/
 
-# Set permissions
-RUN chmod a+x /usr/local/bin/citydb-wfs-entrypoint.sh
+# Delete existing ROOT context and set permissions
+RUN rm -rf ${CATALINA_HOME}/webapps/ROOT && \
+    chmod a+x /usr/local/bin/citydb-wfs-entrypoint.sh
 
 WORKDIR /citydb-wfs
 USER 1000
