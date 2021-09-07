@@ -1,19 +1,19 @@
-# git and github related files
+# Git and GitHub
 .github/
 .git/
 .gitignore
 .gitattributes
 
-# Gradle & build output folder
+# Gradle
 .gradle/
-*/build/
+**/build/
 
-# Unused impexp stuff
+# Docker
+.dockerignore
+Dockerfile*
+
+# Unused citydb-wfs content
 resources/jaxb
 resources/license
 LICENSE
 *.md
-
-# Unused docker stuff
-.dockerignore
-Dockerfile*
