@@ -50,7 +50,7 @@ public class CityJSONSchemaReader implements SchemaReader {
 				hierarchies.put("Tunnel", Arrays.asList("TunnelPart", "TunnelInstallation"));
 
 				Gson gson = new GsonBuilder().create();
-				JsonReader reader = new JsonReader(new InputStreamReader(servletContext.getResourceAsStream(Constants.CITYJSON_SCHEMA_PATH + "/cityjson-v1.0.1.min.schema.json")));
+				JsonReader reader = new JsonReader(new InputStreamReader(servletContext.getResourceAsStream(Constants.CITYJSON_SCHEMA_PATH + "/cityjson.min.schema.json")));
 				JsonObject schema = gson.fromJson(reader, JsonObject.class);
 
 				Map<String, JsonElement> cityObjects = new LinkedHashMap<>();
@@ -95,6 +95,6 @@ public class CityJSONSchemaReader implements SchemaReader {
 			}
 		}
 
-		return servletContext.getResourceAsStream(Constants.CITYJSON_SCHEMA_PATH + "/cityjson-v1.0.1.min.schema.json");
+		return servletContext.getResourceAsStream(Constants.CITYJSON_SCHEMA_PATH + "/cityjson.min.schema.json");
 	}
 }
