@@ -1,4 +1,4 @@
-package vcs.citydb.wfs.xml;
+package vcs.citydb.wfs.util.xml;
 
 import org.citydb.config.project.global.LogLevel;
 import org.citydb.util.log.Logger;

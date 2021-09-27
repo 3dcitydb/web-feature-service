@@ -1,4 +1,4 @@
-package vcs.citydb.wfs.rest.management;
+package vcs.citydb.wfs.management;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

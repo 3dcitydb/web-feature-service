@@ -1,4 +1,4 @@
-package vcs.citydb.wfs;
+package vcs.citydb.wfs.management;
 
 import org.citydb.core.registry.ObjectRegistry;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -6,8 +6,8 @@ import vcs.citydb.wfs.config.Constants;
 import vcs.citydb.wfs.config.WFSConfig;
 import vcs.citydb.wfs.exception.GenericExtensionMapper;
 import vcs.citydb.wfs.filter.CORSResponseFilter;
-import vcs.citydb.wfs.rest.json.GsonMessageBodyHandler;
-import vcs.citydb.wfs.rest.management.VersionResource;
+import vcs.citydb.wfs.util.json.GsonMessageBodyHandler;
+import vcs.citydb.wfs.management.VersionResource;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;

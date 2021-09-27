@@ -19,7 +19,7 @@ import org.citydb.core.query.filter.sorting.Sorting;
 import vcs.citydb.wfs.exception.WFSException;
 import vcs.citydb.wfs.exception.WFSExceptionCode;
 import vcs.citydb.wfs.kvp.KVPConstants;
-import vcs.citydb.wfs.xml.NamespaceFilter;
+import vcs.citydb.wfs.util.xml.NamespaceFilter;
 
 import javax.xml.bind.JAXBElement;
 import java.util.HashSet;

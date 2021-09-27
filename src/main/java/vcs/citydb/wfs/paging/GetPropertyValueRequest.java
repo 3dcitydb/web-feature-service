@@ -5,7 +5,7 @@ import net.opengis.wfs._2.ResultTypeType;
 import vcs.citydb.wfs.config.WFSConfig;
 import vcs.citydb.wfs.kvp.KVPConstants;
 import vcs.citydb.wfs.operation.getpropertyvalue.QueryExpression;
-import vcs.citydb.wfs.xml.NamespaceFilter;
+import vcs.citydb.wfs.util.xml.NamespaceFilter;
 
 import java.math.BigInteger;
 

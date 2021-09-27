@@ -30,8 +30,8 @@ import vcs.citydb.wfs.paging.PagingCacheManager;
 import vcs.citydb.wfs.paging.PagingHandler;
 import vcs.citydb.wfs.security.AccessController;
 import vcs.citydb.wfs.util.*;
-import vcs.citydb.wfs.xml.NamespaceFilter;
-import vcs.citydb.wfs.xml.ValidationEventHandlerImpl;
+import vcs.citydb.wfs.util.xml.NamespaceFilter;
+import vcs.citydb.wfs.util.xml.ValidationEventHandlerImpl;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;

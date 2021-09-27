@@ -1,4 +1,4 @@
-package vcs.citydb.wfs.xml;
+package vcs.citydb.wfs.util.xml;
 
 import org.citygml4j.model.module.gml.GMLCoreModule;
 import org.xml.sax.Attributes;

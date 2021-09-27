@@ -7,7 +7,7 @@ import org.citydb.util.concurrent.WorkerPool;
 import vcs.citydb.wfs.config.WFSConfig;
 import vcs.citydb.wfs.operation.getfeature.QueryExpression;
 import vcs.citydb.wfs.util.CacheCleanerWork;
-import vcs.citydb.wfs.xml.NamespaceFilter;
+import vcs.citydb.wfs.util.xml.NamespaceFilter;
 
 import java.io.IOException;
 import java.nio.file.Files;

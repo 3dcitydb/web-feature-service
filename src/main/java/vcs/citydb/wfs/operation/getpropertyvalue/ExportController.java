@@ -33,7 +33,7 @@ import vcs.citydb.wfs.util.CacheCleanerWork;
 import vcs.citydb.wfs.util.CacheCleanerWorker;
 import vcs.citydb.wfs.util.NullWorker;
 import vcs.citydb.wfs.util.ServerUtil;
-import vcs.citydb.wfs.xml.NamespaceFilter;
+import vcs.citydb.wfs.util.xml.NamespaceFilter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

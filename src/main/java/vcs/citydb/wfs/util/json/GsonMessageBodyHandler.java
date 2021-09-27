@@ -1,4 +1,4 @@
-package vcs.citydb.wfs.rest.json;
+package vcs.citydb.wfs.util.json;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

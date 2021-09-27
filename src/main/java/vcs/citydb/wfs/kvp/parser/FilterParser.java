@@ -6,8 +6,8 @@ import org.citygml4j.builder.jaxb.CityGMLBuilder;
 import vcs.citydb.wfs.config.Constants;
 import vcs.citydb.wfs.config.WFSConfig;
 import vcs.citydb.wfs.exception.KVPParseException;
-import vcs.citydb.wfs.xml.NamespaceFilter;
-import vcs.citydb.wfs.xml.ValidationEventHandlerImpl;
+import vcs.citydb.wfs.util.xml.NamespaceFilter;
+import vcs.citydb.wfs.util.xml.ValidationEventHandlerImpl;
 
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBElement;

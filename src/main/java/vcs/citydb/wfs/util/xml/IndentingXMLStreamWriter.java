@@ -1,4 +1,4 @@
-package vcs.citydb.wfs.xml;
+package vcs.citydb.wfs.util.xml;
 
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.stream.XMLStreamException;

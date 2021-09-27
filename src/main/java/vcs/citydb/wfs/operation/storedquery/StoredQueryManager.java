@@ -18,7 +18,7 @@ import vcs.citydb.wfs.config.WFSConfig;
 import vcs.citydb.wfs.exception.WFSException;
 import vcs.citydb.wfs.exception.WFSExceptionCode;
 import vcs.citydb.wfs.kvp.KVPConstants;
-import vcs.citydb.wfs.xml.NamespaceFilter;
+import vcs.citydb.wfs.util.xml.NamespaceFilter;
 
 import javax.xml.XMLConstants;
 import javax.xml.bind.*;

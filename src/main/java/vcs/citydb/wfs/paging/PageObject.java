@@ -4,7 +4,7 @@ import net.opengis.wfs._2.GetFeatureType;
 import net.opengis.wfs._2.GetPropertyValueType;
 import vcs.citydb.wfs.config.WFSConfig;
 import vcs.citydb.wfs.operation.getfeature.QueryExpression;
-import vcs.citydb.wfs.xml.NamespaceFilter;
+import vcs.citydb.wfs.util.xml.NamespaceFilter;
 
 import java.nio.file.Path;
 import java.util.List;

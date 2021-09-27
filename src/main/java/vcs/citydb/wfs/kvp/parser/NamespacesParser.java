@@ -9,7 +9,7 @@ import org.xml.sax.SAXException;
 import vcs.citydb.wfs.config.Constants;
 import vcs.citydb.wfs.config.WFSConfig;
 import vcs.citydb.wfs.exception.KVPParseException;
-import vcs.citydb.wfs.xml.NamespaceFilter;
+import vcs.citydb.wfs.util.xml.NamespaceFilter;
 
 import javax.xml.XMLConstants;
 import java.util.regex.Matcher;

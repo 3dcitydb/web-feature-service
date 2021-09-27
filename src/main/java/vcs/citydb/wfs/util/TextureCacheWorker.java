@@ -2,8 +2,8 @@ package vcs.citydb.wfs.util;
 
 import org.citydb.util.concurrent.DefaultWorker;
 import org.citydb.util.log.Logger;
-import vcs.citydb.wfs.rest.texture.TextureProvider;
-import vcs.citydb.wfs.rest.texture.TextureWrapper;
+import vcs.citydb.wfs.texture.TextureProvider;
+import vcs.citydb.wfs.texture.TextureWrapper;
 
 import java.io.IOException;
 import java.nio.file.Files;

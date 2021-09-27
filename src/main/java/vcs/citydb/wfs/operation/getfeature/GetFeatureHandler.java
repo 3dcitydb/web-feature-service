@@ -37,7 +37,7 @@ import vcs.citydb.wfs.operation.filter.FilterHandler;
 import vcs.citydb.wfs.operation.filter.SortingHandler;
 import vcs.citydb.wfs.operation.storedquery.StoredQueryManager;
 import vcs.citydb.wfs.util.LoggerUtil;
-import vcs.citydb.wfs.xml.NamespaceFilter;
+import vcs.citydb.wfs.util.xml.NamespaceFilter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

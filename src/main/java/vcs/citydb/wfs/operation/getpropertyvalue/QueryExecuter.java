@@ -29,7 +29,7 @@ import vcs.citydb.wfs.exception.WFSExceptionReportHandler;
 import vcs.citydb.wfs.kvp.KVPConstants;
 import vcs.citydb.wfs.paging.PageRequest;
 import vcs.citydb.wfs.paging.PagingCacheManager;
-import vcs.citydb.wfs.xml.NamespaceFilter;
+import vcs.citydb.wfs.util.xml.NamespaceFilter;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;

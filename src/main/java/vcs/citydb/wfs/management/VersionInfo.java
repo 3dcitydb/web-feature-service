@@ -1,4 +1,4 @@
-package vcs.citydb.wfs.rest.management;
+package vcs.citydb.wfs.management;
 
 import java.io.IOException;
 import java.time.LocalDate;

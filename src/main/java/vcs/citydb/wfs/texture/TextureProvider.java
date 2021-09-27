@@ -1,4 +1,4 @@
-package vcs.citydb.wfs.rest.texture;
+package vcs.citydb.wfs.texture;
 
 import org.apache.tika.Tika;
 import org.citydb.config.Config;

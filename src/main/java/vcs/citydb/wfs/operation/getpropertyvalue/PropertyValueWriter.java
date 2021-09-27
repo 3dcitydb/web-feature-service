@@ -32,7 +32,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import vcs.citydb.wfs.config.Constants;
 import vcs.citydb.wfs.util.GeometryStripper;
-import vcs.citydb.wfs.xml.NamespaceFilter;
+import vcs.citydb.wfs.util.xml.NamespaceFilter;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;

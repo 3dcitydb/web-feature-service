@@ -20,7 +20,7 @@ import org.citygml4j.util.xml.SAXWriter;
 import vcs.citydb.wfs.config.Constants;
 import vcs.citydb.wfs.config.WFSConfig;
 import vcs.citydb.wfs.util.GeometryStripper;
-import vcs.citydb.wfs.xml.NamespaceFilter;
+import vcs.citydb.wfs.util.xml.NamespaceFilter;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.transform.Templates;

@@ -5,7 +5,7 @@ import vcs.citydb.wfs.exception.KVPParseException;
 import vcs.citydb.wfs.exception.WFSException;
 import vcs.citydb.wfs.exception.WFSExceptionCode;
 import vcs.citydb.wfs.kvp.parser.NamespacesParser;
-import vcs.citydb.wfs.xml.NamespaceFilter;
+import vcs.citydb.wfs.util.xml.NamespaceFilter;
 
 import java.util.Map;
 

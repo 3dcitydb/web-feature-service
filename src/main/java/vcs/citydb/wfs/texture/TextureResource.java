@@ -1,4 +1,4 @@
-package vcs.citydb.wfs.rest.texture;
+package vcs.citydb.wfs.texture;
 
 import org.citydb.util.log.Logger;
 import vcs.citydb.wfs.exception.WFSException;

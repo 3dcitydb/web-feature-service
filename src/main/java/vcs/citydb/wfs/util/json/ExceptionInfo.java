@@ -1,4 +1,4 @@
-package vcs.citydb.wfs.rest.json;
+package vcs.citydb.wfs.util.json;
 
 import java.util.ArrayList;
 import java.util.List;

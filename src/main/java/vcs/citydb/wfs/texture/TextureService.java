@@ -1,4 +1,4 @@
-package vcs.citydb.wfs;
+package vcs.citydb.wfs.texture;
 
 import org.citydb.config.Config;
 import org.citydb.core.registry.ObjectRegistry;
@@ -8,10 +8,10 @@ import vcs.citydb.wfs.config.Constants;
 import vcs.citydb.wfs.config.WFSConfig;
 import vcs.citydb.wfs.exception.GenericExtensionMapper;
 import vcs.citydb.wfs.filter.CORSResponseFilter;
-import vcs.citydb.wfs.rest.json.GsonMessageBodyHandler;
-import vcs.citydb.wfs.rest.texture.DeleteTexture;
-import vcs.citydb.wfs.rest.texture.TextureProvider;
-import vcs.citydb.wfs.rest.texture.TextureResource;
+import vcs.citydb.wfs.util.json.GsonMessageBodyHandler;
+import vcs.citydb.wfs.texture.DeleteTexture;
+import vcs.citydb.wfs.texture.TextureProvider;
+import vcs.citydb.wfs.texture.TextureResource;
 
 import javax.annotation.PreDestroy;
 import javax.servlet.ServletContext;

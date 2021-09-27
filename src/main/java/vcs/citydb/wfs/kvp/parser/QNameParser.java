@@ -1,7 +1,7 @@
 package vcs.citydb.wfs.kvp.parser;
 
 import vcs.citydb.wfs.exception.KVPParseException;
-import vcs.citydb.wfs.xml.NamespaceFilter;
+import vcs.citydb.wfs.util.xml.NamespaceFilter;
 
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;

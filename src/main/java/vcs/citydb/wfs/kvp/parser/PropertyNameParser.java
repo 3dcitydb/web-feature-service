@@ -2,7 +2,7 @@ package vcs.citydb.wfs.kvp.parser;
 
 import net.opengis.wfs._2.PropertyName;
 import vcs.citydb.wfs.exception.KVPParseException;
-import vcs.citydb.wfs.xml.NamespaceFilter;
+import vcs.citydb.wfs.util.xml.NamespaceFilter;
 
 import javax.xml.namespace.QName;
 

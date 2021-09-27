@@ -1,4 +1,4 @@
-package vcs.citydb.wfs.rest.texture;
+package vcs.citydb.wfs.texture;
 
 import javax.inject.Inject;
 import javax.ws.rs.DELETE;
