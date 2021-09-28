@@ -6,12 +6,9 @@ import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.server.ResourceConfig;
 import vcs.citydb.wfs.config.Constants;
 import vcs.citydb.wfs.config.WFSConfig;
-import vcs.citydb.wfs.exception.GenericExtensionMapper;
+import vcs.citydb.wfs.exception.GenericExceptionMapper;
 import vcs.citydb.wfs.filter.CORSResponseFilter;
 import vcs.citydb.wfs.util.json.GsonMessageBodyHandler;
-import vcs.citydb.wfs.texture.DeleteTexture;
-import vcs.citydb.wfs.texture.TextureProvider;
-import vcs.citydb.wfs.texture.TextureResource;
 
 import javax.annotation.PreDestroy;
 import javax.servlet.ServletContext;
@@ -34,7 +31,7 @@ public class TextureService extends ResourceConfig {
 		register(GsonMessageBodyHandler.class);
 		register(TextureResource.class);
 		register(DeleteTexture.class);
-		register(GenericExtensionMapper.class);
+		register(GenericExceptionMapper.class);
 		
 		if (wfsConfig.getServer().isEnableCORS())
 			register(CORSResponseFilter.class);

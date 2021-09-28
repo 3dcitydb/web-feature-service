@@ -13,7 +13,7 @@ import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
 @Provider
-public class GenericExtensionMapper implements ExceptionMapper<Throwable> {
+public class GenericExceptionMapper implements ExceptionMapper<Throwable> {
     private final Logger log = Logger.getInstance();
 
     @Context

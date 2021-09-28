@@ -4,10 +4,9 @@ import org.citydb.core.registry.ObjectRegistry;
 import org.glassfish.jersey.server.ResourceConfig;
 import vcs.citydb.wfs.config.Constants;
 import vcs.citydb.wfs.config.WFSConfig;
-import vcs.citydb.wfs.exception.GenericExtensionMapper;
+import vcs.citydb.wfs.exception.GenericExceptionMapper;
 import vcs.citydb.wfs.filter.CORSResponseFilter;
 import vcs.citydb.wfs.util.json.GsonMessageBodyHandler;
-import vcs.citydb.wfs.management.VersionResource;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -29,7 +28,7 @@ public class ManagementService extends ResourceConfig {
 		
 		register(GsonMessageBodyHandler.class);
 		register(VersionResource.class);
-		register(GenericExtensionMapper.class);
+		register(GenericExceptionMapper.class);
 	}
 
 }
