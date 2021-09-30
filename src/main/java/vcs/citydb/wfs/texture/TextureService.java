@@ -32,7 +32,8 @@ public class TextureService extends ResourceConfig {
 		register(TextureResource.class);
 		register(DeleteTexture.class);
 		register(GenericExceptionMapper.class);
-		
+		register(OpenApiResource.class);
+
 		if (wfsConfig.getServer().isEnableCORS())
 			register(CORSResponseFilter.class);
 		

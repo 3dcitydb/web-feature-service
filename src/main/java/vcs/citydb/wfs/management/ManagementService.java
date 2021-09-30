@@ -29,6 +29,7 @@ public class ManagementService extends ResourceConfig {
 		register(GsonMessageBodyHandler.class);
 		register(VersionResource.class);
 		register(GenericExceptionMapper.class);
+		register(OpenApiResource.class);
 	}
 
 }
