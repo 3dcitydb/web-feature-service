@@ -10,13 +10,12 @@ import java.nio.file.Files;
 import java.util.Comparator;
 import java.util.stream.Stream;
 
-@Path("/delete")
+@Path("/cache")
 public class DeleteTexture {
 	@Inject
 	private TextureProvider textureProvider;
 
 	@DELETE
-	@Path("/cache")
 	public void deleteCache() {
 		java.nio.file.Path cachePath = textureProvider.getLocalCachePath();
 

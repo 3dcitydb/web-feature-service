@@ -36,9 +36,37 @@ public class VersionInfo {
 		return instance;
 	}
 
+	public String getName() {
+		return name;
+	}
+
+	public String getVersion() {
+		return version;
+	}
+
+	public String getCopyright() {
+		return copyright;
+	}
+
+	public Vendor getVendor() {
+		return vendor;
+	}
+
 	private static class Vendor {
 		private String name = "virtualcitysystems GmbH";
 		private String address = "Tauentzienstraße 7 b/c, 10789 Berlin, Germany";
 		private String websiteUrl = "https://www.vc.systems";
+
+		public String getName() {
+			return name;
+		}
+
+		public String getAddress() {
+			return address;
+		}
+
+		public String getWebsiteUrl() {
+			return websiteUrl;
+		}
 	}
 }
