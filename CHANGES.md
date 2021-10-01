@@ -1,6 +1,39 @@
 Change Log
 ==========
 
+### 4.4.0 - tbd
+
+##### Changes
+* Added Docker files to build your own images for the WFS service. Pre-built Docker images
+  are available from Docker Hub at https://hub.docker.com/r/3dcitydb/wfs. [#9](https://github.com/3dcitydb/web-feature-service/pull/9)
+* Support for the WFS 2.0 operations `GetFeature`, `GetPropertyValue`. `CreateStoredQuery`, `DropStoredQuery`
+  with both XML and KVP encodings.
+* Support for ad-hoc queries and stored queries.
+* New filter capabilities including spatial, thematic and logical filters based on OGC Filter Encoding.
+* Support for XPath expressions in filter expressions to allow queries on complex attributes and nested features.
+* Support for exporting local and global appearances of the requested city objects. Texture images are provided
+  through a separate RESTful service that is included in the WFS package and automatically started with the WFS
+  service.
+* Support for response paging allowing a client to scroll through large sets of features or property values
+  based on the `count` and `startIndex` parameters.
+* The city objects and property values in a response document can now be sorted by thematic attributes.
+* Address attributes and 3DCityDB metadata can be used in query expressions based on corresponding CityGML ADEs
+  like with the Importer/Exporter.
+* Management of stored queries is now possible.
+* Individual WFS operations can now be secured using IP- and token-based access control rules.
+* Support for setting the time zone to be used for queries involving date and time attributes.
+* JDBC drivers are now kept in `WEB-INF/lib` to better support running the WFS in a Docker environment. So, there
+  is no need to copy JDBC drivers to a global or shared lib folder anymore.
+* This release is based on the Importer/Exporter version 5.0.0, and thus incorporates all bug fixes and updates
+  introduced in that version.
+* Added support for providing database connection details via environment variables.
+* CityJSON output now uses the latest CityJSON version 1.0.3.
+* Many bugfixes and improvements.
+
+##### Miscellaneous
+* Updated citygml4j to 2.11.4.
+* Updated PostgreSQL driver to 42.2.23 and Oracle driver to 21.1.0.
+
 ### 4.3.0 - 2021-04-28
 
 ##### Changes
