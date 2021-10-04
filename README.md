@@ -10,9 +10,9 @@ they are seeking and possibly much more.
 The 3D City Database WFS interface is implemented against the latest version 2.0 of the [OGC Web Feature Service standard](http://www.opengeospatial.org/standards/wfs)
 and hence is compliant with ISO 19142:2010. Previous versions of the WFS standard are not supported.
 The development of the WFS is led by the company [Virtual City Systems](https://vc.systems/)
-which offers an extended version of the WFS with additional functionalities that go beyond the Simple WFS class
-(e.g., thematic and spatial filter capabilities and transaction support). This additional functionality may be fed back
-to the open source project in future releases.
+that offers an extended version of the WFS with additional capabilities such as, for instance,
+transaction support through insert, update, replace and delete operations. This additional functionality may
+be fed back to the open source project in future releases.
 
 License
 -------
