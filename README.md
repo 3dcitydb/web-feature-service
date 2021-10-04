@@ -8,8 +8,8 @@ allows clients to only retrieve the city objects they are seeking, rather than r
 they are seeking and possibly much more.
 
 The 3D City Database WFS interface is implemented against the latest version 2.0 of the [OGC Web Feature Service standard](http://www.opengeospatial.org/standards/wfs)
-and hence is compliant with ISO 19142:2010. Previous versions of the WFS standard are not supported. The implementation
-currently satisfies the `Simple WFS` conformance class. The development of the WFS is led by the company [Virtual City Systems](https://vc.systems/)
+and hence is compliant with ISO 19142:2010. Previous versions of the WFS standard are not supported.
+The development of the WFS is led by the company [Virtual City Systems](https://vc.systems/)
 which offers an extended version of the WFS with additional functionalities that go beyond the Simple WFS class
 (e.g., thematic and spatial filter capabilities and transaction support). This additional functionality may be fed back
 to the open source project in future releases.
@@ -35,10 +35,11 @@ The 3D City Database WFS is implemented as Java web application based on the Jav
 be run in a Java servlet container on a web server. The following minimum software requirements have to be met:
 
 * Java servlet container supporting the Java Servlet 3.1/3.0 specification
-* Java 8 Runtime Environment (Java 7 or earlier versions are not supported)  
+* Java 8 Runtime Environment (or higher)
 
 The WFS implementation has been successfully deployed and tested on [Apache Tomcat](http://tomcat.apache.org/)
-versions 9, 8 and 7.
+versions 9 and 8. All previous versions of the Apache Tomcat server have reached end of life and are not supported
+anymore.
 
 Documentation
 -------------
@@ -61,6 +62,43 @@ your local machine and run the following command from the root of the repository
     > gradlew installDist
     
 The build process will produce the WFS software package under `build/install`.
+
+Using with Docker
+-----------------
+
+The 3D City Database Web Feature Service is also available as Docker image. You can either build the image
+yourself using one of the provided Docker files or use a pre-built image from Docker Hub at
+https://hub.docker.com/r/3dcitydb/wfs.
+
+To build the image, clone the repository to your local machine and run the following command from the root of the
+repository:
+
+    > docker build -t 3dcitydb/wfs .
+
+Using the Docker image of the 3D City Database WFS is simple:
+
+```
+> docker run --name wfs [-d] -p 8080:8080 \
+    [-e CITYDB_TYPE=postgresql|oracle] \
+    [-e CITYDB_HOST=the.host.de] \
+    [-e CITYDB_PORT=thePort] \
+    [-e CITYDB_NAME=theDBName] \
+    [-e CITYDB_SCHEMA=theCityDBSchemaName] \
+    [-e CITYDB_USERNAME=theUsername] \
+    [-e CITYDB_PASSWORD=theSecretPass] \
+    [-e WFS_CONTEXT_PATH=wfs-context-path] \
+    [-e WFS_ADE_EXTENSIONS_PATH=/path/to/ade-extensions/] \
+    [-e WFS_CONFIG_FILE=/path/to/config.xml] \
+    [-v /my/data/config.xml:/path/to/config.xml] \
+  3dcitydb/wfs
+```
+
+When running a Docker container with default settings, the WFS will listen at the following URL.
+
+    http[s]://[host][:port]/wfs
+
+More details on how to use the 3D City Database WFS with Docker can be found in the
+[online documentation](https://3dcitydb-docs.readthedocs.io/en/release-v4.3.0/wfs/).
 
 Developers
 ----------
