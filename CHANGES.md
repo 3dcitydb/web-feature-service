@@ -1,6 +1,28 @@
 Change Log
 ==========
 
+### 5.1.0 - tba
+
+This release is based on the Importer/Exporter version 5.1.0 libraries, and thus incorporates all bug fixes and updates
+introduced in that version ([more information](https://github.com/3dcitydb/importer-exporter/releases/tag/v5.1.0)).
+
+##### Changes
+* Changed the handling of date-time values and timezones. Before this change, `xsd:date` values in exports could be
+  different from the values stored in the database in case different timezone settings were used for the database
+  server and the import and export operations.
+* Simplified database queries used by the `GetFeature` and `GetPropertyValue` operations for top-level features
+  involving many nested features/tables to avoid extremely large result sets causing performance issues.
+
+##### Fixes
+* Fixed bug in parsing of XPath expressions of XML queries that caused a slash `/` being part of a literal value to
+  be interpreted as step operator.
+* Empty strings for gml:id attributes are no longer imported but the `GMLID` column is set to `NULL` instead.
+
+##### Miscellaneous
+* Updated H2 database used for local caching to 2.1.210.
+* Updated PostgreSQL driver to 42.3.1 and PostGIS driver to 2021.1.0.
+* Updated citygml4j to 2.12.0.
+
 ### 5.0.0 - 2021-10-08
 
 ##### Changes
@@ -29,10 +51,10 @@ Change Log
 * Added support for providing database connection details via environment variables.
 * CityJSON output now uses the latest CityJSON version 1.0.3.
 * Many bugfixes and improvements.
-
 ##### Miscellaneous
 * Updated citygml4j to 2.11.4.
 * Updated PostgreSQL driver to 42.2.23 and Oracle driver to 21.1.0.
+
 
 ### 4.3.0 - 2021-04-28
 
