@@ -1,10 +1,10 @@
 Change Log
 ==========
 
-### 5.1.0 - tba
+### 5.1.0 - 2022-04-12
 
-This release is based on the Importer/Exporter version 5.1.0 libraries, and thus incorporates all bug fixes and updates
-introduced in that version ([more information](https://github.com/3dcitydb/importer-exporter/releases/tag/v5.1.0)).
+This release is based on the Importer/Exporter version 5.1.1 libraries, and thus incorporates all bug fixes and updates
+introduced in that version ([more information](https://github.com/3dcitydb/importer-exporter/releases/tag/v5.1.1)).
 
 ##### Changes
 * Changed the handling of date-time values and timezones. Before this change, `xsd:date` values in exports could be
