@@ -13,7 +13,7 @@ import java.util.List;
 
 public class DatabaseVersionChecker implements org.citydb.core.database.version.DatabaseVersionChecker {
 	private final DatabaseVersionSupport[] supportedVersions = new DatabaseVersionSupport[]{
-			DatabaseVersionSupport.targetVersion(4, 2, 0).withBackwardsCompatibility(4, 0, 0).withRevisionForwardCompatibility(true),
+			DatabaseVersionSupport.targetVersion(4, 3, 0).withBackwardsCompatibility(4, 0, 0).withRevisionForwardCompatibility(true),
 			DatabaseVersionSupport.targetVersion(3, 3, 1).withBackwardsCompatibility(3, 1, 0).withRevisionForwardCompatibility(true)
 	};
 
