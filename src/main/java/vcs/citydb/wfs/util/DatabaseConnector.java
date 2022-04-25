@@ -100,6 +100,7 @@ public class DatabaseConnector {
 
         // get connection details from environment variables
         String host = System.getenv(CoreConstants.ENV_CITYDB_HOST);
+        String port = System.getenv(CoreConstants.ENV_CITYDB_PORT);
         String name = System.getenv(CoreConstants.ENV_CITYDB_NAME);
         String schema = System.getenv(CoreConstants.ENV_CITYDB_SCHEMA);
         String username = System.getenv(CoreConstants.ENV_CITYDB_USERNAME);
@@ -107,13 +108,6 @@ public class DatabaseConnector {
         DatabaseType type = System.getenv(CoreConstants.ENV_CITYDB_TYPE) != null ?
                 DatabaseType.fromValue(System.getenv(CoreConstants.ENV_CITYDB_TYPE)) :
                 null;
-
-        Integer port;
-        try {
-            port = Integer.parseInt(CoreConstants.ENV_CITYDB_PORT);
-        } catch (NumberFormatException e) {
-            port = null;
-        }
 
         // replace values from config with environment variables
         if (type != null) {
@@ -125,7 +119,11 @@ public class DatabaseConnector {
         }
 
         if (port != null) {
-            connection.setPort(port);
+            try {
+                connection.setPort(Integer.parseInt(port));
+            } catch (NumberFormatException e) {
+                //
+            }
         }
 
         if (name != null) {
