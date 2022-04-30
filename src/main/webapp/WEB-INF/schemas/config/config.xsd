@@ -188,9 +188,18 @@
       <xs:element name="exportCityDBMetadata" type="xs:boolean" minOccurs="0"/>
       <xs:element name="exportAppearance" type="xs:boolean" minOccurs="0"/>
       <xs:element name="useResultPaging" type="xs:boolean" minOccurs="0"/>
+      <xs:element name="replaceResourceIds" type="ResourceIdType" minOccurs="0"/>
       <xs:element name="stripGeometry" type="xs:boolean" minOccurs="0"/>
       <xs:element name="lodFilter" type="WFSLodFilterType" minOccurs="0"/>
     </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="ResourceIdType">
+    <xs:simpleContent>
+      <xs:extension base="xs:boolean">
+        <xs:attribute name="prefix" type="xs:string"/>
+      </xs:extension>
+    </xs:simpleContent>
   </xs:complexType>
 
   <xs:complexType name="WFSLodFilterType">

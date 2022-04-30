@@ -1,8 +1,8 @@
 package vcs.citydb.wfs.exception;
 
 import org.citydb.util.log.Logger;
-import vcs.citydb.wfs.util.json.ExceptionInfo;
 import vcs.citydb.wfs.util.LoggerUtil;
+import vcs.citydb.wfs.util.json.ExceptionInfo;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;

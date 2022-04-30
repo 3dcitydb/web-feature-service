@@ -2,6 +2,7 @@ package vcs.citydb.wfs.config.constraints;
 
 import vcs.citydb.wfs.config.Constants;
 
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 @XmlType(name="ConstraintsType", propOrder={})
@@ -14,10 +15,13 @@ public class Constraints {
 	private Boolean exportCityDBMetadata = false;
 	private Boolean exportAppearance = false;
 	private Boolean useResultPaging = true;
+	@XmlElement(name = "replaceResourceIds")
+	private ResourceId resourceId;
 	private Boolean stripGeometry = false;
 	private LodFilter lodFilter;
 
 	public Constraints() {
+		resourceId = new ResourceId();
 		lodFilter = new LodFilter();
 	}
 
@@ -87,6 +91,14 @@ public class Constraints {
 
 	public void setUseResultPaging(boolean useResultPaging) {
 		this.useResultPaging = useResultPaging;
+	}
+
+	public ResourceId getResourceId() {
+		return resourceId;
+	}
+
+	public void setResourceId(ResourceId replaceResourceIds) {
+		this.resourceId = replaceResourceIds;
 	}
 
 	public boolean isStripGeometry() {

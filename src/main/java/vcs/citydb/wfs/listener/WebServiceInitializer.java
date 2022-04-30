@@ -267,6 +267,8 @@ public class WebServiceInitializer implements ServletContextListener {
 
 		// export settings
 		ExportConfig exportConfig = config.getExportConfig();
+		exportConfig.getResourceId().setReplaceWithUUIDs(wfsConfig.getConstraints().getResourceId().isReplace());
+		exportConfig.getResourceId().setIdPrefix(wfsConfig.getConstraints().getResourceId().getPrefix());
 		exportConfig.getContinuation().setExportCityDBMetadata(wfsConfig.getConstraints().isExportCityDBMetadata());
 		exportConfig.getCityObjectGroup().setExportMemberAsXLinks(true);
 		exportConfig.getAppearances().setExportAppearances(wfsConfig.getConstraints().isExportAppearance());
