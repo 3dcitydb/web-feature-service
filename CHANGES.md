@@ -7,6 +7,7 @@ This release is based on the Importer/Exporter version 5.2.0 libraries, and thus
 introduced in that version ([more information](https://github.com/3dcitydb/importer-exporter/releases/tag/v5.2.0)).
 
 ##### Additions
+* Added support for 3DCityDB v4.3
 * Added `replaceResourceIds` configuration option to replace all identifiers of features and geometries with UUIDs.
 
 ##### Miscellaneous
