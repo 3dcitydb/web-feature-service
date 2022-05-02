@@ -10,6 +10,9 @@ introduced in that version ([more information](https://github.com/3dcitydb/impor
 * Added support for 3DCityDB v4.3
 * Added `replaceResourceIds` configuration option to replace all identifiers of features and geometries with UUIDs.
 
+##### Fixes
+* The database port was not correctly set when using the `CITYDB_PORT` environment variable.
+
 ##### Miscellaneous
 * Updated PostgreSQL driver to 42.3.4
 * Updated Oracle driver to 21.3.0.0
