@@ -1,6 +1,19 @@
 Change Log
 ==========
 
+### 5.2.0 - tba
+
+This release is based on the Importer/Exporter version 5.2.0 libraries, and thus incorporates all bug fixes and updates
+introduced in that version ([more information](https://github.com/3dcitydb/importer-exporter/releases/tag/v5.2.0)).
+
+##### Additions
+* Added `replaceResourceIds` configuration option to replace all identifiers of features and geometries with UUIDs.
+
+##### Miscellaneous
+* Updated PostgreSQL driver to 42.3.4
+* Updated Oracle driver to 21.3.0.0
+* Updated GeoTools to 26.4.
+
 ### 5.1.0 - 2022-04-12
 
 This release is based on the Importer/Exporter version 5.1.1 libraries, and thus incorporates all bug fixes and updates
@@ -51,6 +64,7 @@ introduced in that version ([more information](https://github.com/3dcitydb/impor
 * Added support for providing database connection details via environment variables.
 * CityJSON output now uses the latest CityJSON version 1.0.3.
 * Many bugfixes and improvements.
+
 ##### Miscellaneous
 * Updated citygml4j to 2.11.4.
 * Updated PostgreSQL driver to 42.2.23 and Oracle driver to 21.1.0.
