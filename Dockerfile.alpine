@@ -5,7 +5,7 @@
 
 # Fetch & build stage #########################################################
 # ARGS
-ARG BUILDER_IMAGE_TAG='11.0.12-jdk-slim'
+ARG BUILDER_IMAGE_TAG='17-jdk-slim'
 ARG RUNTIME_IMAGE_TAG='9-alpine'
 
 # Base image
