@@ -6,7 +6,7 @@
 # Fetch & build stage #########################################################
 # ARGS
 ARG BUILDER_IMAGE_TAG='17-jdk-slim'
-ARG RUNTIME_IMAGE_TAG='9-alpine'
+ARG RUNTIME_IMAGE_TAG='17'
 
 # Base image
 FROM openjdk:${BUILDER_IMAGE_TAG} AS builder
@@ -25,28 +25,35 @@ RUN chmod u+x ./gradlew && ./gradlew installDist
 
 # Runtime stage ###############################################################
 # Base image
-FROM tomcat:${RUNTIME_IMAGE_TAG} AS runtime
+FROM bellsoft/liberica-openjdk-alpine:${RUNTIME_IMAGE_TAG} AS runtime
 
-ARG TOMCAT_USER='tomcat'
-ARG TOMCAT_GROUP='tomcat'
+ARG TOMCAT_USER='tomcat9'
+ARG TOMCAT_GROUP='tomcat9'
+ENV CATALINA_HOME=/usr/share/tomcat9
 
-# Run as non-root user user
-RUN addgroup -g 1000 -S ${TOMCAT_GROUP} && \
-    adduser -u 1000 -G ${TOMCAT_USER} -h /citydb-wfs -S ${TOMCAT_USER} && \
-    chown -R 1000:1000 ${CATALINA_HOME}
+# Install Tomcat
+RUN set -ex && \
+    apk add --update-cache --no-cache \
+        --virtual runtime-deps \
+        -X https://dl-cdn.alpinelinux.org/alpine/edge/testing/ \
+        tomcat9 bash && \
+    chmod -v u+x ${CATALINA_HOME}/bin/catalina.sh && \
+    ln -s -v ${CATALINA_HOME}/bin/catalina.sh /usr/bin/catalina.sh
 
 # Copy WAR to webapps folder
-COPY --from=builder --chown=1000:1000 /build/build/install/3DCityDB-Web-Feature-Service/citydb-wfs.war \
-       ${CATALINA_HOME}/webapps/ROOT.war
+COPY --from=builder --chown=${TOMCAT_USER}:${TOMCAT_GROUP} \
+    /build/build/install/3DCityDB-Web-Feature-Service/citydb-wfs.war \
+    ${CATALINA_HOME}/webapps/ROOT.war
 
-COPY --chown=1000:1000 resources/docker/citydb-wfs-entrypoint.sh /usr/local/bin/
+COPY --chown=${TOMCAT_USER}:${TOMCAT_GROUP} \
+    resources/docker/citydb-wfs-entrypoint.sh /usr/local/bin/
 
 # Delete existing ROOT context and set permissions
 RUN rm -rf ${CATALINA_HOME}/webapps/ROOT && \
     chmod a+x /usr/local/bin/citydb-wfs-entrypoint.sh
 
 WORKDIR /citydb-wfs
-USER 1000
+USER 100
 EXPOSE 8080
 
 ENTRYPOINT ["citydb-wfs-entrypoint.sh"]
