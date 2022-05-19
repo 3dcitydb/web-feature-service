@@ -5,8 +5,8 @@
 
 # Fetch & build stage #########################################################
 # ARGS
-ARG BUILDER_IMAGE_TAG='11.0.12-jdk-slim'
-ARG RUNTIME_IMAGE_TAG='9-jdk11'
+ARG BUILDER_IMAGE_TAG='17-jdk-slim'
+ARG RUNTIME_IMAGE_TAG='9-jdk17-openjdk-slim'
 
 # Base image
 FROM openjdk:${BUILDER_IMAGE_TAG} AS builder
@@ -37,7 +37,7 @@ RUN groupadd --gid 1000 -r ${TOMCAT_GROUP} && \
 
 # Copy WAR to webapps folder
 COPY --from=builder --chown=1000:1000 /build/build/install/3DCityDB-Web-Feature-Service/citydb-wfs.war \
-       ${CATALINA_HOME}/webapps/ROOT.war
+     ${CATALINA_HOME}/webapps/ROOT.war
 
 COPY --chown=1000:1000 resources/docker/citydb-wfs-entrypoint.sh /usr/local/bin/
 
