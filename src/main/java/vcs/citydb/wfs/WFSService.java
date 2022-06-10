@@ -7,6 +7,7 @@ import org.citydb.core.registry.ObjectRegistry;
 import org.citydb.core.util.Util;
 import org.citydb.util.concurrent.SingleWorkerPool;
 import org.citydb.util.log.Logger;
+import org.citydb.util.xml.SecureXMLProcessors;
 import org.citygml4j.builder.jaxb.CityGMLBuilder;
 import org.citygml4j.xml.schema.SchemaHandler;
 import org.xml.sax.InputSource;
@@ -90,8 +91,16 @@ public class WFSService extends HttpServlet {
 		wfsConfig = registry.lookup(WFSConfig.class);
 
 		exceptionReportHandler = new WFSExceptionReportHandler(cityGMLBuilder);
-		saxParserFactory = SAXParserFactory.newInstance();
-		saxParserFactory.setNamespaceAware(true);
+
+		try {
+			saxParserFactory = SecureXMLProcessors.newSAXParserFactory();
+			saxParserFactory.setNamespaceAware(true);
+		} catch (Throwable e) {
+			String message = "Failed to enable secure processing of XML queries.";
+			log.error(message);
+			log.error(e.getMessage());
+			throw new ServletException(message, e);
+		}
 
 		try {
 			StoredQueryManager storedQueryManager = new StoredQueryManager(cityGMLBuilder, saxParserFactory, getServletContext().getRealPath(Constants.STORED_QUERIES_PATH), wfsConfig);

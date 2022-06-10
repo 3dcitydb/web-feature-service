@@ -1,6 +1,6 @@
 package vcs.citydb.wfs.config;
 
-import org.citydb.config.ConfigUtil;
+import org.citydb.config.util.ConfigConstants;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.SchemaOutputResolver;
@@ -21,7 +21,7 @@ public class WFSConfigSchemaWriter {
 			public Result createOutput(String namespaceUri, String suggestedFileName) throws IOException {
 				File file;
 
-				if (namespaceUri.equals(ConfigUtil.CITYDB_CONFIG_NAMESPACE_URI))
+				if (namespaceUri.equals(ConfigConstants.CITYDB_CONFIG_NAMESPACE_URI))
 					file = new File(Constants.CONFIG_SCHEMA_FILE);
 				else
 					file = new File(Constants.CONFIG_SCHEMA_PATH + "/ows/" + suggestedFileName);

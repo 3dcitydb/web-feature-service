@@ -4,6 +4,7 @@ import net.opengis.fes._2.AbstractQueryExpressionType;
 import net.opengis.fes._2.FilterType;
 import net.opengis.fes._2.ResourceIdType;
 import net.opengis.wfs._2.*;
+import org.citydb.util.xml.SecureXMLProcessors;
 import org.citygml4j.builder.jaxb.CityGMLBuilder;
 import org.citygml4j.model.module.citygml.CityGMLModule;
 import org.citygml4j.model.module.citygml.CityGMLModuleType;
@@ -27,6 +28,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.stream.XMLOutputFactory;
+import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
@@ -35,6 +37,7 @@ import javax.xml.xpath.XPathFactory;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -58,16 +61,16 @@ public class StoredQueryManager {
 	private final WFSConfig wfsConfig;
 	private final MessageDigest md5;
 
-	public StoredQueryManager(CityGMLBuilder cityGMLBuilder, SAXParserFactory saxParserFactory, String path, WFSConfig wfsConfig) throws ParserConfigurationException, SAXException, NoSuchAlgorithmException, IOException {
+	public StoredQueryManager(CityGMLBuilder cityGMLBuilder, SAXParserFactory saxParserFactory, String path, WFSConfig wfsConfig) throws ParserConfigurationException, SAXException, NoSuchAlgorithmException, IOException, TransformerConfigurationException {
 		this.cityGMLBuilder = cityGMLBuilder;
 		this.saxParserFactory = saxParserFactory;
 		this.wfsConfig = wfsConfig;
 
 		md5 = MessageDigest.getInstance("MD5");
 		wfsFactory = new ObjectFactory();
-		transformerFactory = TransformerFactory.newInstance();
+		transformerFactory = SecureXMLProcessors.newTransformerFactory();
 		xmlOutputFactory = XMLOutputFactory.newInstance();
-		documentBuilderFactory = DocumentBuilderFactory.newInstance();
+		documentBuilderFactory = SecureXMLProcessors.newDocumentBuilderFactory();
 		documentBuilderFactory.setNamespaceAware(true);
 
 		storedQueriesPath = Paths.get(path);
@@ -83,9 +86,11 @@ public class StoredQueryManager {
 		storedQueries.add(new StoredQueryAdapter(DEFAULT_QUERY.getId()));
 
 		try {
-			for (Path file : Files.newDirectoryStream(storedQueriesPath)) {
-				if (Files.isRegularFile(file))
-					storedQueries.add(new StoredQueryAdapter(file));
+			try (DirectoryStream<Path> stream = Files.newDirectoryStream(storedQueriesPath)) {
+				for (Path file : stream) {
+					if (Files.isRegularFile(file))
+						storedQueries.add(new StoredQueryAdapter(file));
+				}
 			}
 		} catch (IOException e) {
 			throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "Failed to list stored queries.", handle, e);

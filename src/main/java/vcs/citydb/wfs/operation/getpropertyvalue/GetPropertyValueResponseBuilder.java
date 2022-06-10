@@ -8,6 +8,7 @@ import org.citydb.config.Config;
 import org.citydb.core.database.schema.mapping.FeatureType;
 import org.citydb.core.operation.exporter.writer.FeatureWriteException;
 import org.citydb.util.log.Logger;
+import org.citydb.util.xml.SecureXMLProcessors;
 import org.citygml4j.model.module.Module;
 import org.citygml4j.model.module.ModuleContext;
 import org.citygml4j.model.module.Modules;
@@ -25,7 +26,6 @@ import vcs.citydb.wfs.util.xml.NamespaceFilter;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.transform.Templates;
 import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.sax.SAXTransformerFactory;
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
@@ -124,7 +124,7 @@ public class GetPropertyValueResponseBuilder {
 					&& wfsConfig.getPostProcessing().getXSLTransformation().isSetStylesheets()) {
 				try {
 					List<String> stylesheets = wfsConfig.getPostProcessing().getXSLTransformation().getStylesheets();
-					SAXTransformerFactory factory = (SAXTransformerFactory) TransformerFactory.newInstance();
+					SAXTransformerFactory factory = (SAXTransformerFactory) SecureXMLProcessors.newTransformerFactory();
 					Templates[] templates = new Templates[stylesheets.size()];
 
 					for (int i = 0; i < stylesheets.size(); i++) {
