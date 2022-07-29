@@ -24,9 +24,9 @@ previous release of the 3D City Database Importer/Exporter under Apache License 
 
 Latest release
 --------------
-The latest stable release of the 3D City Database WFS interface is 5.2.0.
+The latest stable release of the 3D City Database WFS interface is 5.2.1.
 
-Download a ZIP file of the WFS [here](https://github.com/3dcitydb/web-feature-service/releases/download/v5.2.0/3DCityDB-Web-Feature-Service-5.2.0.zip).
+Download a ZIP file of the WFS [here](https://github.com/3dcitydb/web-feature-service/releases/download/v5.2.1/3DCityDB-Web-Feature-Service-5.2.1.zip).
 Previous releases are available from the [releases section](https://github.com/3dcitydb/web-feature-service/releases).
 
 System requirements

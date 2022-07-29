@@ -1,7 +1,10 @@
 Change Log
 ==========
 
-### 5.2.1 - tba
+### 5.2.1 - 2022-07-09
+
+This release is based on the Importer/Exporter version 5.2.1 libraries, and thus incorporates all bug fixes and updates
+introduced in that version ([more information](https://github.com/3dcitydb/importer-exporter/releases/tag/v5.2.1)).
 
 #### Fixes
 *  Fixed XXE vulnerabilities when parsing XML files. [#12](https://github.com/3dcitydb/web-feature-service/pull/12/files)
