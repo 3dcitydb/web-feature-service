@@ -7,7 +7,7 @@ plugins {
 }
 
 group 'org.citydb.wfs'
-version '5.2.0'
+version '5.2.1'
 
 apply from: 'properties.gradle'
 
@@ -46,7 +46,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.citydb:impexp-core:5.2.1-SNAPSHOT'
+    implementation 'org.citydb:impexp-core:5.2.1'
     implementation 'com.github.seancfoley:ipaddress:5.3.4'
     implementation 'org.glassfish.jersey.containers:jersey-container-servlet:2.35'
     implementation 'org.glassfish.jersey.inject:jersey-hk2:2.35'
