@@ -171,8 +171,10 @@ public class QueryExecuter implements EventHandler {
 
                 if (!isWriteSingleFeature) {
                     // query and write global appearances
-                    if (internalConfig.isExportGlobalAppearances() && returnAll > 0)
+                    if (internalConfig.getGlobalAppearanceMode() == InternalConfig.GlobalAppearanceMode.EXPORT
+                            && returnAll > 0) {
                         processGlobalAppearances();
+                    }
 
                     // write additional objects
                     writer.writeAdditionalObjects();
@@ -379,8 +381,9 @@ public class QueryExecuter implements EventHandler {
         connection.setAutoCommit(false);
 
         // create temporary table for global appearances if needed
-        if (internalConfig.isExportGlobalAppearances())
+        if (internalConfig.getGlobalAppearanceMode() == InternalConfig.GlobalAppearanceMode.EXPORT) {
             cacheTableManager.createCacheTable(CacheTableModel.GLOBAL_APPEARANCE, CacheMode.DATABASE);
+        }
 
         return connection;
     }

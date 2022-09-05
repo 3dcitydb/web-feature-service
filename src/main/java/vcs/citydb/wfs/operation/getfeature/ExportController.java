@@ -80,12 +80,23 @@ public class ExportController {
 		// define queue size for worker pools
 		int queueSize = config.getExportConfig().getResources().getThreadPool().getMaxThreads() * 2;
 
-		// check whether we have to export global appearances
+		OutputFormat outputFormat = wfsConfig.getOperations().getGetFeature().getOutputFormat(
+				wfsRequest.isSetOutputFormat() ?
+						wfsRequest.getOutputFormat() :
+						GetFeatureOutputFormat.GML3_1.value());
+
+		// check if and how to handle global appearances
 		try {
-			internalConfig.setExportGlobalAppearances(wfsConfig.getConstraints().isExportAppearance()
-					&& connectionPool.getActiveDatabaseAdapter().getUtil().containsGlobalAppearances());
+			if (wfsConfig.getConstraints().isExportAppearance()
+					&& connectionPool.getActiveDatabaseAdapter().getUtil().containsGlobalAppearances()) {
+				internalConfig.setGlobalAppearanceMode(
+						GetFeatureOutputFormat.CITY_JSON.value().equals(wfsRequest.getOutputFormat()) ||
+								"true".equals(outputFormat.getOption(CityGMLWriterBuilder.CONVERT_GLOBAL_APPEARANCES)) ?
+								InternalConfig.GlobalAppearanceMode.CONVERT :
+								InternalConfig.GlobalAppearanceMode.EXPORT);
+			}
 		} catch (SQLException e) {
-			throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "Database error while testing for global appearances.", e);
+			throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "Database error while checking for global appearances.", e);
 		}
 
 		if (wfsConfig.getConstraints().isExportAppearance()) {
@@ -155,7 +166,7 @@ public class ExportController {
 
 			// create response writer
 			try {
-				GetFeatureResponseBuilder builder = getFeatureWriterBuilder(wfsRequest, queryExpressions, idCacheManager, internalConfig);
+				GetFeatureResponseBuilder builder = getFeatureWriterBuilder(outputFormat, wfsRequest, queryExpressions, idCacheManager, internalConfig);
 
 				response.setContentType(builder.getMimeType());
 				response.setCharacterEncoding(StandardCharsets.UTF_8.name());
@@ -248,10 +259,7 @@ public class ExportController {
 		}
 	}
 
-	private GetFeatureResponseBuilder getFeatureWriterBuilder(GetFeatureType wfsRequest, List<QueryExpression> queryExpressions, IdCacheManager idCacheManager, InternalConfig internalConfig) throws FeatureWriteException {
-		OutputFormat outputFormat = wfsConfig.getOperations().getGetFeature().getOutputFormat(wfsRequest.isSetOutputFormat() ? 
-				wfsRequest.getOutputFormat() : GetFeatureOutputFormat.GML3_1.value());
-
+	private GetFeatureResponseBuilder getFeatureWriterBuilder(OutputFormat outputFormat, GetFeatureType wfsRequest, List<QueryExpression> queryExpressions, IdCacheManager idCacheManager, InternalConfig internalConfig) throws FeatureWriteException {
 		// create geometry stripper
 		GeometryStripper geometryStripper = wfsConfig.getConstraints().isStripGeometry() ? new GeometryStripper() : null;
 

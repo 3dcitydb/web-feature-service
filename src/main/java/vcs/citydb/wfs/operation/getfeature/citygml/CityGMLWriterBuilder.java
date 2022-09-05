@@ -39,6 +39,7 @@ import java.util.Map;
 
 public class CityGMLWriterBuilder implements GetFeatureResponseBuilder {
 	private final Logger log = Logger.getInstance();
+	public static final String CONVERT_GLOBAL_APPEARANCES = "convertGlobalAppearances";
 	private final String PRETTY_PRINT = "prettyPrint";
 
 	private CityGMLVersion version;

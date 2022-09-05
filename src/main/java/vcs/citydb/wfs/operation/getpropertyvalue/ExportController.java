@@ -82,7 +82,7 @@ public class ExportController {
 		int queueSize = config.getExportConfig().getResources().getThreadPool().getMaxThreads() * 2;
 
 		// global appearance settings
-		internalConfig.setExportGlobalAppearances(false);
+		internalConfig.setGlobalAppearanceMode(InternalConfig.GlobalAppearanceMode.SKIP);
 
 		if (wfsConfig.getConstraints().isExportAppearance()) {
 			String serviceURL;
