@@ -1,6 +1,15 @@
 Change Log
 ==========
 
+### 5.3.0 - tba
+
+This release is based on the Importer/Exporter version 5.3.0 libraries, and thus incorporates all bug fixes and updates
+introduced in that version ([more information](https://github.com/3dcitydb/importer-exporter/releases/tag/v5.3.0)).
+
+##### Additions
+* Added new ``convertGlobalAppearances`` option to the CityGML output format that allows for converting global 
+  appearances to local ones on-the-fly during export.
+
 ### 5.2.1 - 2022-07-09
 
 This release is based on the Importer/Exporter version 5.2.1 libraries, and thus incorporates all bug fixes and updates
