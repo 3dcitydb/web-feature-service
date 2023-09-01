@@ -6,7 +6,7 @@
 # Fetch & build stage #########################################################
 # ARGS
 ARG BUILDER_IMAGE_TAG='17-jdk-slim'
-ARG RUNTIME_IMAGE_TAG='9-jdk17-openjdk-slim'
+ARG RUNTIME_IMAGE_TAG='9-jdk21-openjdk-slim'
 
 # Base image
 FROM openjdk:${BUILDER_IMAGE_TAG} AS builder
