@@ -24,9 +24,9 @@ previous release of the 3D City Database Importer/Exporter under Apache License 
 
 Latest release
 --------------
-The latest stable release of the 3D City Database WFS interface is 5.3.0.
+The latest stable release of the 3D City Database WFS interface is 5.3.1.
 
-Download a ZIP file of the WFS [here](https://github.com/3dcitydb/web-feature-service/releases/download/v5.3.0/3DCityDB-Web-Feature-Service-5.3.0.zip).
+Download a ZIP file of the WFS [here](https://github.com/3dcitydb/web-feature-service/releases/download/v5.4.0/3DCityDB-Web-Feature-Service-5.4.0.zip).
 Previous releases are available from the [releases section](https://github.com/3dcitydb/web-feature-service/releases).
 
 System requirements
@@ -44,7 +44,7 @@ anymore.
 Documentation
 -------------
 A complete and comprehensive user manual on the Web Feature Service is available
-[online](https://3dcitydb-docs.readthedocs.io/en/version-2022.2/wfs/).
+[online](https://3dcitydb-docs.readthedocs.io/en/version-2023.0/wfs/).
 
 The documentation contains a step-by-step guide for deploying the WFS on a servlet container.
 
@@ -98,7 +98,7 @@ When running a Docker container with default settings, the WFS will listen at th
     http[s]://[host][:port]/wfs
 
 More details on how to use the 3D City Database WFS with Docker can be found in the
-[online documentation](https://3dcitydb-docs.readthedocs.io/en/version-2022.2/wfs/).
+[online documentation](https://3dcitydb-docs.readthedocs.io/en/version-2023.0/wfs/).
 
 Developers
 ----------
