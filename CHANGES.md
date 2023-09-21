@@ -1,7 +1,7 @@
 Change Log
 ==========
 
-### 5.3.1 - tba
+### 5.3.1 - 2023-09-21
 
 * This release is based on the Importer/Exporter version 5.4.0 libraries, and thus incorporates all bug fixes and updates
 introduced in that version ([more information](https://github.com/3dcitydb/importer-exporter/releases/tag/v5.4.0)).
