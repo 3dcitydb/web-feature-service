@@ -7,7 +7,7 @@ plugins {
 }
 
 group 'org.citydb.wfs'
-version '5.3.0'
+version '5.3.1'
 
 apply from: 'properties.gradle'
 
@@ -37,16 +37,16 @@ repositories {
         url 'https://repo.osgeo.org/repository/release'
     }
     maven {
-        url 'https://citydb.jfrog.io/artifactory/maven'
+        url 'https://oss.sonatype.org/content/repositories/snapshots/'
     }
     maven {
-        url 'https://oss.sonatype.org/content/repositories/snapshots/'
+        url project.citydbMavenUrl
     }
     mavenCentral()
 }
 
 dependencies {
-    implementation 'org.citydb:impexp-core:5.3.0'
+    implementation 'org.citydb:impexp-core:5.4.0'
     implementation 'com.github.seancfoley:ipaddress:5.3.4'
     implementation 'org.glassfish.jersey.containers:jersey-container-servlet:2.37'
     implementation 'org.glassfish.jersey.inject:jersey-hk2:2.37'
