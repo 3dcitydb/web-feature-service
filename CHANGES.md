@@ -1,10 +1,20 @@
 Change Log
 ==========
 
+### 5.3.2 - 2024-04-19
+
+This release is based on the Importer/Exporter version 5.4.3 libraries, and thus incorporates all bug fixes and updates 
+introduced in that version ([more information](https://github.com/3dcitydb/importer-exporter/releases/tag/v5.4.3)).
+
+##### Miscellaneous
+* Updated ipaddress to 5.5.0.
+
 ### 5.3.1 - 2023-09-21
 
-* This release is based on the Importer/Exporter version 5.4.0 libraries, and thus incorporates all bug fixes and updates
+This release is based on the Importer/Exporter version 5.4.0 libraries, and thus incorporates all bug fixes and updates
 introduced in that version ([more information](https://github.com/3dcitydb/importer-exporter/releases/tag/v5.4.0)).
+
+##### Miscellaneous
 * Updated tomcat docker image to version `9-jdk21-openjdk-slim` with lower vulnerabilities.
 
 ### 5.3.0 - 2022-12-15
