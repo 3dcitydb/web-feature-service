@@ -17,84 +17,84 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class CityJSONSchemaReader implements SchemaReader {
-	private Set<FeatureType> featureTypes;
-	private ServletContext servletContext;
-	
-	@Override
-	public String getMimeType() {
-		return "application/json";
-	}
+    private Set<FeatureType> featureTypes;
+    private ServletContext servletContext;
 
-	@Override
-	public void initializeContext(Set<FeatureType> featureTypes, CityGMLVersion version, ServletContext servletContext) throws SchemaReaderException {
-		this.featureTypes = featureTypes;
-		this.servletContext = servletContext;
-		
-		List<String> unsupported = Arrays.asList("TransportationComplex", "Track");
-		for (FeatureType featureType : featureTypes) {
-			if (unsupported.contains(featureType.getPath()))
-				throw new SchemaReaderException("The feature type '" + featureType.getPath() + "' is not supported by CityJSON.");
-		}
-	}
+    @Override
+    public String getMimeType() {
+        return "application/json";
+    }
 
-	@Override
-	public InputStream openSchema() throws SchemaReaderException, IOException {
-		if (!featureTypes.isEmpty()) {
-			try {
-				Map<String, String> mappings = new HashMap<>();
-				mappings.put("TransportSquare", "Square");
-				
-				Map<String, List<String>> hierarchies = new HashMap<>();
-				hierarchies.put("Building", Arrays.asList("BuildingPart", "BuildingInstallation"));
-				hierarchies.put("Bridge", Arrays.asList("BridgePart", "BridgeInstallation", "BridgeConstructionElement"));
-				hierarchies.put("Tunnel", Arrays.asList("TunnelPart", "TunnelInstallation"));
+    @Override
+    public void initializeContext(Set<FeatureType> featureTypes, CityGMLVersion version, ServletContext servletContext) throws SchemaReaderException {
+        this.featureTypes = featureTypes;
+        this.servletContext = servletContext;
 
-				Gson gson = new GsonBuilder().create();
-				JsonReader reader = new JsonReader(new InputStreamReader(servletContext.getResourceAsStream(Constants.CITYJSON_SCHEMA_PATH + "/cityjson.min.schema.json")));
-				JsonObject schema = gson.fromJson(reader, JsonObject.class);
+        List<String> unsupported = Arrays.asList("TransportationComplex", "Track");
+        for (FeatureType featureType : featureTypes) {
+            if (unsupported.contains(featureType.getPath()))
+                throw new SchemaReaderException("The feature type '" + featureType.getPath() + "' is not supported by CityJSON.");
+        }
+    }
 
-				Map<String, JsonElement> cityObjects = new LinkedHashMap<>();
-				JsonArray definitions = schema.get("properties").getAsJsonObject()
-						.get("CityObjects").getAsJsonObject()
-						.get("additionalProperties").getAsJsonObject()
-						.get("oneOf").getAsJsonArray();
+    @Override
+    public InputStream openSchema() throws SchemaReaderException, IOException {
+        if (!featureTypes.isEmpty()) {
+            try {
+                Map<String, String> mappings = new HashMap<>();
+                mappings.put("TransportSquare", "Square");
 
-				for (Iterator<JsonElement> iter = definitions.iterator(); iter.hasNext(); ) {
-					JsonElement cityObject = iter.next();
-					if (cityObject.isJsonObject() && cityObject.getAsJsonObject().has("allOf")) {
-						String typeName = cityObject.getAsJsonObject()
-								.get("allOf").getAsJsonArray().get(1).getAsJsonObject()
-								.get("properties").getAsJsonObject()
-								.get("type").getAsJsonObject()
-								.get("enum").getAsJsonArray().get(0).getAsString();
+                Map<String, List<String>> hierarchies = new HashMap<>();
+                hierarchies.put("Building", Arrays.asList("BuildingPart", "BuildingInstallation"));
+                hierarchies.put("Bridge", Arrays.asList("BridgePart", "BridgeInstallation", "BridgeConstructionElement"));
+                hierarchies.put("Tunnel", Arrays.asList("TunnelPart", "TunnelInstallation"));
 
-						cityObjects.put(mappings.getOrDefault(typeName, typeName), cityObject);
-						iter.remove();
-					}
-				}
+                Gson gson = new GsonBuilder().create();
+                JsonReader reader = new JsonReader(new InputStreamReader(servletContext.getResourceAsStream(Constants.CITYJSON_SCHEMA_PATH + "/cityjson.min.schema.json")));
+                JsonObject schema = gson.fromJson(reader, JsonObject.class);
 
-				for (FeatureType featureType : featureTypes) {
-					String typeName = featureType.getPath();
-					JsonElement cityObject = cityObjects.get(typeName);
+                Map<String, JsonElement> cityObjects = new LinkedHashMap<>();
+                JsonArray definitions = schema.get("properties").getAsJsonObject()
+                        .get("CityObjects").getAsJsonObject()
+                        .get("additionalProperties").getAsJsonObject()
+                        .get("oneOf").getAsJsonArray();
 
-					if (cityObject != null) {
-						definitions.add(cityObject);
+                for (Iterator<JsonElement> iter = definitions.iterator(); iter.hasNext(); ) {
+                    JsonElement cityObject = iter.next();
+                    if (cityObject.isJsonObject() && cityObject.getAsJsonObject().has("allOf")) {
+                        String typeName = cityObject.getAsJsonObject()
+                                .get("allOf").getAsJsonArray().get(1).getAsJsonObject()
+                                .get("properties").getAsJsonObject()
+                                .get("type").getAsJsonObject()
+                                .get("enum").getAsJsonArray().get(0).getAsString();
 
-						// add children
-						for (String childName : hierarchies.getOrDefault(typeName, Collections.emptyList())) {
-							JsonElement child = cityObjects.get(childName);
-							if (child != null)
-								definitions.add(child);
-						}
-					}
-				}
+                        cityObjects.put(mappings.getOrDefault(typeName, typeName), cityObject);
+                        iter.remove();
+                    }
+                }
 
-				return new ByteArrayInputStream(gson.toJson(schema).getBytes(StandardCharsets.UTF_8));
-			} catch (Throwable e) {
-				//
-			}
-		}
+                for (FeatureType featureType : featureTypes) {
+                    String typeName = featureType.getPath();
+                    JsonElement cityObject = cityObjects.get(typeName);
 
-		return servletContext.getResourceAsStream(Constants.CITYJSON_SCHEMA_PATH + "/cityjson.min.schema.json");
-	}
+                    if (cityObject != null) {
+                        definitions.add(cityObject);
+
+                        // add children
+                        for (String childName : hierarchies.getOrDefault(typeName, Collections.emptyList())) {
+                            JsonElement child = cityObjects.get(childName);
+                            if (child != null)
+                                definitions.add(child);
+                        }
+                    }
+                }
+
+                return new ByteArrayInputStream(gson.toJson(schema).getBytes(StandardCharsets.UTF_8));
+            } catch (Throwable e) {
+                //
+            }
+        }
+
+        return servletContext.getResourceAsStream(Constants.CITYJSON_SCHEMA_PATH + "/cityjson.min.schema.json");
+    }
 }

@@ -11,31 +11,31 @@ import vcs.citydb.wfs.kvp.parser.StringParser;
 import java.util.Map;
 
 public class DescribeStoredQueriesReader extends KVPRequestReader {
-	private final BaseRequestReader baseRequestReader;
+    private final BaseRequestReader baseRequestReader;
 
-	public DescribeStoredQueriesReader(Map<String, String> parameters, WFSConfig wfsConfig) {
-		super(parameters, wfsConfig);
-		baseRequestReader = new BaseRequestReader();
-	}
+    public DescribeStoredQueriesReader(Map<String, String> parameters, WFSConfig wfsConfig) {
+        super(parameters, wfsConfig);
+        baseRequestReader = new BaseRequestReader();
+    }
 
-	@Override
-	public DescribeStoredQueriesType readRequest() throws WFSException {
-		DescribeStoredQueriesType wfsRequest = new DescribeStoredQueriesType();
-		baseRequestReader.read(wfsRequest, parameters);
+    @Override
+    public DescribeStoredQueriesType readRequest() throws WFSException {
+        DescribeStoredQueriesType wfsRequest = new DescribeStoredQueriesType();
+        baseRequestReader.read(wfsRequest, parameters);
 
-		try {
-			if (parameters.containsKey(KVPConstants.STOREDQUERY_ID))
-				wfsRequest.setStoredQueryId(new FlatValueListParser<>(new StringParser()).parse(KVPConstants.STOREDQUERY_ID, parameters.get(KVPConstants.STOREDQUERY_ID)));
+        try {
+            if (parameters.containsKey(KVPConstants.STOREDQUERY_ID))
+                wfsRequest.setStoredQueryId(new FlatValueListParser<>(new StringParser()).parse(KVPConstants.STOREDQUERY_ID, parameters.get(KVPConstants.STOREDQUERY_ID)));
 
-		} catch (KVPParseException e) {
-			throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, e.getMessage(), e.getParameter(), e.getCause());
-		}
+        } catch (KVPParseException e) {
+            throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, e.getMessage(), e.getParameter(), e.getCause());
+        }
 
-		return wfsRequest;
-	}
+        return wfsRequest;
+    }
 
-	@Override
-	public String getOperationName() {
-		return KVPConstants.DESCRIBE_STORED_QUERIES;
-	}
+    @Override
+    public String getOperationName() {
+        return KVPConstants.DESCRIBE_STORED_QUERIES;
+    }
 }

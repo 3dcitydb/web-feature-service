@@ -16,34 +16,34 @@ import java.sql.SQLException;
 
 @Path("/{bucket}/{name}")
 public class TextureResource {
-	private final Logger log = Logger.getInstance();
+    private final Logger log = Logger.getInstance();
 
-	@Inject
-	private TextureProvider textureProvider;
+    @Inject
+    private TextureProvider textureProvider;
 
-	@GET
-	@Produces("image/*")
-	public Response getTexture(@PathParam("bucket") String bucket, @PathParam("name") String name, @Context HttpServletRequest request) throws WFSException, SQLException {
-		try {
-			TextureWrapper texture = null;
+    @GET
+    @Produces("image/*")
+    public Response getTexture(@PathParam("bucket") String bucket, @PathParam("name") String name, @Context HttpServletRequest request) throws WFSException, SQLException {
+        try {
+            TextureWrapper texture = null;
 
-			if (textureProvider.isUseTextureCache())
-				texture = textureProvider.getFromCache(name, bucket);
+            if (textureProvider.isUseTextureCache())
+                texture = textureProvider.getFromCache(name, bucket);
 
-			if (texture == null) {
-				texture = textureProvider.getFromDatabase(name, request);
+            if (texture == null) {
+                texture = textureProvider.getFromDatabase(name, request);
 
-				if (textureProvider.isUseTextureCache())
-					textureProvider.addTextureToCache(texture, name, bucket);
-			}
+                if (textureProvider.isUseTextureCache())
+                    textureProvider.addTextureToCache(texture, name, bucket);
+            }
 
-			return Response.ok()
-					.entity(texture.isSetPath() ? texture.getPath().toFile() : texture.getBytes())
-					.type(texture.getMimeType())
-					.build();
-		} catch (WFSException | SQLException e) {
-			log.error(LoggerUtil.getLogMessage(request, "Failed to load texture '" + bucket + "/" + name + "'. Check next messages for reasons."));
-			throw e;
-		}
-	}
+            return Response.ok()
+                    .entity(texture.isSetPath() ? texture.getPath().toFile() : texture.getBytes())
+                    .type(texture.getMimeType())
+                    .build();
+        } catch (WFSException | SQLException e) {
+            log.error(LoggerUtil.getLogMessage(request, "Failed to load texture '" + bucket + "/" + name + "'. Check next messages for reasons."));
+            throw e;
+        }
+    }
 }

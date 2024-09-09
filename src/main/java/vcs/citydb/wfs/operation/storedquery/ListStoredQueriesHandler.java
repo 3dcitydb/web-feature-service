@@ -32,107 +32,107 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 public class ListStoredQueriesHandler {
-	private final Logger log = Logger.getInstance();
-	private final WFSConfig wfsConfig;
+    private final Logger log = Logger.getInstance();
+    private final WFSConfig wfsConfig;
 
-	private final BaseRequestHandler baseRequestHandler;
-	private final StoredQueryManager storedQueryManager;
-	private final Marshaller marshaller;
-	private final ObjectFactory wfsFactory;
+    private final BaseRequestHandler baseRequestHandler;
+    private final StoredQueryManager storedQueryManager;
+    private final Marshaller marshaller;
+    private final ObjectFactory wfsFactory;
 
-	public ListStoredQueriesHandler(CityGMLBuilder cityGMLBuilder, WFSConfig wfsConfig) throws JAXBException {
-		this.wfsConfig = wfsConfig;
+    public ListStoredQueriesHandler(CityGMLBuilder cityGMLBuilder, WFSConfig wfsConfig) throws JAXBException {
+        this.wfsConfig = wfsConfig;
 
-		baseRequestHandler = new BaseRequestHandler(wfsConfig);
-		storedQueryManager = ObjectRegistry.getInstance().lookup(StoredQueryManager.class);
-		wfsFactory = storedQueryManager.getObjectFactory();
-		marshaller = cityGMLBuilder.getJAXBContext().createMarshaller();
-	}
+        baseRequestHandler = new BaseRequestHandler(wfsConfig);
+        storedQueryManager = ObjectRegistry.getInstance().lookup(StoredQueryManager.class);
+        wfsFactory = storedQueryManager.getObjectFactory();
+        marshaller = cityGMLBuilder.getJAXBContext().createMarshaller();
+    }
 
-	public void doOperation(ListStoredQueriesType wfsRequest,
-			HttpServletRequest request,
-			HttpServletResponse response) throws WFSException {
+    public void doOperation(ListStoredQueriesType wfsRequest,
+                            HttpServletRequest request,
+                            HttpServletResponse response) throws WFSException {
 
-		log.info(LoggerUtil.getLogMessage(request, "Accepting ListStoredQueries request."));
-		final String operationHandle = wfsRequest.getHandle();
+        log.info(LoggerUtil.getLogMessage(request, "Accepting ListStoredQueries request."));
+        final String operationHandle = wfsRequest.getHandle();
 
-		// check base service parameters
-		baseRequestHandler.validate(wfsRequest);
+        // check base service parameters
+        baseRequestHandler.validate(wfsRequest);
 
-		// get stored queries offered by server
-		List<StoredQueryAdapter> adapters = storedQueryManager.listStoredQueries(operationHandle);
+        // get stored queries offered by server
+        List<StoredQueryAdapter> adapters = storedQueryManager.listStoredQueries(operationHandle);
 
-		final SAXWriter saxWriter = new SAXWriter();
+        final SAXWriter saxWriter = new SAXWriter();
 
-		try {
-			// generate stored queries list
-			ListStoredQueriesResponseType listStoredQueriesResponse = new ListStoredQueriesResponseType();
-			for (StoredQueryAdapter adapter : adapters) {
-				StoredQuery storedQuery = storedQueryManager.getStoredQuery(adapter, operationHandle);
-				StoredQueryListItemType listItem = new StoredQueryListItemType();
-				listItem.setId(storedQuery.getId());
-				listItem.setTitle(storedQuery.getTitle());
+        try {
+            // generate stored queries list
+            ListStoredQueriesResponseType listStoredQueriesResponse = new ListStoredQueriesResponseType();
+            for (StoredQueryAdapter adapter : adapters) {
+                StoredQuery storedQuery = storedQueryManager.getStoredQuery(adapter, operationHandle);
+                StoredQueryListItemType listItem = new StoredQueryListItemType();
+                listItem.setId(storedQuery.getId());
+                listItem.setTitle(storedQuery.getTitle());
 
-				List<QName> returnTypeNames = storedQuery.getReturnFeatureTypeNames();
-				if (returnTypeNames.isEmpty() && wfsRequest.getVersion().equals("2.0.0")) {
-					for (FeatureType featureType : wfsConfig.getFeatureTypes().getAdvertisedFeatureTypes())
-						returnTypeNames.add(featureType.getName());
-				}
+                List<QName> returnTypeNames = storedQuery.getReturnFeatureTypeNames();
+                if (returnTypeNames.isEmpty() && wfsRequest.getVersion().equals("2.0.0")) {
+                    for (FeatureType featureType : wfsConfig.getFeatureTypes().getAdvertisedFeatureTypes())
+                        returnTypeNames.add(featureType.getName());
+                }
 
-				listItem.setReturnFeatureType(returnTypeNames);
-				
-				// add namespace declarations
-				int i = 1;
-				for (QName featureType : returnTypeNames) {
-					String prefix;
+                listItem.setReturnFeatureType(returnTypeNames);
 
-					Module module = Modules.getModule(featureType.getNamespaceURI());
-					if (module != null) {
-						prefix = module.getNamespacePrefix();
-						if (module instanceof CityGMLModule) {
-							CityGMLModule cityGMLModule = (CityGMLModule)module;
-							prefix += cityGMLModule.getVersion() == CityGMLModuleVersion.v2_0_0 ? "2" : "1";
-						}
-					} else
-						prefix = storedQuery.getNamespaceFilter().getPrefix(featureType.getNamespaceURI());
-					
-					if (prefix != null) {
-						String uri = saxWriter.getNamespaceURI(prefix);
-						if (uri != null && !uri.equals(featureType.getNamespaceURI()))
-							prefix = "ns" + (i++);						
-					} else
-						prefix = "ns" + (i++);
-					
-					saxWriter.setPrefix(prefix, featureType.getNamespaceURI());
-				}
+                // add namespace declarations
+                int i = 1;
+                for (QName featureType : returnTypeNames) {
+                    String prefix;
 
-				listStoredQueriesResponse.getStoredQuery().add(listItem);
-			}
+                    Module module = Modules.getModule(featureType.getNamespaceURI());
+                    if (module != null) {
+                        prefix = module.getNamespacePrefix();
+                        if (module instanceof CityGMLModule) {
+                            CityGMLModule cityGMLModule = (CityGMLModule) module;
+                            prefix += cityGMLModule.getVersion() == CityGMLModuleVersion.v2_0_0 ? "2" : "1";
+                        }
+                    } else
+                        prefix = storedQuery.getNamespaceFilter().getPrefix(featureType.getNamespaceURI());
 
-			JAXBElement<ListStoredQueriesResponseType> responseElement = wfsFactory.createListStoredQueriesResponse(listStoredQueriesResponse);
+                    if (prefix != null) {
+                        String uri = saxWriter.getNamespaceURI(prefix);
+                        if (uri != null && !uri.equals(featureType.getNamespaceURI()))
+                            prefix = "ns" + (i++);
+                    } else
+                        prefix = "ns" + (i++);
 
-			// write response
-			response.setContentType("text/xml");
-			response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+                    saxWriter.setPrefix(prefix, featureType.getNamespaceURI());
+                }
 
-			saxWriter.setWriteEncoding(true);
-			saxWriter.setIndentString("  ");
-			saxWriter.setPrefix(Constants.WFS_NAMESPACE_PREFIX, Constants.WFS_NAMESPACE_URI);
-			saxWriter.setSchemaLocation(Constants.WFS_NAMESPACE_URI, Constants.WFS_SCHEMA_LOCATION);
-			saxWriter.setOutput(response.getWriter());
+                listStoredQueriesResponse.getStoredQuery().add(listItem);
+            }
 
-			marshaller.setProperty("com.sun.xml.bind.namespacePrefixMapper", new NamespacePrefixMapper() {
-				public String getPreferredPrefix(String namespaceUri, String suggestion, boolean requirePrefix) {
-					return saxWriter.getPrefix(namespaceUri);
-				}
-			});
+            JAXBElement<ListStoredQueriesResponseType> responseElement = wfsFactory.createListStoredQueriesResponse(listStoredQueriesResponse);
 
-			marshaller.marshal(responseElement, saxWriter);
+            // write response
+            response.setContentType("text/xml");
+            response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
-			log.info(LoggerUtil.getLogMessage(request, "ListStoredQueriesHandler operation successfully finished."));
-		} catch (JAXBException | IOException e) {
-			throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "A fatal error occurred whilst marshalling the response document.", e);
-		}
-	}
+            saxWriter.setWriteEncoding(true);
+            saxWriter.setIndentString("  ");
+            saxWriter.setPrefix(Constants.WFS_NAMESPACE_PREFIX, Constants.WFS_NAMESPACE_URI);
+            saxWriter.setSchemaLocation(Constants.WFS_NAMESPACE_URI, Constants.WFS_SCHEMA_LOCATION);
+            saxWriter.setOutput(response.getWriter());
+
+            marshaller.setProperty("com.sun.xml.bind.namespacePrefixMapper", new NamespacePrefixMapper() {
+                public String getPreferredPrefix(String namespaceUri, String suggestion, boolean requirePrefix) {
+                    return saxWriter.getPrefix(namespaceUri);
+                }
+            });
+
+            marshaller.marshal(responseElement, saxWriter);
+
+            log.info(LoggerUtil.getLogMessage(request, "ListStoredQueriesHandler operation successfully finished."));
+        } catch (JAXBException | IOException e) {
+            throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "A fatal error occurred whilst marshalling the response document.", e);
+        }
+    }
 
 }

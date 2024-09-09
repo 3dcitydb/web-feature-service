@@ -2,28 +2,28 @@ package vcs.citydb.wfs.config.operation;
 
 import javax.xml.bind.annotation.XmlType;
 
-@XmlType(name="RequestEncodingType", propOrder={
-		"method",
-		"useXMLValidation"
+@XmlType(name = "RequestEncodingType", propOrder = {
+        "method",
+        "useXMLValidation"
 })
 public class RequestEncoding {
-	private EncodingMethod method = EncodingMethod.KVP_XML;
-	private Boolean useXMLValidation = true;
-	
-	public EncodingMethod getMethod() {
-		return method;
-	}
+    private EncodingMethod method = EncodingMethod.KVP_XML;
+    private Boolean useXMLValidation = true;
 
-	public void setMethod(EncodingMethod method) {
-		this.method = method;
-	}
+    public EncodingMethod getMethod() {
+        return method;
+    }
 
-	public boolean isUseXMLValidation() {
-		return useXMLValidation;
-	}
+    public void setMethod(EncodingMethod method) {
+        this.method = method;
+    }
 
-	public void setUseXMLValidation(boolean useXMLValidation) {
-		this.useXMLValidation = useXMLValidation;
-	}
+    public boolean isUseXMLValidation() {
+        return useXMLValidation;
+    }
+
+    public void setUseXMLValidation(boolean useXMLValidation) {
+        this.useXMLValidation = useXMLValidation;
+    }
 
 }

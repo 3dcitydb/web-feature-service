@@ -16,19 +16,19 @@ import javax.ws.rs.core.Context;
 @ApplicationPath(Constants.MANAGEMENT_SERVICE_PATH)
 public class ManagementService extends ResourceConfig {
 
-	public ManagementService(@Context ServletContext context) throws ServletException {
-		Object e = context.getAttribute(Constants.INIT_ERROR_ATTRNAME);
-		if (e instanceof ServletException)
-			throw (ServletException)e;
-		
-		WFSConfig wfsConfig = ObjectRegistry.getInstance().lookup(WFSConfig.class);
+    public ManagementService(@Context ServletContext context) throws ServletException {
+        Object e = context.getAttribute(Constants.INIT_ERROR_ATTRNAME);
+        if (e instanceof ServletException)
+            throw (ServletException) e;
 
-		if (wfsConfig.getServer().isEnableCORS())
-			register(CORSResponseFilter.class);
-		
-		register(GsonMessageBodyHandler.class);
-		register(VersionResource.class);
-		register(GenericExceptionMapper.class);
-	}
+        WFSConfig wfsConfig = ObjectRegistry.getInstance().lookup(WFSConfig.class);
+
+        if (wfsConfig.getServer().isEnableCORS())
+            register(CORSResponseFilter.class);
+
+        register(GsonMessageBodyHandler.class);
+        register(VersionResource.class);
+        register(GenericExceptionMapper.class);
+    }
 
 }

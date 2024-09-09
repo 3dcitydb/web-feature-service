@@ -3,43 +3,43 @@ package vcs.citydb.wfs.texture;
 import java.nio.file.Path;
 
 public class TextureWrapper {
-	private final byte[] bytes;
-	private final String mimeType;
-	private Path path;
-	
-	public TextureWrapper(byte[] bytes, String mimeType) {
-		this.bytes = bytes;
-		this.mimeType = mimeType;
-	}
+    private final byte[] bytes;
+    private final String mimeType;
+    private Path path;
 
-	public TextureWrapper(Path path, String mimeType) {
-		this.path = path;
-		this.mimeType = mimeType;
-		bytes = null;
-	}
+    public TextureWrapper(byte[] bytes, String mimeType) {
+        this.bytes = bytes;
+        this.mimeType = mimeType;
+    }
 
-	public boolean isSetBytes() {
-		return bytes != null;
-	}
+    public TextureWrapper(Path path, String mimeType) {
+        this.path = path;
+        this.mimeType = mimeType;
+        bytes = null;
+    }
 
-	public byte[] getBytes() {
-		return bytes;
-	}
+    public boolean isSetBytes() {
+        return bytes != null;
+    }
 
-	public String getMimeType() {
-		return mimeType;
-	}
+    public byte[] getBytes() {
+        return bytes;
+    }
 
-	public boolean isSetPath() {
-		return path != null;
-	}
+    public String getMimeType() {
+        return mimeType;
+    }
 
-	public Path getPath() {
-		return path;
-	}
+    public boolean isSetPath() {
+        return path != null;
+    }
 
-	public void setPath(Path path) {
-		this.path = path;
-	}
-	
+    public Path getPath() {
+        return path;
+    }
+
+    public void setPath(Path path) {
+        this.path = path;
+    }
+
 }

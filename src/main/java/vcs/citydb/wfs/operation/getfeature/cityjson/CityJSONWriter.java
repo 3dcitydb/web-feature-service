@@ -26,208 +26,208 @@ import vcs.citydb.wfs.operation.getfeature.FeatureWriter;
 import vcs.citydb.wfs.util.GeometryStripper;
 
 public class CityJSONWriter implements FeatureWriter, EventHandler {
-	private final CityJSONChunkWriter writer;
-	private final GeometryStripper geometryStripper;
-	private final IdCacheManager idCacheManager;
-	private final Object eventChannel;
-	private final InternalConfig internalConfig;
-	private final EventDispatcher eventDispatcher;
+    private final CityJSONChunkWriter writer;
+    private final GeometryStripper geometryStripper;
+    private final IdCacheManager idCacheManager;
+    private final Object eventChannel;
+    private final InternalConfig internalConfig;
+    private final EventDispatcher eventDispatcher;
 
-	private final SingleWorkerPool<AbstractCityObjectType> writerPool;
-	private final CityJSONMarshaller marshaller;
+    private final SingleWorkerPool<AbstractCityObjectType> writerPool;
+    private final CityJSONMarshaller marshaller;
 
-	private boolean isWriteSingleFeature;
-	private boolean hasContent;
-	private boolean checkForDuplicates;
-	private boolean useSequentialWriting;
-	private SequentialWriter<AbstractCityObjectType> sequentialWriter;
+    private boolean isWriteSingleFeature;
+    private boolean hasContent;
+    private boolean checkForDuplicates;
+    private boolean useSequentialWriting;
+    private SequentialWriter<AbstractCityObjectType> sequentialWriter;
 
-	private boolean addSequenceId;
-	private long idOffset;
+    private boolean addSequenceId;
+    private long idOffset;
 
-	public CityJSONWriter(
-			CityJSONChunkWriter writer,
-			GeometryStripper geometryStripper,
-			IdCacheManager idCacheManager,
-			Object eventChannel,
-			InternalConfig internalConfig,
-			Config config) {
-		this.writer = writer;
-		this.geometryStripper = geometryStripper;
-		this.idCacheManager = idCacheManager;
-		this.eventChannel = eventChannel;
-		this.internalConfig = internalConfig;
+    public CityJSONWriter(
+            CityJSONChunkWriter writer,
+            GeometryStripper geometryStripper,
+            IdCacheManager idCacheManager,
+            Object eventChannel,
+            InternalConfig internalConfig,
+            Config config) {
+        this.writer = writer;
+        this.geometryStripper = geometryStripper;
+        this.idCacheManager = idCacheManager;
+        this.eventChannel = eventChannel;
+        this.internalConfig = internalConfig;
 
-		marshaller = writer.getCityJSONMarshaller();
-		int queueSize = config.getExportConfig().getResources().getThreadPool().getMaxThreads() * 2;
+        marshaller = writer.getCityJSONMarshaller();
+        int queueSize = config.getExportConfig().getResources().getThreadPool().getMaxThreads() * 2;
 
-		eventDispatcher = ObjectRegistry.getInstance().getEventDispatcher();
-		eventDispatcher.addEventHandler(EventType.INTERRUPT, this);
+        eventDispatcher = ObjectRegistry.getInstance().getEventDispatcher();
+        eventDispatcher.addEventHandler(EventType.INTERRUPT, this);
 
-		writerPool = new SingleWorkerPool<>(
-				"cityjson_writer_pool",
-				new CityJSONWriterWorkerFactory(writer, eventDispatcher),
-				queueSize,
-				false);
+        writerPool = new SingleWorkerPool<>(
+                "cityjson_writer_pool",
+                new CityJSONWriterWorkerFactory(writer, eventDispatcher),
+                queueSize,
+                false);
 
-		writerPool.setEventSource(eventChannel);
-		writerPool.prestartCoreWorkers();
-	}
+        writerPool.setEventSource(eventChannel);
+        writerPool.prestartCoreWorkers();
+    }
 
-	void addSequenceIdWhenSorting(boolean addSequenceId) {
-		this.addSequenceId = addSequenceId;
-	}
+    void addSequenceIdWhenSorting(boolean addSequenceId) {
+        this.addSequenceId = addSequenceId;
+    }
 
-	@Override
-	public void useIndentation(boolean useIndentation) {
-		writer.setIndent(useIndentation ? " " : "");
-	}
+    @Override
+    public void useIndentation(boolean useIndentation) {
+        writer.setIndent(useIndentation ? " " : "");
+    }
 
-	@Override
-	public void setWriteSingleFeature(boolean isWriteSingleFeature) {
-		this.isWriteSingleFeature = isWriteSingleFeature;
-	}
+    @Override
+    public void setWriteSingleFeature(boolean isWriteSingleFeature) {
+        this.isWriteSingleFeature = isWriteSingleFeature;
+    }
 
-	@Override
-	public void startFeatureCollection(long matchNo, long returnNo, String previous, String next) throws FeatureWriteException {
-		// nothing to do here...
-	}
+    @Override
+    public void startFeatureCollection(long matchNo, long returnNo, String previous, String next) throws FeatureWriteException {
+        // nothing to do here...
+    }
 
-	@Override
-	public void startFeatureCollection(long matchNo, long returnNo) throws FeatureWriteException {
-		// nothing to do here...
-	}
+    @Override
+    public void startFeatureCollection(long matchNo, long returnNo) throws FeatureWriteException {
+        // nothing to do here...
+    }
 
-	@Override
-	public void endFeatureCollection() throws FeatureWriteException {
-		// we only have to check for duplicates after the first set of features
-		checkForDuplicates = internalConfig.isRegisterGmlIdInCache();
-	}
+    @Override
+    public void endFeatureCollection() throws FeatureWriteException {
+        // we only have to check for duplicates after the first set of features
+        checkForDuplicates = internalConfig.isRegisterGmlIdInCache();
+    }
 
-	@Override
-	public void startAdditionalObjects() throws FeatureWriteException {
-		// nothing to do here...
-	}
+    @Override
+    public void startAdditionalObjects() throws FeatureWriteException {
+        // nothing to do here...
+    }
 
-	@Override
-	public void endAdditionalObjects() throws FeatureWriteException {
-		// nothing to do here...
-	}
+    @Override
+    public void endAdditionalObjects() throws FeatureWriteException {
+        // nothing to do here...
+    }
 
-	@Override
-	public long setSequentialWriting(boolean useSequentialWriting) {
-		long sequenceId = 0;
+    @Override
+    public long setSequentialWriting(boolean useSequentialWriting) {
+        long sequenceId = 0;
 
-		if (useSequentialWriting) {
-			if (this.useSequentialWriting) {
-				sequenceId = sequentialWriter.getCurrentSequenceId();
-			} else if (sequentialWriter != null) {
-				idOffset = sequentialWriter.getCurrentSequenceId();
-				sequenceId = sequentialWriter.reset();
-			} else {
-				sequentialWriter = new SequentialWriter<>(writerPool);
-			}
-		}
+        if (useSequentialWriting) {
+            if (this.useSequentialWriting) {
+                sequenceId = sequentialWriter.getCurrentSequenceId();
+            } else if (sequentialWriter != null) {
+                idOffset = sequentialWriter.getCurrentSequenceId();
+                sequenceId = sequentialWriter.reset();
+            } else {
+                sequentialWriter = new SequentialWriter<>(writerPool);
+            }
+        }
 
-		this.useSequentialWriting = useSequentialWriting;
-		return sequenceId;
-	}
+        this.useSequentialWriting = useSequentialWriting;
+        return sequenceId;
+    }
 
-	@Override
-	public void write(AbstractFeature feature, long sequenceId) throws FeatureWriteException {
-		if (feature instanceof AbstractCityObject) {
-			if (checkForDuplicates && isFeatureAlreadyExported(feature)) {
-				return;
-			}
+    @Override
+    public void write(AbstractFeature feature, long sequenceId) throws FeatureWriteException {
+        if (feature instanceof AbstractCityObject) {
+            if (checkForDuplicates && isFeatureAlreadyExported(feature)) {
+                return;
+            }
 
-			// security feature: strip geometry from features
-			if (geometryStripper != null) {
-				feature.accept(geometryStripper);
-			}
+            // security feature: strip geometry from features
+            if (geometryStripper != null) {
+                feature.accept(geometryStripper);
+            }
 
-			CityJSON cityJSON = new CityJSON();
+            CityJSON cityJSON = new CityJSON();
 
-			AbstractCityObjectType cityObject = marshaller.marshal((AbstractCityObject) feature, cityJSON);
-			for (AbstractCityObjectType child : cityJSON.getCityObjects()) {
-				writerPool.addWork(child);
-			}
+            AbstractCityObjectType cityObject = marshaller.marshal((AbstractCityObject) feature, cityJSON);
+            for (AbstractCityObjectType child : cityJSON.getCityObjects()) {
+                writerPool.addWork(child);
+            }
 
-			if (cityJSON.isSetExtensionProperties()) {
-				cityJSON.getExtensionProperties().forEach(writer::addRootExtensionProperty);
-			}
+            if (cityJSON.isSetExtensionProperties()) {
+                cityJSON.getExtensionProperties().forEach(writer::addRootExtensionProperty);
+            }
 
-			if (cityObject != null) {
-				if (!useSequentialWriting) {
-					writerPool.addWork(cityObject);
-				} else {
-					try {
-						if (addSequenceId && sequenceId >= 0) {
-							cityObject.getAttributes().addExtensionAttribute("sequenceId", sequenceId + idOffset);
-						}
+            if (cityObject != null) {
+                if (!useSequentialWriting) {
+                    writerPool.addWork(cityObject);
+                } else {
+                    try {
+                        if (addSequenceId && sequenceId >= 0) {
+                            cityObject.getAttributes().addExtensionAttribute("sequenceId", sequenceId + idOffset);
+                        }
 
-						sequentialWriter.write(cityObject, sequenceId);
-					} catch (InterruptedException e) {
-						throw new FeatureWriteException("Failed to write city object with gml:id '" + feature.getId() + "'.", e);
-					}
-				}
-			}
+                        sequentialWriter.write(cityObject, sequenceId);
+                    } catch (InterruptedException e) {
+                        throw new FeatureWriteException("Failed to write city object with gml:id '" + feature.getId() + "'.", e);
+                    }
+                }
+            }
 
-			hasContent = cityObject != null || cityJSON.hasCityObjects();
-		}
-	}
+            hasContent = cityObject != null || cityJSON.hasCityObjects();
+        }
+    }
 
-	@Override
-	public void updateSequenceId(long sequenceId) throws FeatureWriteException {
-		if (useSequentialWriting) {
-			try {
-				sequentialWriter.updateSequenceId(sequenceId);
-			} catch (InterruptedException e) {
-				throw new FeatureWriteException("Failed to update sequence id.", e);
-			}
-		}
-	}
+    @Override
+    public void updateSequenceId(long sequenceId) throws FeatureWriteException {
+        if (useSequentialWriting) {
+            try {
+                sequentialWriter.updateSequenceId(sequenceId);
+            } catch (InterruptedException e) {
+                throw new FeatureWriteException("Failed to update sequence id.", e);
+            }
+        }
+    }
 
-	@Override
-	public void writeAdditionalObjects() throws FeatureWriteException {
-		// not supported by this writer
-	}
+    @Override
+    public void writeAdditionalObjects() throws FeatureWriteException {
+        // not supported by this writer
+    }
 
-	@Override
-	public void writeTruncatedResponse(TruncatedResponse truncatedResponse) throws FeatureWriteException {
-		// not supported by this writer
-	}
+    @Override
+    public void writeTruncatedResponse(TruncatedResponse truncatedResponse) throws FeatureWriteException {
+        // not supported by this writer
+    }
 
-	@Override
-	public void close() throws FeatureWriteException {
-		try {
-			writerPool.shutdownAndWait();
-			if (!isWriteSingleFeature || hasContent) {
-				writer.writeEndDocument();
-			}
-		} catch (InterruptedException | CityJSONWriteException e) {
-			throw new FeatureWriteException("Failed to close CityJSON response writer.", e);
-		} finally {
-			if (!writerPool.isTerminated()) {
-				writerPool.shutdownNow();
-			}
+    @Override
+    public void close() throws FeatureWriteException {
+        try {
+            writerPool.shutdownAndWait();
+            if (!isWriteSingleFeature || hasContent) {
+                writer.writeEndDocument();
+            }
+        } catch (InterruptedException | CityJSONWriteException e) {
+            throw new FeatureWriteException("Failed to close CityJSON response writer.", e);
+        } finally {
+            if (!writerPool.isTerminated()) {
+                writerPool.shutdownNow();
+            }
 
-			eventDispatcher.removeEventHandler(this);
-		}
-	}
+            eventDispatcher.removeEventHandler(this);
+        }
+    }
 
-	private boolean isFeatureAlreadyExported(AbstractFeature feature) {
-		if (!feature.isSetId()) {
-			return false;
-		}
+    private boolean isFeatureAlreadyExported(AbstractFeature feature) {
+        if (!feature.isSetId()) {
+            return false;
+        }
 
-		IdCache cache = idCacheManager.getCache(IdCacheType.OBJECT);
-		return cache.get(feature.getId()) != null;
-	}
+        IdCache cache = idCacheManager.getCache(IdCacheType.OBJECT);
+        return cache.get(feature.getId()) != null;
+    }
 
-	@Override
-	public void handleEvent(Event event) throws Exception {
-		if (event.getChannel() == eventChannel && sequentialWriter != null) {
-			sequentialWriter.interrupt();
-		}
-	}
+    @Override
+    public void handleEvent(Event event) throws Exception {
+        if (event.getChannel() == eventChannel && sequentialWriter != null) {
+            sequentialWriter.interrupt();
+        }
+    }
 }

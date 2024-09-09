@@ -147,7 +147,8 @@ public class AdditionalObjectsHandler {
                 }
             }
 
-        } catch (CityGMLWriteException | CityGMLBuilderException | CityGMLReadException | SAXException | TransformerConfigurationException e) {
+        } catch (CityGMLWriteException | CityGMLBuilderException | CityGMLReadException | SAXException |
+                 TransformerConfigurationException e) {
             eventDispatcher.triggerSyncEvent(new InterruptEvent("Failed to write additional objects.", LogLevel.ERROR, e, eventChannel));
         }
     }

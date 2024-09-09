@@ -7,20 +7,20 @@ import vcs.citydb.wfs.util.xml.NamespaceFilter;
 import javax.xml.namespace.QName;
 
 public class PropertyNameParser extends ValueParser<PropertyName> {
-	private final NamespaceFilter namespaceFilter;
+    private final NamespaceFilter namespaceFilter;
 
-	public PropertyNameParser(NamespaceFilter namespaceFilter) {
-		this.namespaceFilter = namespaceFilter;
-	}
+    public PropertyNameParser(NamespaceFilter namespaceFilter) {
+        this.namespaceFilter = namespaceFilter;
+    }
 
-	@Override
-	public PropertyName parse(String key, String value) throws KVPParseException {
-		PropertyName propertyName = new PropertyName();
+    @Override
+    public PropertyName parse(String key, String value) throws KVPParseException {
+        PropertyName propertyName = new PropertyName();
 
-		QName name = new QNameParser(namespaceFilter).parse(key, value);
-		propertyName.setValue(name);
-		
-		return propertyName;
-	}
+        QName name = new QNameParser(namespaceFilter).parse(key, value);
+        propertyName.setValue(name);
+
+        return propertyName;
+    }
 
 }

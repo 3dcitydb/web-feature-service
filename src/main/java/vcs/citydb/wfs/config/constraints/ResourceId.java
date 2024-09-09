@@ -4,7 +4,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
 
-@XmlType(name="ResourceIdType")
+@XmlType(name = "ResourceIdType")
 public class ResourceId {
     @XmlAttribute
     private String prefix;

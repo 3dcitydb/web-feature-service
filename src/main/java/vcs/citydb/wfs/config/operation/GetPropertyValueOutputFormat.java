@@ -1,11 +1,11 @@
 package vcs.citydb.wfs.config.operation;
 
 public enum GetPropertyValueOutputFormat {
-	GML3_1("application/gml+xml; version=3.1");
-	
-	private final String value;
+    GML3_1("application/gml+xml; version=3.1");
 
-	GetPropertyValueOutputFormat(String value) {
+    private final String value;
+
+    GetPropertyValueOutputFormat(String value) {
         this.value = value;
     }
 

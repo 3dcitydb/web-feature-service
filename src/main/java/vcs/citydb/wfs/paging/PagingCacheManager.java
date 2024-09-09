@@ -123,6 +123,6 @@ public class PagingCacheManager {
 
     private long[] getIdentifierBits(String identifier) {
         String[] parts = identifier.split("-");
-        return new long[] { Long.parseUnsignedLong(parts[0], 16), Long.parseUnsignedLong(parts[1], 16) };
+        return new long[]{Long.parseUnsignedLong(parts[0], 16), Long.parseUnsignedLong(parts[1], 16)};
     }
 }

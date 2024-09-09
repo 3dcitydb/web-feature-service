@@ -10,7 +10,9 @@ import java.io.InputStream;
 import java.util.Set;
 
 public interface SchemaReader {
-	String getMimeType();
-	void initializeContext(Set<FeatureType> featureTypes, CityGMLVersion version, ServletContext servletContext) throws SchemaReaderException;
-	InputStream openSchema() throws SchemaReaderException, IOException;
+    String getMimeType();
+
+    void initializeContext(Set<FeatureType> featureTypes, CityGMLVersion version, ServletContext servletContext) throws SchemaReaderException;
+
+    InputStream openSchema() throws SchemaReaderException, IOException;
 }

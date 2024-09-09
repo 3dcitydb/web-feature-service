@@ -10,31 +10,31 @@ import vcs.citydb.wfs.kvp.parser.StringParser;
 import java.util.Map;
 
 public class DropStoredQueryReader extends KVPRequestReader {
-	private final BaseRequestReader baseRequestReader;
+    private final BaseRequestReader baseRequestReader;
 
-	public DropStoredQueryReader(Map<String, String> parameters, WFSConfig wfsConfig) {
-		super(parameters, wfsConfig);
-		baseRequestReader = new BaseRequestReader();
-	}
+    public DropStoredQueryReader(Map<String, String> parameters, WFSConfig wfsConfig) {
+        super(parameters, wfsConfig);
+        baseRequestReader = new BaseRequestReader();
+    }
 
-	@Override
-	public DropStoredQueryType readRequest() throws WFSException {
-		DropStoredQueryType wfsRequest = new DropStoredQueryType();
-		baseRequestReader.read(wfsRequest, parameters);
+    @Override
+    public DropStoredQueryType readRequest() throws WFSException {
+        DropStoredQueryType wfsRequest = new DropStoredQueryType();
+        baseRequestReader.read(wfsRequest, parameters);
 
-		try {
-			if (parameters.containsKey(KVPConstants.STOREDQUERY_ID))
-				wfsRequest.setId(new StringParser().parse(KVPConstants.STOREDQUERY_ID, parameters.get(KVPConstants.STOREDQUERY_ID)));
+        try {
+            if (parameters.containsKey(KVPConstants.STOREDQUERY_ID))
+                wfsRequest.setId(new StringParser().parse(KVPConstants.STOREDQUERY_ID, parameters.get(KVPConstants.STOREDQUERY_ID)));
 
-		} catch (KVPParseException e) {
-			throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, e.getMessage(), e.getParameter(), e.getCause());
-		}
+        } catch (KVPParseException e) {
+            throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, e.getMessage(), e.getParameter(), e.getCause());
+        }
 
-		return wfsRequest;
-	}
+        return wfsRequest;
+    }
 
-	@Override
-	public String getOperationName() {
-		return KVPConstants.DROP_STORED_QUERY;
-	}
+    @Override
+    public String getOperationName() {
+        return KVPConstants.DROP_STORED_QUERY;
+    }
 }

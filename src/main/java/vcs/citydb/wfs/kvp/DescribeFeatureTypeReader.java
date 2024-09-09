@@ -12,37 +12,37 @@ import vcs.citydb.wfs.kvp.parser.StringParser;
 import java.util.Map;
 
 public class DescribeFeatureTypeReader extends KVPRequestReader {
-	private final BaseRequestReader baseRequestReader;
+    private final BaseRequestReader baseRequestReader;
 
-	public DescribeFeatureTypeReader(Map<String, String> parameters, WFSConfig wfsConfig) {
-		super(parameters, wfsConfig);
-		baseRequestReader = new BaseRequestReader();
-	}
+    public DescribeFeatureTypeReader(Map<String, String> parameters, WFSConfig wfsConfig) {
+        super(parameters, wfsConfig);
+        baseRequestReader = new BaseRequestReader();
+    }
 
-	@Override
-	public DescribeFeatureTypeType readRequest() throws WFSException {
-		DescribeFeatureTypeType wfsRequest = new DescribeFeatureTypeType();
-		baseRequestReader.read(wfsRequest, parameters);
+    @Override
+    public DescribeFeatureTypeType readRequest() throws WFSException {
+        DescribeFeatureTypeType wfsRequest = new DescribeFeatureTypeType();
+        baseRequestReader.read(wfsRequest, parameters);
 
-		try {
-			if (parameters.containsKey(KVPConstants.TYPE_NAME))
-				wfsRequest.getTypeName().addAll(new FlatValueListParser<>(new QNameParser(getNamespaces())).parse(KVPConstants.TYPE_NAME, parameters.get(KVPConstants.TYPE_NAME)));
+        try {
+            if (parameters.containsKey(KVPConstants.TYPE_NAME))
+                wfsRequest.getTypeName().addAll(new FlatValueListParser<>(new QNameParser(getNamespaces())).parse(KVPConstants.TYPE_NAME, parameters.get(KVPConstants.TYPE_NAME)));
 
-			if (parameters.containsKey(KVPConstants.TYPE_NAMES))
-				wfsRequest.getTypeName().addAll(new FlatValueListParser<>(new QNameParser(getNamespaces())).parse(KVPConstants.TYPE_NAMES, parameters.get(KVPConstants.TYPE_NAMES)));
+            if (parameters.containsKey(KVPConstants.TYPE_NAMES))
+                wfsRequest.getTypeName().addAll(new FlatValueListParser<>(new QNameParser(getNamespaces())).parse(KVPConstants.TYPE_NAMES, parameters.get(KVPConstants.TYPE_NAMES)));
 
-			if (parameters.containsKey(KVPConstants.OUTPUT_FORMAT))
-				wfsRequest.setOutputFormat(new StringParser().parse(KVPConstants.OUTPUT_FORMAT, parameters.get(KVPConstants.OUTPUT_FORMAT)));
+            if (parameters.containsKey(KVPConstants.OUTPUT_FORMAT))
+                wfsRequest.setOutputFormat(new StringParser().parse(KVPConstants.OUTPUT_FORMAT, parameters.get(KVPConstants.OUTPUT_FORMAT)));
 
-		} catch (KVPParseException e) {
-			throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, e.getMessage(), e.getParameter(), e.getCause());
-		}
+        } catch (KVPParseException e) {
+            throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, e.getMessage(), e.getParameter(), e.getCause());
+        }
 
-		return wfsRequest;
-	}
+        return wfsRequest;
+    }
 
-	@Override
-	public String getOperationName() {
-		return KVPConstants.DESCRIBE_FEATURE_TYPE;
-	}
+    @Override
+    public String getOperationName() {
+        return KVPConstants.DESCRIBE_FEATURE_TYPE;
+    }
 }

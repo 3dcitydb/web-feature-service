@@ -51,322 +51,322 @@ import java.math.BigInteger;
 import java.time.LocalDateTime;
 
 public class CityGMLWriter implements FeatureWriter, EventHandler {
-	private final SAXWriter saxWriter;
-	private final CityGMLVersion version;
-	private final TransformerChainFactory transformerChainFactory;
-	private final GeometryStripper geometryStripper;
-	private final IdCacheManager idCacheManager;
-	private final Object eventChannel;
-	private final InternalConfig internalConfig;
+    private final SAXWriter saxWriter;
+    private final CityGMLVersion version;
+    private final TransformerChainFactory transformerChainFactory;
+    private final GeometryStripper geometryStripper;
+    private final IdCacheManager idCacheManager;
+    private final Object eventChannel;
+    private final InternalConfig internalConfig;
 
-	private final SingleWorkerPool<SAXEventBuffer> writerPool;
-	private final CityGMLBuilder cityGMLBuilder;
-	private final JAXBMarshaller jaxbMarshaller;
-	private final ObjectFactory wfsFactory;
-	private final DatatypeFactory datatypeFactory;
-	private final AdditionalObjectsHandler additionalObjectsHandler;
-	private final EventDispatcher eventDispatcher;
+    private final SingleWorkerPool<SAXEventBuffer> writerPool;
+    private final CityGMLBuilder cityGMLBuilder;
+    private final JAXBMarshaller jaxbMarshaller;
+    private final ObjectFactory wfsFactory;
+    private final DatatypeFactory datatypeFactory;
+    private final AdditionalObjectsHandler additionalObjectsHandler;
+    private final EventDispatcher eventDispatcher;
 
-	private int level;
-	private boolean isWriteSingleFeature;
-	private boolean checkForDuplicates;
-	private boolean useSequentialWriting;
-	private SequentialWriter<SAXEventBuffer> sequentialWriter;
+    private int level;
+    private boolean isWriteSingleFeature;
+    private boolean checkForDuplicates;
+    private boolean useSequentialWriting;
+    private SequentialWriter<SAXEventBuffer> sequentialWriter;
 
-	public CityGMLWriter(
-			SAXWriter saxWriter,
-			CityGMLVersion version,
-			TransformerChainFactory transformerChainFactory,
-			GeometryStripper geometryStripper,
-			IdCacheManager idCacheManager,
-			Object eventChannel,
-			InternalConfig internalConfig,
-			Config config) throws DatatypeConfigurationException {
-		this.saxWriter = saxWriter;
-		this.version = version;
-		this.transformerChainFactory = transformerChainFactory;
-		this.geometryStripper = geometryStripper;
-		this.idCacheManager = idCacheManager;
-		this.eventChannel = eventChannel;
-		this.internalConfig = internalConfig;
+    public CityGMLWriter(
+            SAXWriter saxWriter,
+            CityGMLVersion version,
+            TransformerChainFactory transformerChainFactory,
+            GeometryStripper geometryStripper,
+            IdCacheManager idCacheManager,
+            Object eventChannel,
+            InternalConfig internalConfig,
+            Config config) throws DatatypeConfigurationException {
+        this.saxWriter = saxWriter;
+        this.version = version;
+        this.transformerChainFactory = transformerChainFactory;
+        this.geometryStripper = geometryStripper;
+        this.idCacheManager = idCacheManager;
+        this.eventChannel = eventChannel;
+        this.internalConfig = internalConfig;
 
-		cityGMLBuilder = ObjectRegistry.getInstance().getCityGMLBuilder();
-		jaxbMarshaller = cityGMLBuilder.createJAXBMarshaller(version);
-		wfsFactory = new ObjectFactory();
-		datatypeFactory = DatatypeFactory.newInstance();
-		additionalObjectsHandler = new AdditionalObjectsHandler(saxWriter, version, cityGMLBuilder, transformerChainFactory, eventChannel);
+        cityGMLBuilder = ObjectRegistry.getInstance().getCityGMLBuilder();
+        jaxbMarshaller = cityGMLBuilder.createJAXBMarshaller(version);
+        wfsFactory = new ObjectFactory();
+        datatypeFactory = DatatypeFactory.newInstance();
+        additionalObjectsHandler = new AdditionalObjectsHandler(saxWriter, version, cityGMLBuilder, transformerChainFactory, eventChannel);
 
-		eventDispatcher = ObjectRegistry.getInstance().getEventDispatcher();
-		eventDispatcher.addEventHandler(EventType.INTERRUPT, this);
-		
-		int queueSize = config.getExportConfig().getResources().getThreadPool().getMaxThreads() * 2;
-		writerPool = new SingleWorkerPool<>(
-				"citygml_writer_pool",
-				new XMLWriterWorkerFactory(saxWriter, eventDispatcher),
-				queueSize,
-				false);
+        eventDispatcher = ObjectRegistry.getInstance().getEventDispatcher();
+        eventDispatcher.addEventHandler(EventType.INTERRUPT, this);
 
-		writerPool.setEventSource(eventChannel);
-		writerPool.prestartCoreWorkers();
-	}
+        int queueSize = config.getExportConfig().getResources().getThreadPool().getMaxThreads() * 2;
+        writerPool = new SingleWorkerPool<>(
+                "citygml_writer_pool",
+                new XMLWriterWorkerFactory(saxWriter, eventDispatcher),
+                queueSize,
+                false);
 
-	@Override
-	public void setWriteSingleFeature(boolean isWriteSingleFeature) {
-		this.isWriteSingleFeature = isWriteSingleFeature;
-	}
+        writerPool.setEventSource(eventChannel);
+        writerPool.prestartCoreWorkers();
+    }
 
-	@Override
-	public boolean supportsFlatHierarchies() {
-		return !isWriteSingleFeature;
-	}
+    @Override
+    public void setWriteSingleFeature(boolean isWriteSingleFeature) {
+        this.isWriteSingleFeature = isWriteSingleFeature;
+    }
 
-	@Override
-	public void useIndentation(boolean useIndentation) {
-		saxWriter.setIndentString(useIndentation ? " " : "");
-	}
+    @Override
+    public boolean supportsFlatHierarchies() {
+        return !isWriteSingleFeature;
+    }
 
-	@Override
-	public void startFeatureCollection(long matchNo, long returnNo, String previous, String next) throws FeatureWriteException {
-		level++;
-		writeFeatureCollection(matchNo, returnNo, previous, next, WriteMode.HEAD);
-	}
+    @Override
+    public void useIndentation(boolean useIndentation) {
+        saxWriter.setIndentString(useIndentation ? " " : "");
+    }
 
-	@Override
-	public void startFeatureCollection(long matchNo, long returnNo) throws FeatureWriteException {
-		startFeatureCollection(matchNo, returnNo, null, null);
-	}
+    @Override
+    public void startFeatureCollection(long matchNo, long returnNo, String previous, String next) throws FeatureWriteException {
+        level++;
+        writeFeatureCollection(matchNo, returnNo, previous, next, WriteMode.HEAD);
+    }
 
-	@Override
-	public void endFeatureCollection() throws FeatureWriteException {
-		writeFeatureCollection(0, 0, null, null, WriteMode.TAIL);
-		level--;
-		
-		// we only have to check for duplicates after the first set of features
-		checkForDuplicates = internalConfig.isRegisterGmlIdInCache();
-	}
+    @Override
+    public void startFeatureCollection(long matchNo, long returnNo) throws FeatureWriteException {
+        startFeatureCollection(matchNo, returnNo, null, null);
+    }
 
-	@Override
-	public void startAdditionalObjects() throws FeatureWriteException {
-		try {
-			writerPool.join();
-			additionalObjectsHandler.startAdditionalObjects();
-		} catch (SAXException | InterruptedException e) {
-			throw new FeatureWriteException("Failed to marshal additional objects collection element.", e);
-		}
-	}
+    @Override
+    public void endFeatureCollection() throws FeatureWriteException {
+        writeFeatureCollection(0, 0, null, null, WriteMode.TAIL);
+        level--;
 
-	@Override
-	public void endAdditionalObjects() throws FeatureWriteException {
-		try {
-			additionalObjectsHandler.endAdditionalObjects();
-		} catch (SAXException e) {
-			throw new FeatureWriteException("Failed to marshal additional objects collection element.", e);
-		}
-	}
+        // we only have to check for duplicates after the first set of features
+        checkForDuplicates = internalConfig.isRegisterGmlIdInCache();
+    }
 
-	@Override
-	public long setSequentialWriting(boolean useSequentialWriting)  {
-		long sequenceId = 0;
+    @Override
+    public void startAdditionalObjects() throws FeatureWriteException {
+        try {
+            writerPool.join();
+            additionalObjectsHandler.startAdditionalObjects();
+        } catch (SAXException | InterruptedException e) {
+            throw new FeatureWriteException("Failed to marshal additional objects collection element.", e);
+        }
+    }
 
-		if (useSequentialWriting) {
-			if (this.useSequentialWriting)
-				sequenceId = sequentialWriter.getCurrentSequenceId();
-			else if (sequentialWriter != null)
-				sequenceId = sequentialWriter.reset();
-			else
-				sequentialWriter = new SequentialWriter<>(writerPool);
-		}
+    @Override
+    public void endAdditionalObjects() throws FeatureWriteException {
+        try {
+            additionalObjectsHandler.endAdditionalObjects();
+        } catch (SAXException e) {
+            throw new FeatureWriteException("Failed to marshal additional objects collection element.", e);
+        }
+    }
 
-		this.useSequentialWriting = useSequentialWriting;
-		return sequenceId;
-	}
+    @Override
+    public long setSequentialWriting(boolean useSequentialWriting) {
+        long sequenceId = 0;
 
-	@Override
-	public void write(AbstractFeature feature, long sequenceId) throws FeatureWriteException {
-		// security feature: strip geometry from features
-		if (geometryStripper != null)
-			feature.accept(geometryStripper);
+        if (useSequentialWriting) {
+            if (this.useSequentialWriting)
+                sequenceId = sequentialWriter.getCurrentSequenceId();
+            else if (sequentialWriter != null)
+                sequenceId = sequentialWriter.reset();
+            else
+                sequentialWriter = new SequentialWriter<>(writerPool);
+        }
 
-		if (feature.hasLocalProperty(CoreConstants.EXPORT_AS_ADDITIONAL_OBJECT)) {
-			// according to the WFS 2.0 spec, additional objects shall be placed
-			// within the wfs:additionalObjects collection element. So we need to
-			// cache them here.
-			additionalObjectsHandler.cacheObject(feature);
-			return;
-		}
+        this.useSequentialWriting = useSequentialWriting;
+        return sequenceId;
+    }
 
-		JAXBElement<?> output = null;
-		if (!isWriteSingleFeature) {
-			MemberPropertyType memberProperty = new MemberPropertyType();
+    @Override
+    public void write(AbstractFeature feature, long sequenceId) throws FeatureWriteException {
+        // security feature: strip geometry from features
+        if (geometryStripper != null)
+            feature.accept(geometryStripper);
 
-			if (!checkForDuplicates || !isFeatureAlreadyExported(feature)) {
-				if (!(feature instanceof Appearance) || version == CityGMLVersion.v2_0_0) {
-					JAXBElement<?> element = jaxbMarshaller.marshalJAXBElement(feature);
-					if (element != null)
-						memberProperty.getContent().add(element);
-				} else {
-					// appearance elements are not global XML elements in CityGML 1.0. Thus, we have
-					// to wrap them with a property element and use an intermediate DOM element.
-					Element element = jaxbMarshaller.marshalDOMElement(new AppearanceMember((Appearance) feature));
-					if (element != null && element.hasChildNodes())
-						memberProperty.getContent().add(element.getFirstChild());
-				}
+        if (feature.hasLocalProperty(CoreConstants.EXPORT_AS_ADDITIONAL_OBJECT)) {
+            // according to the WFS 2.0 spec, additional objects shall be placed
+            // within the wfs:additionalObjects collection element. So we need to
+            // cache them here.
+            additionalObjectsHandler.cacheObject(feature);
+            return;
+        }
 
-				if (memberProperty.isSetContent())
-					output = wfsFactory.createMember(memberProperty);
-			} else {
-				memberProperty.setHref("#" + feature.getId());
-				output = wfsFactory.createMember(memberProperty);
-			}
-		} else
-			output = jaxbMarshaller.marshalJAXBElement(feature);
+        JAXBElement<?> output = null;
+        if (!isWriteSingleFeature) {
+            MemberPropertyType memberProperty = new MemberPropertyType();
 
-		SAXEventBuffer buffer = new SAXEventBuffer();
-		try {
-			if (output != null) {
-				Marshaller marshaller = cityGMLBuilder.getJAXBContext().createMarshaller();
-				marshaller.setProperty(Marshaller.JAXB_FRAGMENT, !isWriteSingleFeature);
+            if (!checkForDuplicates || !isFeatureAlreadyExported(feature)) {
+                if (!(feature instanceof Appearance) || version == CityGMLVersion.v2_0_0) {
+                    JAXBElement<?> element = jaxbMarshaller.marshalJAXBElement(feature);
+                    if (element != null)
+                        memberProperty.getContent().add(element);
+                } else {
+                    // appearance elements are not global XML elements in CityGML 1.0. Thus, we have
+                    // to wrap them with a property element and use an intermediate DOM element.
+                    Element element = jaxbMarshaller.marshalDOMElement(new AppearanceMember((Appearance) feature));
+                    if (element != null && element.hasChildNodes())
+                        memberProperty.getContent().add(element.getFirstChild());
+                }
 
-				if (transformerChainFactory == null)
-					marshaller.marshal(output, buffer);
-				else {
-					TransformerChain chain = transformerChainFactory.buildChain();
-					chain.tail().setResult(new SAXResult(buffer));
-					chain.head().startDocument();
-					marshaller.marshal(output, chain.head());
-					chain.head().endDocument();
-				}
-			} else
-				throw new FeatureWriteException("Failed to write feature with gml:id '" + feature.getId() + "'.");
-		} catch (JAXBException | SAXException | TransformerConfigurationException e) {
-			throw new FeatureWriteException("Failed to write feature with gml:id '" + feature.getId() + "'.", e);
-		}
+                if (memberProperty.isSetContent())
+                    output = wfsFactory.createMember(memberProperty);
+            } else {
+                memberProperty.setHref("#" + feature.getId());
+                output = wfsFactory.createMember(memberProperty);
+            }
+        } else
+            output = jaxbMarshaller.marshalJAXBElement(feature);
 
-		if (buffer.isEmpty())
-			throw new FeatureWriteException("Failed to write feature with gml:id '" + feature.getId() + "'.");
+        SAXEventBuffer buffer = new SAXEventBuffer();
+        try {
+            if (output != null) {
+                Marshaller marshaller = cityGMLBuilder.getJAXBContext().createMarshaller();
+                marshaller.setProperty(Marshaller.JAXB_FRAGMENT, !isWriteSingleFeature);
 
-		if (!useSequentialWriting)
-			writerPool.addWork(buffer);
-		else {
-			try {
-				sequentialWriter.write(buffer, sequenceId);
-			} catch (InterruptedException e) {
-				throw new FeatureWriteException("Failed to write feature with gml:id '" + feature.getId() + "'.", e);
-			}
-		}
-	}
+                if (transformerChainFactory == null)
+                    marshaller.marshal(output, buffer);
+                else {
+                    TransformerChain chain = transformerChainFactory.buildChain();
+                    chain.tail().setResult(new SAXResult(buffer));
+                    chain.head().startDocument();
+                    marshaller.marshal(output, chain.head());
+                    chain.head().endDocument();
+                }
+            } else
+                throw new FeatureWriteException("Failed to write feature with gml:id '" + feature.getId() + "'.");
+        } catch (JAXBException | SAXException | TransformerConfigurationException e) {
+            throw new FeatureWriteException("Failed to write feature with gml:id '" + feature.getId() + "'.", e);
+        }
 
-	@Override
-	public void updateSequenceId(long sequenceId) throws FeatureWriteException {
-		if (useSequentialWriting) {
-			try {
-				sequentialWriter.updateSequenceId(sequenceId);
-			} catch (InterruptedException e) {
-				throw new FeatureWriteException("Failed to update sequence id.", e);
-			}
-		}
-	}
+        if (buffer.isEmpty())
+            throw new FeatureWriteException("Failed to write feature with gml:id '" + feature.getId() + "'.");
 
-	@Override
-	public void writeAdditionalObjects() throws FeatureWriteException {
-		try {
-			writerPool.join();
-			if (additionalObjectsHandler.hasAdditionalObjects())
-				additionalObjectsHandler.writeObjects();
-		} catch (InterruptedException e) {
-			throw new FeatureWriteException("Failed to marshal additional objects.", e);
-		}
-	}
+        if (!useSequentialWriting)
+            writerPool.addWork(buffer);
+        else {
+            try {
+                sequentialWriter.write(buffer, sequenceId);
+            } catch (InterruptedException e) {
+                throw new FeatureWriteException("Failed to write feature with gml:id '" + feature.getId() + "'.", e);
+            }
+        }
+    }
 
-	@Override
-	public void writeTruncatedResponse(TruncatedResponse truncatedResponse) throws FeatureWriteException {
-		try {
-			SAXEventBuffer buffer = new SAXEventBuffer();
-			Marshaller marshaller = cityGMLBuilder.getJAXBContext().createMarshaller();
-			marshaller.marshal(truncatedResponse, buffer); 
-			writerPool.addWork(buffer);
-		} catch (JAXBException e) {
-			throw new FeatureWriteException("Failed to marshal truncated response element.", e);
-		}
-	}
+    @Override
+    public void updateSequenceId(long sequenceId) throws FeatureWriteException {
+        if (useSequentialWriting) {
+            try {
+                sequentialWriter.updateSequenceId(sequenceId);
+            } catch (InterruptedException e) {
+                throw new FeatureWriteException("Failed to update sequence id.", e);
+            }
+        }
+    }
 
-	@Override
-	public void close() throws FeatureWriteException {
-		try {
-			writerPool.shutdownAndWait();
-		} catch (InterruptedException e) {
-			throw new FeatureWriteException("Failed to close CityGML response writer.", e);
-		} finally {
-			if (!writerPool.isTerminated())
-				writerPool.shutdownNow();
+    @Override
+    public void writeAdditionalObjects() throws FeatureWriteException {
+        try {
+            writerPool.join();
+            if (additionalObjectsHandler.hasAdditionalObjects())
+                additionalObjectsHandler.writeObjects();
+        } catch (InterruptedException e) {
+            throw new FeatureWriteException("Failed to marshal additional objects.", e);
+        }
+    }
 
-			if (additionalObjectsHandler.hasAdditionalObjects())
-				additionalObjectsHandler.cleanCache();
+    @Override
+    public void writeTruncatedResponse(TruncatedResponse truncatedResponse) throws FeatureWriteException {
+        try {
+            SAXEventBuffer buffer = new SAXEventBuffer();
+            Marshaller marshaller = cityGMLBuilder.getJAXBContext().createMarshaller();
+            marshaller.marshal(truncatedResponse, buffer);
+            writerPool.addWork(buffer);
+        } catch (JAXBException e) {
+            throw new FeatureWriteException("Failed to marshal truncated response element.", e);
+        }
+    }
 
-			eventDispatcher.removeEventHandler(this);
-		}
-	}
-	
-	private boolean isFeatureAlreadyExported(AbstractFeature feature) {
-		if (!feature.isSetId())
-			return false;
+    @Override
+    public void close() throws FeatureWriteException {
+        try {
+            writerPool.shutdownAndWait();
+        } catch (InterruptedException e) {
+            throw new FeatureWriteException("Failed to close CityGML response writer.", e);
+        } finally {
+            if (!writerPool.isTerminated())
+                writerPool.shutdownNow();
 
-		IdCache cache = idCacheManager.getCache(IdCacheType.OBJECT);
-		return cache.get(feature.getId()) != null;
-	}
+            if (additionalObjectsHandler.hasAdditionalObjects())
+                additionalObjectsHandler.cleanCache();
 
-	private void writeFeatureCollection(long matchNo, long returnNo, String previous, String next, WriteMode writeMode) throws FeatureWriteException {
-		try {
-			FeatureCollectionType featureCollection = new FeatureCollectionType();
+            eventDispatcher.removeEventHandler(this);
+        }
+    }
 
-			if (writeMode == WriteMode.HEAD) {
-				featureCollection.setTimeStamp(getTimeStamp());
-				featureCollection.setNumberMatched(matchNo != Constants.UNKNOWN_NUMBER_MATCHED ? String.valueOf(matchNo) : "unknown");
-				featureCollection.setNumberReturned(BigInteger.valueOf(returnNo));
+    private boolean isFeatureAlreadyExported(AbstractFeature feature) {
+        if (!feature.isSetId())
+            return false;
 
-				if (level == 1) {
-					featureCollection.setPrevious(previous);
-					featureCollection.setNext(next);
-				}
-			}
+        IdCache cache = idCacheManager.getCache(IdCacheType.OBJECT);
+        return cache.get(feature.getId()) != null;
+    }
 
-			JAXBElement<?> output;
-			if (level == 1) {
-				output = wfsFactory.createFeatureCollection(featureCollection);
-			} else {
-				MemberPropertyType member = new MemberPropertyType();
-				member.getContent().add(wfsFactory.createFeatureCollection(featureCollection));
-				output = wfsFactory.createMember(member);
-			}
+    private void writeFeatureCollection(long matchNo, long returnNo, String previous, String next, WriteMode writeMode) throws FeatureWriteException {
+        try {
+            FeatureCollectionType featureCollection = new FeatureCollectionType();
 
-			SAXEventBuffer buffer = new SAXEventBuffer();
-			SAXFragmentWriter fragmentWriter = new SAXFragmentWriter(new QName(Constants.WFS_NAMESPACE_URI, "FeatureCollection"), buffer, writeMode);
-			Marshaller marshaller = cityGMLBuilder.getJAXBContext().createMarshaller();
-			marshaller.marshal(output, fragmentWriter);
+            if (writeMode == WriteMode.HEAD) {
+                featureCollection.setTimeStamp(getTimeStamp());
+                featureCollection.setNumberMatched(matchNo != Constants.UNKNOWN_NUMBER_MATCHED ? String.valueOf(matchNo) : "unknown");
+                featureCollection.setNumberReturned(BigInteger.valueOf(returnNo));
 
-			writerPool.addWork(buffer);
-		} catch (JAXBException e) {
-			throw new FeatureWriteException("Failed to marshal feature collection element.", e);
-		}
-	}
+                if (level == 1) {
+                    featureCollection.setPrevious(previous);
+                    featureCollection.setNext(next);
+                }
+            }
 
-	private XMLGregorianCalendar getTimeStamp() {
-		LocalDateTime date = LocalDateTime.now();
-		return datatypeFactory.newXMLGregorianCalendar(
-				date.getYear(),
-				date.getMonthValue(),
-				date.getDayOfMonth(),
-				date.getHour(),
-				date.getMinute(),
-				date.getSecond(),
-				DatatypeConstants.FIELD_UNDEFINED,
-				DatatypeConstants.FIELD_UNDEFINED);
-	}
+            JAXBElement<?> output;
+            if (level == 1) {
+                output = wfsFactory.createFeatureCollection(featureCollection);
+            } else {
+                MemberPropertyType member = new MemberPropertyType();
+                member.getContent().add(wfsFactory.createFeatureCollection(featureCollection));
+                output = wfsFactory.createMember(member);
+            }
 
-	@Override
-	public void handleEvent(Event event) throws Exception {
-		if (event.getChannel() == eventChannel && sequentialWriter != null)
-			sequentialWriter.interrupt();
-	}
+            SAXEventBuffer buffer = new SAXEventBuffer();
+            SAXFragmentWriter fragmentWriter = new SAXFragmentWriter(new QName(Constants.WFS_NAMESPACE_URI, "FeatureCollection"), buffer, writeMode);
+            Marshaller marshaller = cityGMLBuilder.getJAXBContext().createMarshaller();
+            marshaller.marshal(output, fragmentWriter);
+
+            writerPool.addWork(buffer);
+        } catch (JAXBException e) {
+            throw new FeatureWriteException("Failed to marshal feature collection element.", e);
+        }
+    }
+
+    private XMLGregorianCalendar getTimeStamp() {
+        LocalDateTime date = LocalDateTime.now();
+        return datatypeFactory.newXMLGregorianCalendar(
+                date.getYear(),
+                date.getMonthValue(),
+                date.getDayOfMonth(),
+                date.getHour(),
+                date.getMinute(),
+                date.getSecond(),
+                DatatypeConstants.FIELD_UNDEFINED,
+                DatatypeConstants.FIELD_UNDEFINED);
+    }
+
+    @Override
+    public void handleEvent(Event event) throws Exception {
+        if (event.getChannel() == eventChannel && sequentialWriter != null)
+            sequentialWriter.interrupt();
+    }
 
 }

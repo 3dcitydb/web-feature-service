@@ -11,35 +11,33 @@ import java.io.IOException;
 @WebFilter(Constants.WFS_SERVICE_PATH)
 public class GZIPFilter implements Filter {
 
-	@Override
-	public void init(FilterConfig filterConfig) throws ServletException {
-		// nothing to do
-	}
+    @Override
+    public void init(FilterConfig filterConfig) throws ServletException {
+        // nothing to do
+    }
 
-	@Override
-	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-		HttpServletRequest httpRequest = (HttpServletRequest)request;
-		HttpServletResponse httpResponse = (HttpServletResponse)response;
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        HttpServletRequest httpRequest = (HttpServletRequest) request;
+        HttpServletResponse httpResponse = (HttpServletResponse) response;
 
-		if (httpRequest.getHeader("Accept-Encoding") != null && httpRequest.getHeader("Accept-Encoding").contains("gzip")) {
-			httpResponse.addHeader("Content-Encoding", "gzip");
-			GZIPResponseWrapper wrapper = new GZIPResponseWrapper(httpResponse);
-			
-			try {
-				chain.doFilter(request, wrapper);
-			} finally {
-				wrapper.finish();
-			}
-		}
-		
-		else {
-			chain.doFilter(request, response);
-		}
-	}
+        if (httpRequest.getHeader("Accept-Encoding") != null && httpRequest.getHeader("Accept-Encoding").contains("gzip")) {
+            httpResponse.addHeader("Content-Encoding", "gzip");
+            GZIPResponseWrapper wrapper = new GZIPResponseWrapper(httpResponse);
 
-	@Override
-	public void destroy() {
-		// nothing to do
-	}
+            try {
+                chain.doFilter(request, wrapper);
+            } finally {
+                wrapper.finish();
+            }
+        } else {
+            chain.doFilter(request, response);
+        }
+    }
+
+    @Override
+    public void destroy() {
+        // nothing to do
+    }
 
 }

@@ -29,86 +29,86 @@ import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
 public class DescribeFeatureTypeHandler {
-	private final Logger log = Logger.getInstance();
-	private final WFSConfig wfsConfig;
+    private final Logger log = Logger.getInstance();
+    private final WFSConfig wfsConfig;
 
-	private final BaseRequestHandler baseRequestHandler;
-	private final FeatureTypeHandler featureTypeHandler;
+    private final BaseRequestHandler baseRequestHandler;
+    private final FeatureTypeHandler featureTypeHandler;
 
-	public DescribeFeatureTypeHandler(WFSConfig wfsConfig) {
-		this.wfsConfig = wfsConfig;
+    public DescribeFeatureTypeHandler(WFSConfig wfsConfig) {
+        this.wfsConfig = wfsConfig;
 
-		baseRequestHandler = new BaseRequestHandler(wfsConfig);
-		featureTypeHandler = new FeatureTypeHandler();
-	}
+        baseRequestHandler = new BaseRequestHandler(wfsConfig);
+        featureTypeHandler = new FeatureTypeHandler();
+    }
 
-	public void doOperation(DescribeFeatureTypeType wfsRequest,
-			ServletContext servletContext,
-			HttpServletRequest request,
-			HttpServletResponse response) throws WFSException {
+    public void doOperation(DescribeFeatureTypeType wfsRequest,
+                            ServletContext servletContext,
+                            HttpServletRequest request,
+                            HttpServletResponse response) throws WFSException {
 
-		log.info(LoggerUtil.getLogMessage(request, "Accepting DescribeFeatureType request."));
-		final String operationHandle = wfsRequest.getHandle();
+        log.info(LoggerUtil.getLogMessage(request, "Accepting DescribeFeatureType request."));
+        final String operationHandle = wfsRequest.getHandle();
 
-		// check base service parameters
-		baseRequestHandler.validate(wfsRequest);
+        // check base service parameters
+        baseRequestHandler.validate(wfsRequest);
 
-		// check output format
-		if (wfsRequest.isSetOutputFormat() && !wfsConfig.getOperations().getDescribeFeatureType().supportsOutputFormat(wfsRequest.getOutputFormat())) {
-			WFSExceptionMessage message = new WFSExceptionMessage(WFSExceptionCode.INVALID_PARAMETER_VALUE);
-			message.addExceptionText("The output format of a DescribeFeatureType request must match one of the following formats:");
-			message.addExceptionTexts(wfsConfig.getOperations().getDescribeFeatureType().getOutputFormatsAsString());
-			message.setLocator(KVPConstants.OUTPUT_FORMAT);
+        // check output format
+        if (wfsRequest.isSetOutputFormat() && !wfsConfig.getOperations().getDescribeFeatureType().supportsOutputFormat(wfsRequest.getOutputFormat())) {
+            WFSExceptionMessage message = new WFSExceptionMessage(WFSExceptionCode.INVALID_PARAMETER_VALUE);
+            message.addExceptionText("The output format of a DescribeFeatureType request must match one of the following formats:");
+            message.addExceptionTexts(wfsConfig.getOperations().getDescribeFeatureType().getOutputFormatsAsString());
+            message.setLocator(KVPConstants.OUTPUT_FORMAT);
 
-			throw new WFSException(message);
-		}
+            throw new WFSException(message);
+        }
 
-		Set<FeatureType> featureTypes = featureTypeHandler.getFeatureTypes(wfsRequest.getTypeName(), true, KVPConstants.TYPE_NAME, operationHandle);
-		CityGMLVersion version = featureTypeHandler.getCityGMLVersion();
-		if (version == null)
-			version = wfsConfig.getFeatureTypes().getDefaultVersion();
+        Set<FeatureType> featureTypes = featureTypeHandler.getFeatureTypes(wfsRequest.getTypeName(), true, KVPConstants.TYPE_NAME, operationHandle);
+        CityGMLVersion version = featureTypeHandler.getCityGMLVersion();
+        if (version == null)
+            version = wfsConfig.getFeatureTypes().getDefaultVersion();
 
-		SchemaReader schemaReader;
-		try {
-			schemaReader = getSchemaReader(wfsRequest, featureTypes, version, servletContext);
-		} catch (SchemaReaderException e) {
-			throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "Failed to initialize the schema reader.", operationHandle, e);
-		}
+        SchemaReader schemaReader;
+        try {
+            schemaReader = getSchemaReader(wfsRequest, featureTypes, version, servletContext);
+        } catch (SchemaReaderException e) {
+            throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "Failed to initialize the schema reader.", operationHandle, e);
+        }
 
-		try (BufferedReader reader = new BufferedReader(new InputStreamReader(schemaReader.openSchema()))) {
-			response.setContentType(schemaReader.getMimeType());
-			response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-			PrintWriter writer = response.getWriter();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(schemaReader.openSchema()))) {
+            response.setContentType(schemaReader.getMimeType());
+            response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+            PrintWriter writer = response.getWriter();
 
-			String line;
-			while ((line = reader.readLine()) != null)
-				writer.println(line);
+            String line;
+            while ((line = reader.readLine()) != null)
+                writer.println(line);
 
-		} catch (IOException | SchemaReaderException e) {
-			throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "Failed to process schema document.", operationHandle, e);
-		}
+        } catch (IOException | SchemaReaderException e) {
+            throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "Failed to process schema document.", operationHandle, e);
+        }
 
-		log.info(LoggerUtil.getLogMessage(request, "DescribeFeatureType operation successfully finished."));
-	}
+        log.info(LoggerUtil.getLogMessage(request, "DescribeFeatureType operation successfully finished."));
+    }
 
-	private SchemaReader getSchemaReader(DescribeFeatureTypeType wfsRequest, Set<FeatureType> featureTypes, CityGMLVersion version, ServletContext servletContext) throws SchemaReaderException {
-		OutputFormat outputFormat = wfsConfig.getOperations().getDescribeFeatureType().getOutputFormat(wfsRequest.isSetOutputFormat() ? 
-				wfsRequest.getOutputFormat() : DescribeFeatureTypeOutputFormat.GML3_1.value());
+    private SchemaReader getSchemaReader(DescribeFeatureTypeType wfsRequest, Set<FeatureType> featureTypes, CityGMLVersion version, ServletContext servletContext) throws SchemaReaderException {
+        OutputFormat outputFormat = wfsConfig.getOperations().getDescribeFeatureType().getOutputFormat(wfsRequest.isSetOutputFormat() ?
+                wfsRequest.getOutputFormat() : DescribeFeatureTypeOutputFormat.GML3_1.value());
 
-		SchemaReader schemaReader;
-		switch (outputFormat.getName()) {
-			case "application/gml+xml; version=3.1":
-				schemaReader = new CityGMLSchemaReader();
-				break;
-			case "application/json":
-				schemaReader = new CityJSONSchemaReader();
-				break;
-			default:
-				throw new SchemaReaderException("No schema reader has been registered for the output format '" + outputFormat.getName() + "'.");
-		}
-		
-		schemaReader.initializeContext(featureTypes, version, servletContext);
-		
-		return schemaReader;
-	}
+        SchemaReader schemaReader;
+        switch (outputFormat.getName()) {
+            case "application/gml+xml; version=3.1":
+                schemaReader = new CityGMLSchemaReader();
+                break;
+            case "application/json":
+                schemaReader = new CityJSONSchemaReader();
+                break;
+            default:
+                throw new SchemaReaderException("No schema reader has been registered for the output format '" + outputFormat.getName() + "'.");
+        }
+
+        schemaReader.initializeContext(featureTypes, version, servletContext);
+
+        return schemaReader;
+    }
 }

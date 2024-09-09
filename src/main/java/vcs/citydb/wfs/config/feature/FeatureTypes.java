@@ -22,155 +22,155 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@XmlType(name="FeatureTypesType", propOrder={
-		"cityGMLFeatureTypes",
-		"adeFeatureTypes",
-		"versions"
+@XmlType(name = "FeatureTypesType", propOrder = {
+        "cityGMLFeatureTypes",
+        "adeFeatureTypes",
+        "versions"
 })
 public class FeatureTypes {
-	@XmlElement(name="featureType", required=true)
-	private LinkedHashSet<CityGMLFeatureType> cityGMLFeatureTypes;
-	@XmlElement(name="adeFeatureType")
-	private LinkedHashSet<ADEFeatureType> adeFeatureTypes;
-	@XmlElement(name="version", required=true)
-	private LinkedHashSet<CityGMLVersionType> versions;
+    @XmlElement(name = "featureType", required = true)
+    private LinkedHashSet<CityGMLFeatureType> cityGMLFeatureTypes;
+    @XmlElement(name = "adeFeatureType")
+    private LinkedHashSet<ADEFeatureType> adeFeatureTypes;
+    @XmlElement(name = "version", required = true)
+    private LinkedHashSet<CityGMLVersionType> versions;
 
-	@XmlTransient
-	private Map<QName, FeatureType> featureTypes;
+    @XmlTransient
+    private Map<QName, FeatureType> featureTypes;
 
-	public FeatureTypes() {
-		cityGMLFeatureTypes = new LinkedHashSet<>();
-		adeFeatureTypes = new LinkedHashSet<>();
-		versions = new LinkedHashSet<>();
-	}
+    public FeatureTypes() {
+        cityGMLFeatureTypes = new LinkedHashSet<>();
+        adeFeatureTypes = new LinkedHashSet<>();
+        versions = new LinkedHashSet<>();
+    }
 
-	public Collection<FeatureType> getAdvertisedFeatureTypes() {
-		return getFeatureTypes().values();
-	}
+    public Collection<FeatureType> getAdvertisedFeatureTypes() {
+        return getFeatureTypes().values();
+    }
 
-	public boolean contains(QName featureName) {
-		return getFeatureTypes().containsKey(featureName);
-	}
+    public boolean contains(QName featureName) {
+        return getFeatureTypes().containsKey(featureName);
+    }
 
-	public Set<Module> getModules() {
-		Set<Module> result = new HashSet<>();
-		for (QName name : getFeatureTypes().keySet())
-			result.add(Modules.getModule(name.getNamespaceURI()));
+    public Set<Module> getModules() {
+        Set<Module> result = new HashSet<>();
+        for (QName name : getFeatureTypes().keySet())
+            result.add(Modules.getModule(name.getNamespaceURI()));
 
-		return result;
-	}
+        return result;
+    }
 
-	public CityGMLVersion getDefaultVersion() {
-		for (CityGMLVersionType version : versions)
-			if (version.isDefault())
-				return version.getValue().getCityGMLVersion();
+    public CityGMLVersion getDefaultVersion() {
+        for (CityGMLVersionType version : versions)
+            if (version.isDefault())
+                return version.getValue().getCityGMLVersion();
 
-		return versions.size() == 1 ? 
-				versions.iterator().next().getValue().getCityGMLVersion() : CityGMLVersion.DEFAULT;
-	}
+        return versions.size() == 1 ?
+                versions.iterator().next().getValue().getCityGMLVersion() : CityGMLVersion.DEFAULT;
+    }
 
-	public List<CityGMLVersion> getVersions() {
-		List<CityGMLVersion> result = new ArrayList<>();
-		for (CityGMLVersionType version : versions) {
-			if (version.getValue() == null)
-				continue;
+    public List<CityGMLVersion> getVersions() {
+        List<CityGMLVersion> result = new ArrayList<>();
+        for (CityGMLVersionType version : versions) {
+            if (version.getValue() == null)
+                continue;
 
-			result.add(version.getValue().getCityGMLVersion());
-		}
+            result.add(version.getValue().getCityGMLVersion());
+        }
 
-		return result;
-	}
+        return result;
+    }
 
-	public void preprocessFeatureTypes() {
-		getFeatureTypes();
-	}
+    public void preprocessFeatureTypes() {
+        getFeatureTypes();
+    }
 
-	private Map<QName, FeatureType> getFeatureTypes() {
-		if (featureTypes != null)
-			return featureTypes;
+    private Map<QName, FeatureType> getFeatureTypes() {
+        if (featureTypes != null)
+            return featureTypes;
 
-		featureTypes = new LinkedHashMap<>();
+        featureTypes = new LinkedHashMap<>();
 
-		// add CityGML feature types
-		for (CityGMLFeatureType type : cityGMLFeatureTypes) {				
-			for (CityGMLVersion version : getVersions()) {				
-				QName name = type.getQName(version);
-				if (name != null)
-					featureTypes.put(name, new FeatureType(name, type));
-			}
-		}
+        // add CityGML feature types
+        for (CityGMLFeatureType type : cityGMLFeatureTypes) {
+            for (CityGMLVersion version : getVersions()) {
+                QName name = type.getQName(version);
+                if (name != null)
+                    featureTypes.put(name, new FeatureType(name, type));
+            }
+        }
 
-		// check and add ADE feature types
-		SchemaMapping schemaMapping = ObjectRegistry.getInstance().getSchemaMapping();
-		Logger log = Logger.getInstance();
-		ADEExtensionManager adeManager = ADEExtensionManager.getInstance();
+        // check and add ADE feature types
+        SchemaMapping schemaMapping = ObjectRegistry.getInstance().getSchemaMapping();
+        Logger log = Logger.getInstance();
+        ADEExtensionManager adeManager = ADEExtensionManager.getInstance();
 
-		for (ADEFeatureType type : adeFeatureTypes) {
-			QName name = type.getQName();
-			if (name == null)
-				continue;
+        for (ADEFeatureType type : adeFeatureTypes) {
+            QName name = type.getQName();
+            if (name == null)
+                continue;
 
-			try {
-				org.citydb.core.database.schema.mapping.FeatureType featureType = schemaMapping.getFeatureType(name);
-				if (featureType == null)
-					throw new ADEException("Failed to find a definition for the feature type in the database schema mapping.");
+            try {
+                org.citydb.core.database.schema.mapping.FeatureType featureType = schemaMapping.getFeatureType(name);
+                if (featureType == null)
+                    throw new ADEException("Failed to find a definition for the feature type in the database schema mapping.");
 
-				if (!featureType.isTopLevel())
-					throw new ADEException("The feature type is not top-level.");
+                if (!featureType.isTopLevel())
+                    throw new ADEException("The feature type is not top-level.");
 
-				ADEExtension adeExtension = adeManager.getExtensionByObjectClassId(featureType.getObjectClassId());
-				if (adeExtension == null || !adeExtension.isEnabled())
-					throw new ADEException("The ADE extension of the feature type is disabled.");
+                ADEExtension adeExtension = adeManager.getExtensionByObjectClassId(featureType.getObjectClassId());
+                if (adeExtension == null || !adeExtension.isEnabled())
+                    throw new ADEException("The ADE extension of the feature type is disabled.");
 
-				boolean hasLocalSchemaFile = false;
-				for (ADEContext adeContext : adeExtension.getADEContexts()) {
-					for (ADEModule adeModule : adeContext.getADEModules()) {
-						if (adeModule.getNamespaceURI().equals(name.getNamespaceURI())) {
-							URL schemaLocation = adeModule.getSchemaResource();
-							if (schemaLocation != null) {
-								String protocol = schemaLocation.getProtocol();
-								if ("jar".equalsIgnoreCase(protocol)) {
-									hasLocalSchemaFile = true;
-									break;
-								} else if ("file".equalsIgnoreCase(protocol)
-										&& Files.exists(Paths.get(schemaLocation.getFile()))) {
-									hasLocalSchemaFile = true;
-									break;
-								}
-							}
-						}
+                boolean hasLocalSchemaFile = false;
+                for (ADEContext adeContext : adeExtension.getADEContexts()) {
+                    for (ADEModule adeModule : adeContext.getADEModules()) {
+                        if (adeModule.getNamespaceURI().equals(name.getNamespaceURI())) {
+                            URL schemaLocation = adeModule.getSchemaResource();
+                            if (schemaLocation != null) {
+                                String protocol = schemaLocation.getProtocol();
+                                if ("jar".equalsIgnoreCase(protocol)) {
+                                    hasLocalSchemaFile = true;
+                                    break;
+                                } else if ("file".equalsIgnoreCase(protocol)
+                                        && Files.exists(Paths.get(schemaLocation.getFile()))) {
+                                    hasLocalSchemaFile = true;
+                                    break;
+                                }
+                            }
+                        }
 
-						if (hasLocalSchemaFile)
-							break;
-					}
-				}
+                        if (hasLocalSchemaFile)
+                            break;
+                    }
+                }
 
-				if (!hasLocalSchemaFile)
-					throw new ADEException("No local ADE XML schema file provided for this feature type.");
+                if (!hasLocalSchemaFile)
+                    throw new ADEException("No local ADE XML schema file provided for this feature type.");
 
-				boolean isAvailable = false;
-				for (CityGMLVersion version : getVersions()) {
-					if (featureType.isAvailableForCityGML(version)) {
-						isAvailable = true;
-						break;
-					}
-				}
+                boolean isAvailable = false;
+                for (CityGMLVersion version : getVersions()) {
+                    if (featureType.isAvailableForCityGML(version)) {
+                        isAvailable = true;
+                        break;
+                    }
+                }
 
-				if (!isAvailable)
-					throw new ADEException("The feature type is not available for the CityGML version(s): " 
-							+ getVersions().stream().map(CityGMLVersion::toString).collect(Collectors.joining(",")));
+                if (!isAvailable)
+                    throw new ADEException("The feature type is not available for the CityGML version(s): "
+                            + getVersions().stream().map(CityGMLVersion::toString).collect(Collectors.joining(",")));
 
-				featureTypes.put(name, new FeatureType(name, type));
-			} catch (ADEException e) {
-				log.error("The ADE feature type '" + name + "' will not be advertised.");
-				log.error("Cause: " + e.getMessage());
-			}
-		}
+                featureTypes.put(name, new FeatureType(name, type));
+            } catch (ADEException e) {
+                log.error("The ADE feature type '" + name + "' will not be advertised.");
+                log.error("Cause: " + e.getMessage());
+            }
+        }
 
-		cityGMLFeatureTypes = null;
-		adeFeatureTypes = null;
+        cityGMLFeatureTypes = null;
+        adeFeatureTypes = null;
 
-		return featureTypes;
-	}
+        return featureTypes;
+    }
 
 }

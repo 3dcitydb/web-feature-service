@@ -49,193 +49,193 @@ import java.util.List;
 import java.util.Set;
 
 public class GetFeatureHandler {
-	private final Logger log = Logger.getInstance();
-	private final WFSConfig wfsConfig;
+    private final Logger log = Logger.getInstance();
+    private final WFSConfig wfsConfig;
 
-	private final AbstractDatabaseAdapter databaseAdapter;
-	private final ExportController controller;
-	private final BaseRequestHandler baseRequestHandler;
-	private final FeatureTypeHandler featureTypeHandler;
-	private final DatabaseSrsParser srsNameParser;
-	private final FilterHandler filterHandler;
-	private final SortingHandler sortingHandler;
-	private final SchemaMapping schemaMapping;
-	private final StoredQueryManager storedQueryManager;
+    private final AbstractDatabaseAdapter databaseAdapter;
+    private final ExportController controller;
+    private final BaseRequestHandler baseRequestHandler;
+    private final FeatureTypeHandler featureTypeHandler;
+    private final DatabaseSrsParser srsNameParser;
+    private final FilterHandler filterHandler;
+    private final SortingHandler sortingHandler;
+    private final SchemaMapping schemaMapping;
+    private final StoredQueryManager storedQueryManager;
 
-	public GetFeatureHandler(CityGMLBuilder cityGMLBuilder, WFSConfig wfsConfig, Config config) {
-		this.wfsConfig = wfsConfig;
+    public GetFeatureHandler(CityGMLBuilder cityGMLBuilder, WFSConfig wfsConfig, Config config) {
+        this.wfsConfig = wfsConfig;
 
-		databaseAdapter = DatabaseConnectionPool.getInstance().getActiveDatabaseAdapter();
-		controller = new ExportController(cityGMLBuilder, wfsConfig, config);
-		baseRequestHandler = new BaseRequestHandler(wfsConfig);
-		featureTypeHandler = new FeatureTypeHandler();
-		srsNameParser = new DatabaseSrsParser(databaseAdapter, config);
-		schemaMapping = ObjectRegistry.getInstance().getSchemaMapping();
-		storedQueryManager = ObjectRegistry.getInstance().lookup(StoredQueryManager.class);
+        databaseAdapter = DatabaseConnectionPool.getInstance().getActiveDatabaseAdapter();
+        controller = new ExportController(cityGMLBuilder, wfsConfig, config);
+        baseRequestHandler = new BaseRequestHandler(wfsConfig);
+        featureTypeHandler = new FeatureTypeHandler();
+        srsNameParser = new DatabaseSrsParser(databaseAdapter, config);
+        schemaMapping = ObjectRegistry.getInstance().getSchemaMapping();
+        storedQueryManager = ObjectRegistry.getInstance().lookup(StoredQueryManager.class);
 
-		JAXBUnmarshaller unmarshaller = cityGMLBuilder.createJAXBUnmarshaller(ObjectRegistry.getInstance().lookup(SchemaHandler.class));
-		SimpleXPathParser xpathParser = new SimpleXPathParser(schemaMapping);
-		filterHandler = new FilterHandler(unmarshaller, xpathParser, srsNameParser, wfsConfig);
-		sortingHandler = new SortingHandler(xpathParser);
-	}
+        JAXBUnmarshaller unmarshaller = cityGMLBuilder.createJAXBUnmarshaller(ObjectRegistry.getInstance().lookup(SchemaHandler.class));
+        SimpleXPathParser xpathParser = new SimpleXPathParser(schemaMapping);
+        filterHandler = new FilterHandler(unmarshaller, xpathParser, srsNameParser, wfsConfig);
+        sortingHandler = new SortingHandler(xpathParser);
+    }
 
-	public void doOperation(GetFeatureType wfsRequest,
-			NamespaceFilter namespaceFilter,
-			HttpServletRequest request,
-			HttpServletResponse response) throws WFSException {
+    public void doOperation(GetFeatureType wfsRequest,
+                            NamespaceFilter namespaceFilter,
+                            HttpServletRequest request,
+                            HttpServletResponse response) throws WFSException {
 
-		log.info(LoggerUtil.getLogMessage(request, "Accepting GetFeature request."));
-		final List<QueryExpression> queryExpressions = new ArrayList<>();
-		final String operationHandle = wfsRequest.getHandle();
-		CityGMLVersion version = null;
-		LodFilter lodFilter = null;
+        log.info(LoggerUtil.getLogMessage(request, "Accepting GetFeature request."));
+        final List<QueryExpression> queryExpressions = new ArrayList<>();
+        final String operationHandle = wfsRequest.getHandle();
+        CityGMLVersion version = null;
+        LodFilter lodFilter = null;
 
-		// check base service parameters
-		baseRequestHandler.validate(wfsRequest);
+        // check base service parameters
+        baseRequestHandler.validate(wfsRequest);
 
-		// check output format
-		if (wfsRequest.isSetOutputFormat() && !wfsConfig.getOperations().getGetFeature().supportsOutputFormat(wfsRequest.getOutputFormat())) {
-			WFSExceptionMessage message = new WFSExceptionMessage(WFSExceptionCode.INVALID_PARAMETER_VALUE);
-			message.addExceptionText("The output format of a GetFeature request must match one of the following formats:");
-			message.addExceptionTexts(wfsConfig.getOperations().getGetFeature().getOutputFormatsAsString());
-			message.setLocator(KVPConstants.OUTPUT_FORMAT);
+        // check output format
+        if (wfsRequest.isSetOutputFormat() && !wfsConfig.getOperations().getGetFeature().supportsOutputFormat(wfsRequest.getOutputFormat())) {
+            WFSExceptionMessage message = new WFSExceptionMessage(WFSExceptionCode.INVALID_PARAMETER_VALUE);
+            message.addExceptionText("The output format of a GetFeature request must match one of the following formats:");
+            message.addExceptionTexts(wfsConfig.getOperations().getGetFeature().getOutputFormatsAsString());
+            message.setLocator(KVPConstants.OUTPUT_FORMAT);
 
-			throw new WFSException(message);
-		}
+            throw new WFSException(message);
+        }
 
-		if (wfsRequest.getResolve() != ResolveValueType.NONE && wfsRequest.getResolve() != ResolveValueType.LOCAL)
-			throw new WFSException(WFSExceptionCode.OPTION_NOT_SUPPORTED, "Resolving of remote resources is not supported.", operationHandle);
+        if (wfsRequest.getResolve() != ResolveValueType.NONE && wfsRequest.getResolve() != ResolveValueType.LOCAL)
+            throw new WFSException(WFSExceptionCode.OPTION_NOT_SUPPORTED, "Resolving of remote resources is not supported.", operationHandle);
 
-		if (wfsRequest.getResolve() == ResolveValueType.LOCAL && !wfsRequest.getResolveDepth().equals("*"))
-			throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, "Only the value '*' is supported as resolve depth.", KVPConstants.RESOLVE_DEPTH);
+        if (wfsRequest.getResolve() == ResolveValueType.LOCAL && !wfsRequest.getResolveDepth().equals("*"))
+            throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, "Only the value '*' is supported as resolve depth.", KVPConstants.RESOLVE_DEPTH);
 
-		// check for queries to be present
-		if (wfsRequest.getAbstractQueryExpression().isEmpty())
-			throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "No query provided.", operationHandle);
+        // check for queries to be present
+        if (wfsRequest.getAbstractQueryExpression().isEmpty())
+            throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "No query provided.", operationHandle);
 
-		// compile queries to be executed from ad-hoc and stored queries
-		List<QueryType> queries = new ArrayList<>();
-		for (JAXBElement<? extends AbstractQueryExpressionType> queryElem : wfsRequest.getAbstractQueryExpression())
-			storedQueryManager.compileQuery(queryElem.getValue(), queries, namespaceFilter, operationHandle);
-		
-		// lod filter constraint
-		if (wfsConfig.getConstraints().getLodFilter().isEnabled()) {
-			try {
-				lodFilter = new LodFilterBuilder().buildLodFilter(wfsConfig.getConstraints().getLodFilter());
-			} catch (QueryBuildException e) {
-				throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "Failed to build the LoD filter.", operationHandle, e);
-			}
-		}
+        // compile queries to be executed from ad-hoc and stored queries
+        List<QueryType> queries = new ArrayList<>();
+        for (JAXBElement<? extends AbstractQueryExpressionType> queryElem : wfsRequest.getAbstractQueryExpression())
+            storedQueryManager.compileQuery(queryElem.getValue(), queries, namespaceFilter, operationHandle);
 
-		// iterate through queries		
-		for (QueryType query : queries) {
-			String queryHandle = query.isSetHandle() ? query.getHandle() : operationHandle;
+        // lod filter constraint
+        if (wfsConfig.getConstraints().getLodFilter().isEnabled()) {
+            try {
+                lodFilter = new LodFilterBuilder().buildLodFilter(wfsConfig.getConstraints().getLodFilter());
+            } catch (QueryBuildException e) {
+                throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "Failed to build the LoD filter.", operationHandle, e);
+            }
+        }
 
-			// TODO: aliases are not supported
-			if (!query.getAliases().isEmpty())
-				throw new WFSException(WFSExceptionCode.OPTION_NOT_SUPPORTED, "Aliases for feature type names are not supported.", queryHandle);
+        // iterate through queries
+        for (QueryType query : queries) {
+            String queryHandle = query.isSetHandle() ? query.getHandle() : operationHandle;
 
-			// feature versions are not supported
-			if (query.isSetFeatureVersion())
-				throw new WFSException(WFSExceptionCode.OPTION_NOT_SUPPORTED, "Feature versioning is not supported.", queryHandle);
+            // TODO: aliases are not supported
+            if (!query.getAliases().isEmpty())
+                throw new WFSException(WFSExceptionCode.OPTION_NOT_SUPPORTED, "Aliases for feature type names are not supported.", queryHandle);
 
-			// join queries are not supported
-			if (query.getTypeNames().size() > 1)
-				throw new WFSException(WFSExceptionCode.OPTION_NOT_SUPPORTED, "Join queries are not supported.", queryHandle);
+            // feature versions are not supported
+            if (query.isSetFeatureVersion())
+                throw new WFSException(WFSExceptionCode.OPTION_NOT_SUPPORTED, "Feature versioning is not supported.", queryHandle);
 
-			// create and populate query expression
-			QueryExpression queryExpression = new QueryExpression();
-			queryExpression.setLodFilter(lodFilter);
-			queryExpression.setFeatureIdentifier(query.getFeatureIdentifier());
-			queryExpression.setHandle(queryHandle);
-			
-			// get SRS for coordinate transformation
-			if (query.isSetSrsName()) {
-				try {
-					queryExpression.setTargetSrs(srsNameParser.getDatabaseSrs(query.getSrsName()));
-				} catch (SrsParseException e) {
-					throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, "Failed to parse srsName attribute.", KVPConstants.SRS_NAME, e);
-				}
-			} else
-				queryExpression.setTargetSrs(databaseAdapter.getConnectionMetaData().getReferenceSystem());
-			
-			// create filter from feature type names
-			Set<FeatureType> featureTypes = featureTypeHandler.getFeatureTypes(query.getTypeNames(), namespaceFilter, false, KVPConstants.TYPE_NAMES, queryHandle);
-			try {
-				queryExpression.setFeatureTypeFilter(new FeatureTypeFilter(featureTypes));
-			} catch (FilterException e) {
-				throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "Failed to build filter expression.", queryHandle, e);
-			}
+            // join queries are not supported
+            if (query.getTypeNames().size() > 1)
+                throw new WFSException(WFSExceptionCode.OPTION_NOT_SUPPORTED, "Join queries are not supported.", queryHandle);
 
-			// check for unique CityGML version over multiple queries
-			queryExpression.setTargetVersion(featureTypeHandler.getCityGMLVersion());
-			if (version == null)
-				version = queryExpression.getTargetVersion();
-			else if (version != queryExpression.getTargetVersion())
-				throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "Mixing feature types from different CityGML versions is not supported.", queryHandle);
+            // create and populate query expression
+            QueryExpression queryExpression = new QueryExpression();
+            queryExpression.setLodFilter(lodFilter);
+            queryExpression.setFeatureIdentifier(query.getFeatureIdentifier());
+            queryExpression.setHandle(queryHandle);
 
-			// get requested projection attributes
-			if (query.isSetAbstractProjectionClause())
-				queryExpression.setProjection(getProjection(query.getAbstractProjectionClause(), featureTypes, queryHandle));
+            // get SRS for coordinate transformation
+            if (query.isSetSrsName()) {
+                try {
+                    queryExpression.setTargetSrs(srsNameParser.getDatabaseSrs(query.getSrsName()));
+                } catch (SrsParseException e) {
+                    throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, "Failed to parse srsName attribute.", KVPConstants.SRS_NAME, e);
+                }
+            } else
+                queryExpression.setTargetSrs(databaseAdapter.getConnectionMetaData().getReferenceSystem());
 
-			// get selection clause of query
-			FeatureType featureType = schemaMapping.getCommonSuperType(featureTypes);
-			if (query.isSetAbstractSelectionClause())
-				queryExpression.setSelection(filterHandler.getSelection(query.getAbstractSelectionClause(), featureType, namespaceFilter, queryHandle));
+            // create filter from feature type names
+            Set<FeatureType> featureTypes = featureTypeHandler.getFeatureTypes(query.getTypeNames(), namespaceFilter, false, KVPConstants.TYPE_NAMES, queryHandle);
+            try {
+                queryExpression.setFeatureTypeFilter(new FeatureTypeFilter(featureTypes));
+            } catch (FilterException e) {
+                throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "Failed to build filter expression.", queryHandle, e);
+            }
 
-			// only process non-terminated objects if required
-			if (wfsConfig.getConstraints().isCurrentVersionOnly())
-				filterHandler.addNotTerminatedFilter(queryExpression, queryHandle);
+            // check for unique CityGML version over multiple queries
+            queryExpression.setTargetVersion(featureTypeHandler.getCityGMLVersion());
+            if (version == null)
+                version = queryExpression.getTargetVersion();
+            else if (version != queryExpression.getTargetVersion())
+                throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "Mixing feature types from different CityGML versions is not supported.", queryHandle);
 
-			// get sorting clause
-			if (query.isSetAbstractSortingClause())
-				queryExpression.setSorting(sortingHandler.getSorting(query.getAbstractSortingClause(), featureType, namespaceFilter, queryHandle));
-			else if (wfsConfig.getConstraints().isUseDefaultSorting())
-				sortingHandler.setDefaultSorting(queryExpression, featureType, queryHandle);
+            // get requested projection attributes
+            if (query.isSetAbstractProjectionClause())
+                queryExpression.setProjection(getProjection(query.getAbstractProjectionClause(), featureTypes, queryHandle));
 
-			queryExpressions.add(queryExpression);
-		}
+            // get selection clause of query
+            FeatureType featureType = schemaMapping.getCommonSuperType(featureTypes);
+            if (query.isSetAbstractSelectionClause())
+                queryExpression.setSelection(filterHandler.getSelection(query.getAbstractSelectionClause(), featureType, namespaceFilter, queryHandle));
 
-		if (queryExpressions.size() == 0)
-			throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "No valid query expressions provided.", operationHandle);
+            // only process non-terminated objects if required
+            if (wfsConfig.getConstraints().isCurrentVersionOnly())
+                filterHandler.addNotTerminatedFilter(queryExpression, queryHandle);
 
-		controller.doExport(wfsRequest, queryExpressions, request, response);
-		log.info(LoggerUtil.getLogMessage(request, "GetFeature operation successfully finished."));
-	}
+            // get sorting clause
+            if (query.isSetAbstractSortingClause())
+                queryExpression.setSorting(sortingHandler.getSorting(query.getAbstractSortingClause(), featureType, namespaceFilter, queryHandle));
+            else if (wfsConfig.getConstraints().isUseDefaultSorting())
+                sortingHandler.setDefaultSorting(queryExpression, featureType, queryHandle);
 
-	private Projection getProjection(Collection<JAXBElement<?>> propertyNameElements, Set<FeatureType> featureTypes, String handle) throws WFSException {
-		Projection projection = new Projection();
+            queryExpressions.add(queryExpression);
+        }
 
-		for (JAXBElement<?> propertyNameElement : propertyNameElements) {
-			if (!(propertyNameElement.getValue() instanceof PropertyName))
-				throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "The element " + propertyNameElement.getName() + " is not allowed within the projection clause of queries.", handle);
+        if (queryExpressions.size() == 0)
+            throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "No valid query expressions provided.", operationHandle);
 
-			PropertyName propertyName = (PropertyName)propertyNameElement.getValue();
+        controller.doExport(wfsRequest, queryExpressions, request, response);
+        log.info(LoggerUtil.getLogMessage(request, "GetFeature operation successfully finished."));
+    }
 
-			// TODO: add support for local resource resolving
-			if (propertyName.getResolve() != ResolveValueType.NONE)
-				throw new WFSException(WFSExceptionCode.OPTION_NOT_SUPPORTED, "Resource resolving on property names is not supported.", handle);
+    private Projection getProjection(Collection<JAXBElement<?>> propertyNameElements, Set<FeatureType> featureTypes, String handle) throws WFSException {
+        Projection projection = new Projection();
 
-			QName name = ((PropertyName)propertyNameElement.getValue()).getValue();
-			if (name == null)
-				throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "Failed to parse qualified property name '" + propertyNameElement.getName() + "' in projection clause of the query.", handle);
+        for (JAXBElement<?> propertyNameElement : propertyNameElements) {
+            if (!(propertyNameElement.getValue() instanceof PropertyName))
+                throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "The element " + propertyNameElement.getName() + " is not allowed within the projection clause of queries.", handle);
 
-			// assign property to appropriate feature types
-			boolean found = false;
-			for (FeatureType featureType : featureTypes) {
-				AbstractProperty property = featureType.getProperty(name.getLocalPart(), name.getNamespaceURI(), true);
-				if (property != null) {
-					projection.getProjectionFilter(featureType).addProperty(property);
-					found = true;
-				}
-			}
+            PropertyName propertyName = (PropertyName) propertyNameElement.getValue();
 
-			if (!found)
-				throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "The property " + name.toString() + " is not available for the requested feature "
-						+ (featureTypes.size() == 1 ? "type" : "types") + ".", handle);
-		}
+            // TODO: add support for local resource resolving
+            if (propertyName.getResolve() != ResolveValueType.NONE)
+                throw new WFSException(WFSExceptionCode.OPTION_NOT_SUPPORTED, "Resource resolving on property names is not supported.", handle);
 
-		return projection;
-	}
+            QName name = ((PropertyName) propertyNameElement.getValue()).getValue();
+            if (name == null)
+                throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "Failed to parse qualified property name '" + propertyNameElement.getName() + "' in projection clause of the query.", handle);
+
+            // assign property to appropriate feature types
+            boolean found = false;
+            for (FeatureType featureType : featureTypes) {
+                AbstractProperty property = featureType.getProperty(name.getLocalPart(), name.getNamespaceURI(), true);
+                if (property != null) {
+                    projection.getProjectionFilter(featureType).addProperty(property);
+                    found = true;
+                }
+            }
+
+            if (!found)
+                throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "The property " + name.toString() + " is not available for the requested feature "
+                        + (featureTypes.size() == 1 ? "type" : "types") + ".", handle);
+        }
+
+        return projection;
+    }
 
 }

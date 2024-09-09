@@ -30,10 +30,15 @@ public abstract class PageRequest {
     }
 
     abstract PageRequest newInstance(long pageNumber, String identifier);
+
     abstract int size();
+
     abstract long[] getValues();
+
     abstract void setValues(long[] values);
+
     abstract void setDefaultValues();
+
     public abstract String getOperationName();
 
     PageRequest generateRequestFor(long pageNumber) {

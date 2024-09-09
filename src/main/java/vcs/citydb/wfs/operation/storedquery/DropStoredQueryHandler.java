@@ -24,78 +24,78 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 public class DropStoredQueryHandler {
-	private final Logger log = Logger.getInstance();
+    private final Logger log = Logger.getInstance();
 
-	private final BaseRequestHandler baseRequestHandler;
-	private final StoredQueryManager storedQueryManager;
-	private final Marshaller marshaller;
-	private final ObjectFactory wfsFactory;
-	private final WFSConfig wfsConfig;
+    private final BaseRequestHandler baseRequestHandler;
+    private final StoredQueryManager storedQueryManager;
+    private final Marshaller marshaller;
+    private final ObjectFactory wfsFactory;
+    private final WFSConfig wfsConfig;
 
-	public DropStoredQueryHandler(CityGMLBuilder cityGMLBuilder, WFSConfig wfsConfig) throws JAXBException {
-		this.wfsConfig = wfsConfig;
-		
-		baseRequestHandler = new BaseRequestHandler(wfsConfig);
-		storedQueryManager = ObjectRegistry.getInstance().lookup(StoredQueryManager.class);
-		
-		wfsFactory = storedQueryManager.getObjectFactory();
-		marshaller = cityGMLBuilder.getJAXBContext().createMarshaller();
-	}
+    public DropStoredQueryHandler(CityGMLBuilder cityGMLBuilder, WFSConfig wfsConfig) throws JAXBException {
+        this.wfsConfig = wfsConfig;
 
-	public void doOperation(DropStoredQueryType wfsRequest,
-			HttpServletRequest request,
-			HttpServletResponse response) throws WFSException {
+        baseRequestHandler = new BaseRequestHandler(wfsConfig);
+        storedQueryManager = ObjectRegistry.getInstance().lookup(StoredQueryManager.class);
 
-		final String operationHandle = wfsRequest.getHandle();
+        wfsFactory = storedQueryManager.getObjectFactory();
+        marshaller = cityGMLBuilder.getJAXBContext().createMarshaller();
+    }
 
-		// check whether the create stored query operation is advertised
-		if (!wfsConfig.getOperations().getManagedStoredQueries().isEnabled())
-			throw new WFSException(WFSExceptionCode.OPERATION_NOT_SUPPORTED, "The DropStoredQuery operation is not advertised.", operationHandle);
+    public void doOperation(DropStoredQueryType wfsRequest,
+                            HttpServletRequest request,
+                            HttpServletResponse response) throws WFSException {
 
-		log.info(LoggerUtil.getLogMessage(request, "Accepting CreateStoredQuery request."));
+        final String operationHandle = wfsRequest.getHandle();
 
-		// check base service parameters
-		baseRequestHandler.validate(wfsRequest);
-		
-		// check for stored query id to be present
-		if (!wfsRequest.isSetId())
-			throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "The operation requires a stored query id.", operationHandle);
+        // check whether the create stored query operation is advertised
+        if (!wfsConfig.getOperations().getManagedStoredQueries().isEnabled())
+            throw new WFSException(WFSExceptionCode.OPERATION_NOT_SUPPORTED, "The DropStoredQuery operation is not advertised.", operationHandle);
 
-		// drop stored query
-		storedQueryManager.dropStoredQuery(wfsRequest.getId(), operationHandle);		
-		
-		final SAXWriter saxWriter = new SAXWriter();
+        log.info(LoggerUtil.getLogMessage(request, "Accepting CreateStoredQuery request."));
 
-		try {
-			// generate response
-			ExecutionStatusType status = new ExecutionStatusType();
-			status.setStatus("OK");
+        // check base service parameters
+        baseRequestHandler.validate(wfsRequest);
 
-			JAXBElement<ExecutionStatusType> responseElement = wfsFactory.createDropStoredQueryResponse(status);
-					
-			// write response
-			response.setContentType("text/xml");
-			response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        // check for stored query id to be present
+        if (!wfsRequest.isSetId())
+            throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "The operation requires a stored query id.", operationHandle);
 
-			saxWriter.setWriteEncoding(true);
-			saxWriter.setIndentString("  ");
-			saxWriter.setPrefix(Constants.WFS_NAMESPACE_PREFIX, Constants.WFS_NAMESPACE_URI);
-			saxWriter.setSchemaLocation(Constants.WFS_NAMESPACE_URI, Constants.WFS_SCHEMA_LOCATION);
-			saxWriter.setOutput(response.getWriter());
+        // drop stored query
+        storedQueryManager.dropStoredQuery(wfsRequest.getId(), operationHandle);
 
-			marshaller.setProperty("com.sun.xml.bind.namespacePrefixMapper", new NamespacePrefixMapper() {
-				public String getPreferredPrefix(String namespaceUri, String suggestion, boolean requirePrefix) {
-					return saxWriter.getPrefix(namespaceUri);
-				}
-			});
-			
-			marshaller.marshal(responseElement, saxWriter);
+        final SAXWriter saxWriter = new SAXWriter();
 
-			log.info(LoggerUtil.getLogMessage(request, "DropStoredQuery operation successfully finished."));
-		} catch (JAXBException | IOException e) {
-			throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "A fatal error occurred whilst marshalling the response document.", e);
-		}
+        try {
+            // generate response
+            ExecutionStatusType status = new ExecutionStatusType();
+            status.setStatus("OK");
 
-	}
+            JAXBElement<ExecutionStatusType> responseElement = wfsFactory.createDropStoredQueryResponse(status);
+
+            // write response
+            response.setContentType("text/xml");
+            response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+
+            saxWriter.setWriteEncoding(true);
+            saxWriter.setIndentString("  ");
+            saxWriter.setPrefix(Constants.WFS_NAMESPACE_PREFIX, Constants.WFS_NAMESPACE_URI);
+            saxWriter.setSchemaLocation(Constants.WFS_NAMESPACE_URI, Constants.WFS_SCHEMA_LOCATION);
+            saxWriter.setOutput(response.getWriter());
+
+            marshaller.setProperty("com.sun.xml.bind.namespacePrefixMapper", new NamespacePrefixMapper() {
+                public String getPreferredPrefix(String namespaceUri, String suggestion, boolean requirePrefix) {
+                    return saxWriter.getPrefix(namespaceUri);
+                }
+            });
+
+            marshaller.marshal(responseElement, saxWriter);
+
+            log.info(LoggerUtil.getLogMessage(request, "DropStoredQuery operation successfully finished."));
+        } catch (JAXBException | IOException e) {
+            throw new WFSException(WFSExceptionCode.OPERATION_PROCESSING_FAILED, "A fatal error occurred whilst marshalling the response document.", e);
+        }
+
+    }
 
 }

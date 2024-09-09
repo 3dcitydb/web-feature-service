@@ -3,7 +3,7 @@ package vcs.citydb.wfs.config.constraints;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
-@XmlType(name="WFSLodFilterType")
+@XmlType(name = "WFSLodFilterType")
 public class LodFilter extends org.citydb.config.project.query.filter.lod.LodFilter {
     @XmlAttribute(required = true)
     private boolean isEnabled = false;

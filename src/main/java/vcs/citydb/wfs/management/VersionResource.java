@@ -7,11 +7,11 @@ import javax.ws.rs.core.MediaType;
 
 @Path("/version")
 public class VersionResource {
-	
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	public VersionInfo getVersion() {
-		return VersionInfo.getInstance();
-	}
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public VersionInfo getVersion() {
+        return VersionInfo.getInstance();
+    }
 
 }

@@ -6,41 +6,41 @@ import java.io.IOException;
 import java.util.zip.GZIPOutputStream;
 
 public class GZIPServletOutputStream extends ServletOutputStream {
-	private final ServletOutputStream servletOutputStream;
-	private final GZIPOutputStream gzipOutputStream;
-	
-	public GZIPServletOutputStream(ServletOutputStream servletOutputStream) throws IOException {
-		this.servletOutputStream = servletOutputStream;
-		gzipOutputStream = new GZIPOutputStream(servletOutputStream);
-	}
+    private final ServletOutputStream servletOutputStream;
+    private final GZIPOutputStream gzipOutputStream;
 
-	@Override
-	public boolean isReady() {
-		return servletOutputStream.isReady();
-	}
+    public GZIPServletOutputStream(ServletOutputStream servletOutputStream) throws IOException {
+        this.servletOutputStream = servletOutputStream;
+        gzipOutputStream = new GZIPOutputStream(servletOutputStream);
+    }
 
-	@Override
-	public void setWriteListener(WriteListener writeListener) {
-		servletOutputStream.setWriteListener(writeListener);
-	}
+    @Override
+    public boolean isReady() {
+        return servletOutputStream.isReady();
+    }
 
-	@Override
-	public void write(int b) throws IOException {
-		gzipOutputStream.write(b);
-	}
+    @Override
+    public void setWriteListener(WriteListener writeListener) {
+        servletOutputStream.setWriteListener(writeListener);
+    }
 
-	@Override
-	public void flush() throws IOException {
-		gzipOutputStream.flush();
-	}
+    @Override
+    public void write(int b) throws IOException {
+        gzipOutputStream.write(b);
+    }
 
-	@Override
-	public void close() throws IOException {
-		gzipOutputStream.close();
-	}
-	
-	public void finish() throws IOException {
-		gzipOutputStream.finish();
-	}
-	
+    @Override
+    public void flush() throws IOException {
+        gzipOutputStream.flush();
+    }
+
+    @Override
+    public void close() throws IOException {
+        gzipOutputStream.close();
+    }
+
+    public void finish() throws IOException {
+        gzipOutputStream.finish();
+    }
+
 }

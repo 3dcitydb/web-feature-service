@@ -1,12 +1,12 @@
 package vcs.citydb.wfs.config.operation;
 
 public enum GetFeatureOutputFormat {
-	GML3_1("application/gml+xml; version=3.1"),
-	CITY_JSON("application/json");
-	
-	private final String value;
+    GML3_1("application/gml+xml; version=3.1"),
+    CITY_JSON("application/json");
 
-	GetFeatureOutputFormat(String value) {
+    private final String value;
+
+    GetFeatureOutputFormat(String value) {
         this.value = value;
     }
 

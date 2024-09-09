@@ -12,32 +12,32 @@ import java.util.stream.Stream;
 
 @Path("/cache")
 public class DeleteTexture {
-	@Inject
-	private TextureProvider textureProvider;
+    @Inject
+    private TextureProvider textureProvider;
 
-	@DELETE
-	public void deleteCache() {
-		java.nio.file.Path cachePath = textureProvider.getLocalCachePath();
+    @DELETE
+    public void deleteCache() {
+        java.nio.file.Path cachePath = textureProvider.getLocalCachePath();
 
-		if (cachePath != null) {
-			boolean useCache = textureProvider.isUseTextureCache();
+        if (cachePath != null) {
+            boolean useCache = textureProvider.isUseTextureCache();
 
-			try {
-				// disable caching and delete temp files
-				textureProvider.setUseTextureCache(false);
+            try {
+                // disable caching and delete temp files
+                textureProvider.setUseTextureCache(false);
 
-				try (Stream<java.nio.file.Path> stream = Files.walk(cachePath)) {
-					stream.filter(p -> !p.equals(cachePath))
-							.sorted(Comparator.reverseOrder())
-							.map(java.nio.file.Path::toFile)
-							.forEach(File::delete);
-				}
-			} catch (IOException e) {
-				throw new WebApplicationException("Failed to delete texture cache at '" + cachePath + "'.", e);
-			} finally {
-				// restore previous state
-				textureProvider.setUseTextureCache(useCache);
-			}
-		}
-	}
+                try (Stream<java.nio.file.Path> stream = Files.walk(cachePath)) {
+                    stream.filter(p -> !p.equals(cachePath))
+                            .sorted(Comparator.reverseOrder())
+                            .map(java.nio.file.Path::toFile)
+                            .forEach(File::delete);
+                }
+            } catch (IOException e) {
+                throw new WebApplicationException("Failed to delete texture cache at '" + cachePath + "'.", e);
+            } finally {
+                // restore previous state
+                textureProvider.setUseTextureCache(useCache);
+            }
+        }
+    }
 }

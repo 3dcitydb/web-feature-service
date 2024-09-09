@@ -12,32 +12,32 @@ import java.util.Map;
 
 public class GetCapabilitiesReader extends KVPRequestReader {
 
-	public GetCapabilitiesReader(Map<String, String> parameters, WFSConfig wfsConfig) {
-		super(parameters, wfsConfig);
-	}
-	
-	@Override
-	public GetCapabilitiesType readRequest() throws WFSException {
-		GetCapabilitiesType wfsRequest = new GetCapabilitiesType();
+    public GetCapabilitiesReader(Map<String, String> parameters, WFSConfig wfsConfig) {
+        super(parameters, wfsConfig);
+    }
 
-		try {
-			if (parameters.containsKey(KVPConstants.SERVICE))
-				wfsRequest.setService(new StringParser().parse(KVPConstants.SERVICE, parameters.get(KVPConstants.SERVICE)));
-			else
-				throw new WFSException(WFSExceptionCode.MISSING_PARAMETER_VALUE, "The request lacks the mandatory " + KVPConstants.SERVICE + " parameter.", KVPConstants.SERVICE);
+    @Override
+    public GetCapabilitiesType readRequest() throws WFSException {
+        GetCapabilitiesType wfsRequest = new GetCapabilitiesType();
 
-			if (parameters.containsKey(KVPConstants.ACCEPT_VERSIONS))
-				wfsRequest.setAcceptVersions(new AcceptVersionsParser().parse(KVPConstants.ACCEPT_VERSIONS, parameters.get(KVPConstants.ACCEPT_VERSIONS)));
+        try {
+            if (parameters.containsKey(KVPConstants.SERVICE))
+                wfsRequest.setService(new StringParser().parse(KVPConstants.SERVICE, parameters.get(KVPConstants.SERVICE)));
+            else
+                throw new WFSException(WFSExceptionCode.MISSING_PARAMETER_VALUE, "The request lacks the mandatory " + KVPConstants.SERVICE + " parameter.", KVPConstants.SERVICE);
 
-		} catch (KVPParseException e) {
-			throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, e.getMessage(), e.getParameter(), e.getCause());
-		}
+            if (parameters.containsKey(KVPConstants.ACCEPT_VERSIONS))
+                wfsRequest.setAcceptVersions(new AcceptVersionsParser().parse(KVPConstants.ACCEPT_VERSIONS, parameters.get(KVPConstants.ACCEPT_VERSIONS)));
 
-		return wfsRequest;
-	}
+        } catch (KVPParseException e) {
+            throw new WFSException(WFSExceptionCode.INVALID_PARAMETER_VALUE, e.getMessage(), e.getParameter(), e.getCause());
+        }
 
-	@Override
-	public String getOperationName() {
-		return KVPConstants.GET_CAPABILITIES;
-	}
+        return wfsRequest;
+    }
+
+    @Override
+    public String getOperationName() {
+        return KVPConstants.GET_CAPABILITIES;
+    }
 }

@@ -9,36 +9,36 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 import java.util.List;
 
-@XmlType(name="WFSDatabaseType", propOrder={
-		"referenceSystems",
-		"connection"
+@XmlType(name = "WFSDatabaseType", propOrder = {
+        "referenceSystems",
+        "connection"
 })
 public class Database {
-	private final DatabaseSrsList referenceSystems;
-	@XmlElement(required=true)
-	private DatabaseConnection connection;
-	
-	public Database() {
-		referenceSystems = new DatabaseSrsList();
-	}
+    private final DatabaseSrsList referenceSystems;
+    @XmlElement(required = true)
+    private DatabaseConnection connection;
 
-	public List<DatabaseSrs> getReferenceSystems() {
-		return referenceSystems.getItems();
-	}
+    public Database() {
+        referenceSystems = new DatabaseSrsList();
+    }
 
-	public DatabaseConnection getConnection() {
-		return connection;
-	}
+    public List<DatabaseSrs> getReferenceSystems() {
+        return referenceSystems.getItems();
+    }
 
-	public void setConnection(DatabaseConnection connection) {
-		this.connection = connection;
-	}
+    public DatabaseConnection getConnection() {
+        return connection;
+    }
 
-	void afterUnmarshal(Unmarshaller unmarshaller, Object parent) {
-		if (connection != null) {
-			if (connection.getSchema() != null && connection.getSchema().trim().isEmpty()) {
-				connection.setSchema(null);
-			}
-		}
-	}
+    public void setConnection(DatabaseConnection connection) {
+        this.connection = connection;
+    }
+
+    void afterUnmarshal(Unmarshaller unmarshaller, Object parent) {
+        if (connection != null) {
+            if (connection.getSchema() != null && connection.getSchema().trim().isEmpty()) {
+                connection.setSchema(null);
+            }
+        }
+    }
 }

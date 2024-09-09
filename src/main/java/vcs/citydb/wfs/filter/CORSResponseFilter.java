@@ -8,25 +8,25 @@ import java.io.IOException;
 
 public class CORSResponseFilter implements ContainerResponseFilter {
 
-	@Override
-	public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) throws IOException {
-		// do nothing if this is not a CORS request
-		if (requestContext.getHeaderString("Origin") == null)
-			return;
+    @Override
+    public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) throws IOException {
+        // do nothing if this is not a CORS request
+        if (requestContext.getHeaderString("Origin") == null)
+            return;
 
-		MultivaluedMap<String, Object> headers = responseContext.getHeaders();
-		headers.add("Access-Control-Allow-Origin", "*");
+        MultivaluedMap<String, Object> headers = responseContext.getHeaders();
+        headers.add("Access-Control-Allow-Origin", "*");
 
-		// add preflight headers
-		if ("OPTIONS".equals(requestContext.getMethod()) 
-				&& requestContext.getHeaderString("Access-Control-Request-Method") != null) {
-			headers.add("Access-Control-Allow-Methods", "GET, DELETE");
-			headers.add("Access-Control-Max-Age", "86400");
+        // add preflight headers
+        if ("OPTIONS".equals(requestContext.getMethod())
+                && requestContext.getHeaderString("Access-Control-Request-Method") != null) {
+            headers.add("Access-Control-Allow-Methods", "GET, DELETE");
+            headers.add("Access-Control-Max-Age", "86400");
 
-			String requestCORSHeaders = requestContext.getHeaderString("Access-Control-Request-Headers");
-			if (requestCORSHeaders != null)
-				headers.add("Access-Control-Allow-Headers", requestCORSHeaders);
-		}
-	}
+            String requestCORSHeaders = requestContext.getHeaderString("Access-Control-Request-Headers");
+            if (requestCORSHeaders != null)
+                headers.add("Access-Control-Allow-Headers", requestCORSHeaders);
+        }
+    }
 
 }
