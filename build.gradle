@@ -43,10 +43,10 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.citydb:impexp-core:5.4.3'
-    implementation 'com.github.seancfoley:ipaddress:5.5.0'
-    implementation 'org.glassfish.jersey.containers:jersey-container-servlet:2.37'
-    implementation 'org.glassfish.jersey.inject:jersey-hk2:2.37'
+    implementation 'org.citydb:impexp-core:5.5.0-SNAPSHOT'
+    implementation 'com.github.seancfoley:ipaddress:5.5.1'
+    implementation 'org.glassfish.jersey.containers:jersey-container-servlet:2.45'
+    implementation 'org.glassfish.jersey.inject:jersey-hk2:2.45'
 
     providedCompile 'javax.servlet:javax.servlet-api:3.1.0'
 
