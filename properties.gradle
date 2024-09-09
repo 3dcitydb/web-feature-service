@@ -12,7 +12,6 @@ ext {
     // 3D City Database
     citydbShortName = '3DCityDB'
     citydbName = '3D City Database'
-    citydbMavenUrl = 'https://gitlab.lrz.de/api/v4/projects/150792/packages/maven'
 
     // 3D City Database WFS
     citydbWfsName = citydbName + ' Web Feature Service'

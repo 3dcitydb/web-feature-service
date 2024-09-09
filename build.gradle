@@ -19,9 +19,6 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(11)
     }
-    compileJava {
-        options.release = 8
-    }
     sourceSets {
         main.java.srcDir genSrcDir
     }
@@ -40,7 +37,7 @@ repositories {
         url 'https://oss.sonatype.org/content/repositories/snapshots/'
     }
     maven {
-        url project.citydbMavenUrl
+        url 'https://3dcitydb.org/maven'
     }
     mavenCentral()
 }
