@@ -9,7 +9,7 @@ import org.citydb.core.database.version.DatabaseVersionException;
 import org.citydb.core.util.CoreConstants;
 import org.citydb.core.util.Util;
 import org.citydb.util.log.Logger;
-import org.opengis.referencing.FactoryException;
+import org.geotools.api.referencing.FactoryException;
 import vcs.citydb.wfs.exception.WFSException;
 import vcs.citydb.wfs.exception.WFSExceptionCode;
 import vcs.citydb.wfs.exception.WFSExceptionMessage;
