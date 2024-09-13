@@ -70,7 +70,7 @@ task processLicense(type: Copy) {
                 vendorWebsiteUrl: project.vendorWebsiteUrl
         ])
     }
-    into "$buildDir/tmp/license"
+    into "$projectDir/build/tmp/license"
 }
 
 processResources {
