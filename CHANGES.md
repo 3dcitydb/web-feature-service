@@ -1,12 +1,22 @@
 Change Log
 ==========
 
+### 5.4.0 - tba
+
+#### Changes
+* **Breaking:** Java 11 is now the minimum required version for running the 3DCityDB Web Feature Service.
+* This release is based on the Importer/Exporter version 5.5.0 libraries, and thus incorporates all bug fixes and
+  updates introduced in that version ([more information](https://github.com/3dcitydb/importer-exporter/releases/tag/v5.5.0)).
+
+#### Miscellaneous
+* Updated all dependencies to their latest versions.
+
 ### 5.3.2 - 2024-04-19
 
 This release is based on the Importer/Exporter version 5.4.3 libraries, and thus incorporates all bug fixes and updates 
 introduced in that version ([more information](https://github.com/3dcitydb/importer-exporter/releases/tag/v5.4.3)).
 
-##### Miscellaneous
+#### Miscellaneous
 * Updated ipaddress to 5.5.0.
 
 ### 5.3.1 - 2023-09-21
@@ -14,7 +24,7 @@ introduced in that version ([more information](https://github.com/3dcitydb/impor
 This release is based on the Importer/Exporter version 5.4.0 libraries, and thus incorporates all bug fixes and updates
 introduced in that version ([more information](https://github.com/3dcitydb/importer-exporter/releases/tag/v5.4.0)).
 
-##### Miscellaneous
+#### Miscellaneous
 * Updated tomcat docker image to version `9-jdk21-openjdk-slim` with lower vulnerabilities.
 
 ### 5.3.0 - 2022-12-15
@@ -22,7 +32,7 @@ introduced in that version ([more information](https://github.com/3dcitydb/impor
 This release is based on the Importer/Exporter version 5.3.0 libraries, and thus incorporates all bug fixes and updates
 introduced in that version ([more information](https://github.com/3dcitydb/importer-exporter/releases/tag/v5.3.0)).
 
-##### Additions
+#### Additions
 * Added new ``convertGlobalAppearances`` option to the CityGML output format that allows for converting global 
   appearances to local ones on-the-fly during export.
 
@@ -39,14 +49,14 @@ introduced in that version ([more information](https://github.com/3dcitydb/impor
 This release is based on the Importer/Exporter version 5.2.0 libraries, and thus incorporates all bug fixes and updates
 introduced in that version ([more information](https://github.com/3dcitydb/importer-exporter/releases/tag/v5.2.0)).
 
-##### Additions
+#### Additions
 * Added support for 3DCityDB v4.3
 * Added `replaceResourceIds` configuration option to replace all identifiers of features and geometries with UUIDs.
 
-##### Fixes
+#### Fixes
 * The database port was not correctly set when using the `CITYDB_PORT` environment variable.
 
-##### Miscellaneous
+#### Miscellaneous
 * Updated PostgreSQL driver to 42.3.4
 * Updated Oracle driver to 21.3.0.0
 * Updated GeoTools to 26.4.
@@ -56,26 +66,26 @@ introduced in that version ([more information](https://github.com/3dcitydb/impor
 This release is based on the Importer/Exporter version 5.1.1 libraries, and thus incorporates all bug fixes and updates
 introduced in that version ([more information](https://github.com/3dcitydb/importer-exporter/releases/tag/v5.1.1)).
 
-##### Changes
+#### Changes
 * Changed the handling of date-time values and timezones. Before this change, `xsd:date` values in exports could be
   different from the values stored in the database in case different timezone settings were used for the database
   server and the import and export operations.
 * Simplified database queries used by the `GetFeature` and `GetPropertyValue` operations for top-level features
   involving many nested features/tables to avoid extremely large result sets causing performance issues.
 
-##### Fixes
+#### Fixes
 * Fixed bug in parsing of XPath expressions of XML queries that caused a slash `/` being part of a literal value to
   be interpreted as step operator.
 * Empty strings for gml:id attributes are no longer imported but the `GMLID` column is set to `NULL` instead.
 
-##### Miscellaneous
+#### Miscellaneous
 * Updated H2 database used for local caching to 2.1.210.
 * Updated PostgreSQL driver to 42.3.1 and PostGIS driver to 2021.1.0.
 * Updated citygml4j to 2.12.0.
 
 ### 5.0.0 - 2021-10-08
 
-##### Changes
+#### Changes
 * Added Docker files to build your own images for the WFS service. Pre-built Docker images
   are available from Docker Hub at https://hub.docker.com/r/3dcitydb/wfs. [#9](https://github.com/3dcitydb/web-feature-service/pull/9)
 * Support for the WFS 2.0 operations `GetFeature`, `GetPropertyValue`. `CreateStoredQuery`, `DropStoredQuery`
@@ -102,14 +112,14 @@ introduced in that version ([more information](https://github.com/3dcitydb/impor
 * CityJSON output now uses the latest CityJSON version 1.0.3.
 * Many bugfixes and improvements.
 
-##### Miscellaneous
+#### Miscellaneous
 * Updated citygml4j to 2.11.4.
 * Updated PostgreSQL driver to 42.2.23 and Oracle driver to 21.1.0.
 
 
 ### 4.3.0 - 2021-04-28
 
-##### Changes
+#### Changes
 * Improved export performance (up to 10-15 times faster in case the WFS is not running on the same machine or
   in the same local network as the database server).
 * The default `config.xml` file and ADE extensions folder can now be changed using the environment variables
@@ -123,56 +133,56 @@ introduced in that version ([more information](https://github.com/3dcitydb/impor
 * This release is based on the Importer/Exporter version 4.3.0, and thus incorporates all bug fixes and updates
   introduced in that version.
 
-##### Fixes
+#### Fixes
 * Fixed error when exporting to CityJSON and no top-level feature is returned.
 
-##### Miscellaneous
+#### Miscellaneous
 * Updated citygml4j to 2.11.3.
 * Upgrade PostgreSQL driver to 42.2.14 and PostGIS to 2.5.0.
 
 ### 4.2.3 - 2020-07-16
 
-##### Changes
+#### Changes
 * CityJSON output now uses the latest CityJSON version 1.0.1.
 * This release is based on the Importer/Exporter version 4.2.3, and thus incorporates all bug fixes and updates introduced
 in that version ([more information](https://github.com/3dcitydb/importer-exporter/releases/tag/v4.2.3)).
 
-##### Miscellaneous
+#### Miscellaneous
 * Updated citygml4j to 2.10.5.
 * Upgrade to latest PostgreSQL driver 42.2.10
 * Upgrade Oracle driver to 19.3.
 
 ### 4.2 - 2019-02-13
 
-##### Changes
+#### Changes
 * CityJSON output now uses the latest CityJSON version 0.9.
 
-##### Fixes
+#### Fixes
 * Using UTF-8 encoding for CityJSON output per default.
 * This release is based on the Importer/Exporter version 4.2.0, and thus incorporates all bug fixes and updates introduced 
 in that version ([more information](https://github.com/3dcitydb/importer-exporter/releases/tag/v4.2.0)). 
 
-##### Miscellaneous 
+#### Miscellaneous 
 * Updated citygml4j to 2.9.1.
 
 ### 4.1 - 2019-01-09
 
-##### Changes
+#### Changes
 * renamed the parameter `<useCityDBADE>` to `<exportCityDBMetadata>` in the `config.xml` file. This parameter controls
 whether metadata such as the `LINEAGE` attribute of the `CITYOBJECT` table should be written to the response document.
 If set to `true`, the 3DCityDB ADE will be used for storing the information with the city objects.
 
-##### Fixes
+#### Fixes
 * This release is based on the Importer/Exporter version 4.1.0, and thus incorporates all bug fixes and updates
 introduced in that version ([more information](https://github.com/3dcitydb/importer-exporter/releases/tag/v4.1.0)).
 
-##### Miscellaneous 
+#### Miscellaneous 
 * Upgrade to latest PostgreSQL driver v42.2.5 and PostGIS driver v2.3.0.
 * Upgrade to latest Oracle driver 18.3.
 
 ### 4.0 - 2018-09-18
 
-##### Additions
+#### Additions
 * Added support for CityGML ADEs through ADE extensions.
 * Added KVP over HTTP GET as additional service binding to simplify the integration with GIS and ETL software such as FME.
 * Added [CityJSON](http://www.cityjson.org/) as additional output format besides CityGML.
@@ -182,6 +192,6 @@ introduced in that version ([more information](https://github.com/3dcitydb/impor
 * Major update to Importer/Exporter library 4.0.
 * Switched from Ant to Gradle as build system.
 
-##### Miscellaneous 
+#### Miscellaneous 
 * [3DCityDB Docker images](https://github.com/tum-gis/3dcitydb-docker-postgis) are now available for a range of 3DCityDB
 and WFS versions to support continuous integration workflows.
