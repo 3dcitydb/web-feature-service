@@ -1,7 +1,7 @@
 Change Log
 ==========
 
-### 5.4.0 - tba
+### 5.4.0 - 2024-09-19
 
 #### Changes
 * **Breaking:** Java 11 is now the minimum required version for running the 3DCityDB Web Feature Service.

@@ -24,9 +24,9 @@ previous release of the 3D City Database Importer/Exporter under Apache License 
 
 Latest release
 --------------
-The latest stable release of the 3D City Database WFS interface is 5.3.2.
+The latest stable release of the 3D City Database WFS interface is 5.4.0.
 
-Download a ZIP file of the WFS [here](https://github.com/3dcitydb/web-feature-service/releases/download/v5.3.2/3DCityDB-Web-Feature-Service-5.3.2.zip).
+Download a ZIP file of the WFS [here](https://github.com/3dcitydb/web-feature-service/releases/download/v5.4.0/3DCityDB-Web-Feature-Service-5.4.0.zip).
 Previous releases are available from the [releases section](https://github.com/3dcitydb/web-feature-service/releases).
 
 System requirements
@@ -35,7 +35,7 @@ The 3D City Database WFS is implemented as Java web application based on the Jav
 be run in a Java servlet container on a web server. The following minimum software requirements have to be met:
 
 * Java servlet container supporting the Java Servlet 3.1/3.0 specification
-* Java 8 Runtime Environment (or higher)
+* Java 11 Runtime Environment (or higher)
 
 The WFS implementation has been successfully deployed and tested on [Apache Tomcat](http://tomcat.apache.org/)
 versions 9 and 8. All previous versions of the Apache Tomcat server have reached end of life and are not supported
@@ -44,7 +44,7 @@ anymore.
 Documentation
 -------------
 A complete and comprehensive user manual on the Web Feature Service is available
-[online](https://3dcitydb-docs.readthedocs.io/en/version-2023.0/wfs/).
+[online](https://3dcitydb-docs.readthedocs.io/en/latest/wfs/).
 
 The documentation contains a step-by-step guide for deploying the WFS on a servlet container.
 
