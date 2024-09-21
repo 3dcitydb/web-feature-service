@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <HEAD>
     <title>WFS Client</title>
-    <script type="text/javascript" src="lib/jquery1_9_1.js"></script>
+    <script type="text/javascript" src="lib/jquery-3.7.1.min.js"></script>
     <link type="text/css" href="css/style.css" rel="stylesheet"/>
     <link rel="icon" type="image/png" href="img/wfs_logo.png">
     <!-- codeMirror library for highlighting XML code -->
@@ -19,10 +19,10 @@
 <div id="container">
     <div id="Header">
         <div id="CompanyLogo">
-            <img src="img/wfs_logo.png" alt="virtualcitysystems GmbH" width="70" height="70" style="vertical-align:middle"/>
+            <img src="img/wfs_logo.png" alt="@vendorName@" width="70" height="70" style="vertical-align:middle"/>
             <h1>VC WFS Client</h1>
-            <a href="https://vc.systems/" target="_blank" title="virtualcitysystems GmbH">
-                <img src="img/vcs_logo.png" alt="virtualcitysystems GmbH" width="200" height="48" style="vertical-align:middle; padding-top:20px; position: absolute; right: 10px"/>
+            <a href="@vendorWebsiteUrl@" target="_blank" title="@vendorName@">
+                <img src="img/vcs_logo.png" alt="@vendorName@" width="200" height="48" style="vertical-align:middle; padding-top:20px; position: absolute; right: 10px"/>
             </a>
         </div>
     </div>
@@ -39,8 +39,8 @@
                 <textarea id="response"></textarea>
             </div>
             <div id="copyright">
-                <a href="https://vc.systems/" target="_blank">
-                    (C) 2015 - 2024, virtualcitysystems GmbH. All rights reserved.
+                <a href="@vendorWebsiteUrl@" target="_blank">
+                    (C) @vendorCopyright@, @vendorName@. All rights reserved.
                 </a>
             </div>
         </div>

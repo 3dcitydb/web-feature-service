@@ -141,4 +141,11 @@ war {
     into('META-INF') {
         from processLicense
     }
+    filesMatching('**/index.html') {
+        filter(ReplaceTokens, tokens: [
+                vendorName: project.vendorName,
+                vendorCopyright: project.vendorCopyright,
+                vendorWebsiteUrl: project.vendorWebsiteUrl
+        ])
+    }
 }
