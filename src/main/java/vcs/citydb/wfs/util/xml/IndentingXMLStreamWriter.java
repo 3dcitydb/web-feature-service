@@ -1,5 +1,8 @@
 package vcs.citydb.wfs.util.xml;
 
+import org.xml.sax.helpers.NamespaceSupport;
+
+import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
@@ -10,10 +13,11 @@ public class IndentingXMLStreamWriter implements XMLStreamWriter {
     private final static Object SEEN_ELEMENT = new Object();
     private final static Object SEEN_DATA = new Object();
 
-    private Object state = SEEN_NOTHING;
-    private Stack<Object> stateStack = new Stack<>();
+    private final Stack<Object> stateStack = new Stack<>();
+    private final XMLStreamWriter writer;
+    private final NamespaceSupport namespaces = new NamespaceSupport();
 
-    private XMLStreamWriter writer;
+    private Object state = SEEN_NOTHING;
     private String indentStep = "  ";
     private boolean writeFragment;
     private int depth = 0;
@@ -31,6 +35,7 @@ public class IndentingXMLStreamWriter implements XMLStreamWriter {
     }
 
     private void onStartElement() throws XMLStreamException {
+        namespaces.pushContext();
         stateStack.push(SEEN_ELEMENT);
         state = SEEN_NOTHING;
         if (depth > 0) {
@@ -47,6 +52,7 @@ public class IndentingXMLStreamWriter implements XMLStreamWriter {
             doIndent();
         }
         state = stateStack.pop();
+        namespaces.popContext();
     }
 
     private void onEmptyElement() throws XMLStreamException {
@@ -169,7 +175,9 @@ public class IndentingXMLStreamWriter implements XMLStreamWriter {
 
     @Override
     public void close() throws XMLStreamException {
-        writer.close();
+        if (!writeFragment) {
+            writer.close();
+        }
     }
 
     @Override
@@ -194,12 +202,16 @@ public class IndentingXMLStreamWriter implements XMLStreamWriter {
 
     @Override
     public void writeNamespace(String prefix, String namespaceURI) throws XMLStreamException {
-        writer.writeNamespace(prefix, namespaceURI);
+        if (shouldWriteNamespace(prefix, namespaceURI)) {
+            writer.writeNamespace(prefix, namespaceURI);
+        }
     }
 
     @Override
     public void writeDefaultNamespace(String namespaceURI) throws XMLStreamException {
-        writer.writeDefaultNamespace(namespaceURI);
+        if (shouldWriteNamespace(XMLConstants.DEFAULT_NS_PREFIX, namespaceURI)) {
+            writer.writeDefaultNamespace(namespaceURI);
+        }
     }
 
     @Override
@@ -257,4 +269,12 @@ public class IndentingXMLStreamWriter implements XMLStreamWriter {
         return writer.getProperty(name);
     }
 
+    private boolean shouldWriteNamespace(String prefix, String namespaceURI) {
+        if (!namespaceURI.equals(namespaces.getURI(prefix))) {
+            namespaces.declarePrefix(prefix, namespaceURI);
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
