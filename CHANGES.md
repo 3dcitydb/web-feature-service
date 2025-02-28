@@ -1,6 +1,15 @@
 Change Log
 ==========
 
+### 5.4.1 - 2025-02-28
+
+#### Fixes
+* Fixed bug in `DescribeStoredQueries` operation that caused the XML response to be incomplete and invalid.
+*  Fixed an issue with duplicate namespace declarations in the `DescribeStoredQueries` response.
+
+#### Miscellaneous
+* Updated all dependencies to their latest versions.
+
 ### 5.4.0 - 2024-09-19
 
 #### Changes
