@@ -1,5 +1,13 @@
 3DCityDB Web Feature Service Interface
 ======================================
+
+> [!NOTE]
+> This repository hosts the 3DCityDB v4 Web Feature Service. Although 3DCityDB v5 is now available, 3DCityDB v4
+> remains stable and operational. However, it is in **maintenance mode**, meaning no significant new features are
+> planned, though existing bugs will continue to be addressed. Development is now focused on 3DCityDB v5, and we recommend
+> upgrading to benefit from new features and improvements. Please refer to the [3DCityDB v5 user manual](https://3dcitydb.github.io/3dcitydb-mkdocs/)
+> for more information.
+
 The OGC Web Feature Service (WFS) interface for the 3D City Database enables web-based access to the city objects stored
 in the database. WFS clients can directly connect to this standardized and open interface for requesting 3D content
 across the web using platform-independent calls. Users of the 3D City Database are therefore no longer limited to using
