@@ -7,9 +7,7 @@ set -e;
 # Set default tomcat opts #####################################################
 if [ -z ${CATALINA_OPTS+x} ]; then
   export CATALINA_OPTS="-Djava.awt.headless=true \
-    -Dfile.encoding=UTF-8 \
-    -Xms$(awk '/MemTotal/ { printf "%d\n", $2/1024/1024/2}' /proc/meminfo)G \
-    -Xmx$(awk '/MemTotal/ { printf "%d\n", $2/1024/1024}' /proc/meminfo)G"
+    -Dfile.encoding=UTF-8"
 fi
 
 # Adapt context path of the WFS service #######################################
