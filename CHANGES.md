@@ -1,7 +1,7 @@
 Change Log
 ==========
 
-### 5.4.2 - tba
+### 5.4.2 - 2025-08-17
 
 #### Changes
 * Added a clear error message when attempting to connect to a 3D City Database `v5` instance.
