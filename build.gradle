@@ -43,7 +43,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.citydb:impexp-core:5.5.1'
+    implementation 'org.citydb:impexp-core:5.5.2'
     implementation 'com.github.seancfoley:ipaddress:5.5.1'
     implementation 'org.glassfish.jersey.containers:jersey-container-servlet:2.47'
     implementation 'org.glassfish.jersey.inject:jersey-hk2:2.47'
