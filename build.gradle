@@ -7,7 +7,7 @@ plugins {
 }
 
 group 'org.citydb.wfs'
-version '5.4.1'
+version '5.4.2'
 
 apply from: 'properties.gradle'
 
@@ -43,10 +43,10 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.citydb:impexp-core:5.5.1'
+    implementation 'org.citydb:impexp-core:5.5.2'
     implementation 'com.github.seancfoley:ipaddress:5.5.1'
-    implementation 'org.glassfish.jersey.containers:jersey-container-servlet:2.46'
-    implementation 'org.glassfish.jersey.inject:jersey-hk2:2.46'
+    implementation 'org.glassfish.jersey.containers:jersey-container-servlet:2.47'
+    implementation 'org.glassfish.jersey.inject:jersey-hk2:2.47'
 
     providedCompile 'javax.servlet:javax.servlet-api:3.1.0'
 
@@ -57,7 +57,7 @@ dependencies {
     jaxb 'org.slf4j:slf4j-simple:1.7.25'
 }
 
-task processLicense(type: Copy) {
+tasks.register('processLicense', Copy) {
     from("resources/license/LICENSE.txt") {
         filteringCharset = 'UTF-8'
         filter(ReplaceTokens, tokens: [
@@ -89,7 +89,8 @@ processResources {
     }
 }
 
-task generateJaxb(group: 'jaxb') {
+tasks.register('generateJaxb') {
+    group = 'jaxb'
     outputs.dir genSrcDir
 
     doLast {
@@ -113,7 +114,8 @@ task generateJaxb(group: 'jaxb') {
     }
 }
 
-task cleanJaxb(type: Delete, group: 'jaxb') {
+tasks.register('cleanJaxb', Delete) {
+    group = 'jaxb'
     delete 'src-gen'
 }
 
