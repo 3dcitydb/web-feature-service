@@ -7,7 +7,7 @@ plugins {
 }
 
 group 'org.citydb.wfs'
-version '5.4.2'
+version '5.4.3'
 
 apply from: 'properties.gradle'
 

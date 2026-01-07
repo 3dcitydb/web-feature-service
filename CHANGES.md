@@ -4,7 +4,7 @@ Change Log
 ### 5.4.3 - 2026-01-07
 
 #### Fixes
-* When a default stored query requested a feature in CityJSON that did not exist, the response previously included
+* When the default stored query requested a feature in CityJSON that did not exist, the response previously included
   both JSON content and the XML error message. Now, only the XML error message is returned.
 * Replaced deprecated Tomcat Docker image `9-jdk21-openjdk-slim` with `9-jdk21-temurin-noble`.
 
