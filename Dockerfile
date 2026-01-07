@@ -27,7 +27,7 @@ RUN chmod u+x ./gradlew && ./gradlew installDist
 # Base image
 FROM tomcat:${RUNTIME_IMAGE_TAG} AS runtime
 
-# Prepare working directory for non-root user
+# Prepare runtime directories and remove default ROOT context
 RUN mkdir -p /citydb-wfs && \
     chown -R 1000:1000 "$CATALINA_HOME" /citydb-wfs && \
     rm -rf ${CATALINA_HOME}/webapps/ROOT
@@ -38,7 +38,7 @@ COPY --from=builder --chown=1000:1000 /build/build/install/3DCityDB-Web-Feature-
 
 COPY --chown=1000:1000 resources/docker/citydb-wfs-entrypoint.sh /usr/local/bin/
 
-# Delete existing ROOT context and set permissions
+# Ensure entrypoint is executable
 RUN chmod a+x /usr/local/bin/citydb-wfs-entrypoint.sh
 
 WORKDIR /citydb-wfs
