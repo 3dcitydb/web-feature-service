@@ -1,6 +1,19 @@
 Change Log
 ==========
 
+### 5.4.3 - 2026-01-07
+
+#### Fixes
+* When a default stored query requested a feature in CityJSON that did not exist, the response previously included
+  both JSON content and the XML error message. Now, only the XML error message is returned.
+* Replaced deprecated Tomcat Docker image `9-jdk21-openjdk-slim` with `9-jdk21-temurin-noble`.
+
+#### Changes
+* Removed support for Alpine Docker images.
+
+#### Miscellaneous
+* Updated dependencies to their latest versions.
+
 ### 5.4.2 - 2025-08-17
 
 #### Changes
@@ -13,7 +26,7 @@ Change Log
 
 #### Fixes
 * Fixed bug in `DescribeStoredQueries` operation that caused the XML response to be incomplete and invalid.
-*  Fixed an issue with duplicate namespace declarations in the `DescribeStoredQueries` response.
+* Fixed an issue with duplicate namespace declarations in the `DescribeStoredQueries` response.
 
 #### Miscellaneous
 * Updated all dependencies to their latest versions.
