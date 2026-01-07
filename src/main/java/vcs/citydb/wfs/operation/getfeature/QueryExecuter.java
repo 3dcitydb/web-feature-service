@@ -114,12 +114,13 @@ public class QueryExecuter implements EventHandler {
                     && queryExpressions.get(0).isGetFeatureById()
                     && matchAll <= 1;
 
+            writer.setWriteSingleFeature(isWriteSingleFeature);
+
             if (resultType == ResultTypeType.RESULTS && matchAll > 0) {
                 long returnAll = matchAll != Constants.UNKNOWN_NUMBER_MATCHED ?
                         getNumberReturned(queryExpressions, count, startIndex) :
                         getNumberReturned(queryExpressions, count, startIndex, pageRequest.getPageNumber(), connection);
 
-                writer.setWriteSingleFeature(isWriteSingleFeature);
                 if (!isWriteSingleFeature) {
                     writer.startFeatureCollection(matchAll, returnAll,
                             pageRequest.getPageNumber() > 0 ? pageRequest.previous(request) : null,
