@@ -5,11 +5,11 @@
 
 # Fetch & build stage #########################################################
 # ARGS
-ARG BUILDER_IMAGE_TAG='17-jdk-slim'
-ARG RUNTIME_IMAGE_TAG='9-jdk21-openjdk-slim'
+ARG BUILDER_IMAGE_TAG='21-jdk-noble'
+ARG RUNTIME_IMAGE_TAG='9-jdk21-temurin-noble'
 
 # Base image
-FROM openjdk:${BUILDER_IMAGE_TAG} AS builder
+FROM eclipse-temurin:${BUILDER_IMAGE_TAG} AS builder
 
 ARG DEFAULT_CONFIG='default-config.xml'
 
@@ -27,13 +27,10 @@ RUN chmod u+x ./gradlew && ./gradlew installDist
 # Base image
 FROM tomcat:${RUNTIME_IMAGE_TAG} AS runtime
 
-ARG TOMCAT_USER='tomcat'
-ARG TOMCAT_GROUP='tomcat'
-
-# Run as non-root user user
-RUN groupadd --gid 1000 -r ${TOMCAT_GROUP} && \
-    useradd --uid 1000 --gid 1000 -d /citydb-wfs -m -r --no-log-init ${TOMCAT_USER} && \
-    chown -R 1000:1000 ${CATALINA_HOME}
+# Prepare working directory for non-root user
+RUN mkdir -p /citydb-wfs && \
+    chown -R 1000:1000 "$CATALINA_HOME" /citydb-wfs && \
+    rm -rf ${CATALINA_HOME}/webapps/ROOT
 
 # Copy WAR to webapps folder
 COPY --from=builder --chown=1000:1000 /build/build/install/3DCityDB-Web-Feature-Service/citydb-wfs.war \
@@ -42,8 +39,7 @@ COPY --from=builder --chown=1000:1000 /build/build/install/3DCityDB-Web-Feature-
 COPY --chown=1000:1000 resources/docker/citydb-wfs-entrypoint.sh /usr/local/bin/
 
 # Delete existing ROOT context and set permissions
-RUN rm -rf ${CATALINA_HOME}/webapps/ROOT && \
-    chmod a+x /usr/local/bin/citydb-wfs-entrypoint.sh
+RUN chmod a+x /usr/local/bin/citydb-wfs-entrypoint.sh
 
 WORKDIR /citydb-wfs
 USER 1000
@@ -51,9 +47,3 @@ EXPOSE 8080
 
 ENTRYPOINT ["citydb-wfs-entrypoint.sh"]
 CMD ["catalina.sh","run"]
-
-# Labels ######################################################################
-LABEL maintainer="Bruno Willenborg"
-LABEL maintainer.email="b.willenborg(at)tum.de"
-LABEL maintainer.organization="Chair of Geoinformatics, Technical University of Munich (TUM)"
-LABEL source.repo="https://github.com/3dcitydb/web-feature-service"
